@@ -39,10 +39,10 @@ namespace crow
 {
     struct bad_request : public std::runtime_error
     {
-        bad_request(const std::string& what_arg)
+        bad_request(const std::string &what_arg)
             : std::runtime_error(what_arg) {}
 
-        bad_request(const char* what_arg)
+        bad_request(const char *what_arg)
             : std::runtime_error(what_arg) {}
     };
 }
@@ -66,7 +66,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             GZIP = 15 | 16,
         };
 
-        inline std::string compress_string(std::string const& str, algorithm algo)
+        inline std::string compress_string(std::string const &str, algorithm algo)
         {
             std::string compressed_str;
             z_stream stream{};
@@ -77,13 +77,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
                 stream.avail_in = str.size();
                 // zlib does not take a const pointer. The data is not altered.
-                stream.next_in = const_cast<Bytef*>(reinterpret_cast<const Bytef*>(str.c_str()));
+                stream.next_in = const_cast<Bytef *>(reinterpret_cast<const Bytef *>(str.c_str()));
 
                 int code = Z_OK;
                 do
                 {
                     stream.avail_out = sizeof(buffer);
-                    stream.next_out = reinterpret_cast<Bytef*>(&buffer[0]);
+                    stream.next_out = reinterpret_cast<Bytef *>(&buffer[0]);
 
                     code = ::deflate(&stream, Z_FINISH);
                     // Successful and non-fatal error code returned by deflate when used with Z_FINISH flush
@@ -103,7 +103,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return compressed_str;
         }
 
-        inline std::string decompress_string(std::string const& deflated_string)
+        inline std::string decompress_string(std::string const &deflated_string)
         {
             std::string inflated_string;
             Bytef tmp[8192];
@@ -111,7 +111,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             z_stream zstream{};
             zstream.avail_in = deflated_string.size();
             // Nasty const_cast but zlib won't alter its contents
-            zstream.next_in = const_cast<Bytef*>(reinterpret_cast<Bytef const*>(deflated_string.c_str()));
+            zstream.next_in = const_cast<Bytef *>(reinterpret_cast<Bytef const *>(deflated_string.c_str()));
             // Initialize with automatic header detection, for gzip support
             if (::inflateInit2(&zstream, MAX_WBITS | 32) == Z_OK)
             {
@@ -145,7 +145,6 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
 #endif
 
-
 #include <string>
 
 namespace crow
@@ -156,11 +155,11 @@ namespace crow
         std::string content_type;
         virtual std::string dump() const = 0;
 
-        returnable(std::string ctype):
-          content_type{ctype}
-        {}
+        returnable(std::string ctype) : content_type{ctype}
+        {
+        }
 
-        virtual ~returnable(){};
+        virtual ~returnable() {};
     };
 } // namespace crow
 
@@ -168,13 +167,13 @@ namespace crow
 // TODO(ipkn) replace with runtime config. libucl?
 
 /* #ifdef - enables debug mode */
-//#define CROW_ENABLE_DEBUG
+// #define CROW_ENABLE_DEBUG
 
 /* #ifdef - enables logging */
 #define CROW_ENABLE_LOGGING
 
 /* #ifdef - enforces section 5.2 and 6.1 of RFC6455 (only accepting masked messages from clients) */
-//#define CROW_ENFORCE_WS_SPEC
+// #define CROW_ENFORCE_WS_SPEC
 
 /* #define - specifies log level */
 /*
@@ -206,8 +205,6 @@ namespace crow
 #define noexcept throw()
 #endif
 #endif
-
-
 
 #include <cstdio>
 #include <cstdlib>
@@ -253,21 +250,21 @@ namespace crow
             std::string prefix;
             switch (level)
             {
-                case LogLevel::Debug:
-                    prefix = "DEBUG   ";
-                    break;
-                case LogLevel::Info:
-                    prefix = "INFO    ";
-                    break;
-                case LogLevel::Warning:
-                    prefix = "WARNING ";
-                    break;
-                case LogLevel::Error:
-                    prefix = "ERROR   ";
-                    break;
-                case LogLevel::Critical:
-                    prefix = "CRITICAL";
-                    break;
+            case LogLevel::Debug:
+                prefix = "DEBUG   ";
+                break;
+            case LogLevel::Info:
+                prefix = "INFO    ";
+                break;
+            case LogLevel::Warning:
+                prefix = "WARNING ";
+                break;
+            case LogLevel::Error:
+                prefix = "ERROR   ";
+                break;
+            case LogLevel::Critical:
+                prefix = "CRITICAL";
+                break;
             }
             std::cerr << std::string("(") + timestamp() + std::string(") [") + prefix + std::string("] ") + message << std::endl;
         }
@@ -302,9 +299,9 @@ namespace crow
     class logger
     {
     public:
-        logger(LogLevel level):
-          level_(level)
-        {}
+        logger(LogLevel level) : level_(level)
+        {
+        }
         ~logger()
         {
 #ifdef CROW_ENABLE_LOGGING
@@ -316,8 +313,8 @@ namespace crow
         }
 
         //
-        template<typename T>
-        logger& operator<<(T const& value)
+        template <typename T>
+        logger &operator<<(T const &value)
         {
 #ifdef CROW_ENABLE_LOGGING
             if (level_ >= get_current_log_level())
@@ -331,21 +328,21 @@ namespace crow
         //
         static void setLogLevel(LogLevel level) { get_log_level_ref() = level; }
 
-        static void setHandler(ILogHandler* handler) { get_handler_ref() = handler; }
+        static void setHandler(ILogHandler *handler) { get_handler_ref() = handler; }
 
         static LogLevel get_current_log_level() { return get_log_level_ref(); }
 
     private:
         //
-        static LogLevel& get_log_level_ref()
+        static LogLevel &get_log_level_ref()
         {
             static LogLevel current_level = static_cast<LogLevel>(CROW_LOG_LEVEL);
             return current_level;
         }
-        static ILogHandler*& get_handler_ref()
+        static ILogHandler *&get_handler_ref()
         {
             static CerrLogHandler default_handler;
-            static ILogHandler* current_handler = &default_handler;
+            static ILogHandler *current_handler = &default_handler;
             return current_handler;
         }
 
@@ -371,7 +368,6 @@ namespace crow
     if (crow::logger::get_current_log_level() <= crow::LogLevel::Debug) \
     crow::logger(crow::LogLevel::Debug)
 
-
 #ifdef CROW_USE_BOOST
 #include <boost/asio.hpp>
 #include <boost/asio/basic_waitable_timer.hpp>
@@ -388,7 +384,6 @@ namespace crow
 #include <map>
 #include <vector>
 
-
 namespace crow
 {
 #ifdef CROW_USE_BOOST
@@ -401,7 +396,7 @@ namespace crow
     {
 
         /// A class for scheduling functions to be called after a specific
-        /// amount of ticks. Ther tick length can  be handed over in constructor, 
+        /// amount of ticks. Ther tick length can  be handed over in constructor,
         /// the default tick length is equal to 1 second.
         class task_timer
         {
@@ -412,22 +407,22 @@ namespace crow
         private:
             using clock_type = std::chrono::steady_clock;
             using time_type = clock_type::time_point;
+
         public:
-            task_timer(asio::io_context& io_context,
+            task_timer(asio::io_context &io_context,
                        const std::chrono::milliseconds tick_length =
-                            std::chrono::seconds(1)) :
-              io_context_(io_context), timer_(io_context_),
-              tick_length_ms_(tick_length)
+                           std::chrono::seconds(1)) : io_context_(io_context), timer_(io_context_),
+                                                      tick_length_ms_(tick_length)
             {
                 timer_.expires_after(tick_length_ms_);
                 timer_.async_wait(
-                  std::bind(&task_timer::tick_handler, this,
-                  std::placeholders::_1));
+                    std::bind(&task_timer::tick_handler, this,
+                              std::placeholders::_1));
             }
 
             ~task_timer() { timer_.cancel(); }
 
-            /// Cancel the scheduling of the given task 
+            /// Cancel the scheduling of the given task
             ///
             /// \param identifier_type task identifier of the task to cancel.
             void cancel(identifier_type id)
@@ -444,7 +439,7 @@ namespace crow
             /// It is not bound to this task_timer instance and in some cases
             /// could lead to undefined behavior if used with other task_timer
             /// objects or after the task has been successfully executed.
-            identifier_type schedule(const task_type& task)
+            identifier_type schedule(const task_type &task)
             {
                 return schedule(task, get_default_timeout());
             }
@@ -458,13 +453,12 @@ namespace crow
             /// It is not bound to this task_timer instance and in some cases
             /// could lead to undefined behavior if used with other task_timer
             /// objects or after the task has been successfully executed.
-            identifier_type schedule(const task_type& task, uint8_t timeout)
+            identifier_type schedule(const task_type &task, uint8_t timeout)
             {
                 tasks_.insert({++highest_id_,
                                {clock_type::now() + (timeout * tick_length_ms_),
                                 task}});
-                CROW_LOG_DEBUG << "task_timer scheduled: " << this << ' ' <<
-                                  highest_id_;
+                CROW_LOG_DEBUG << "task_timer scheduled: " << this << ' ' << highest_id_;
                 return highest_id_;
             }
 
@@ -473,19 +467,22 @@ namespace crow
 
             ///
             /// \param timeout The amount of ticks to wait before
-            /// execution. 
-            /// For tick length \see tick_length_ms_ 
-            void set_default_timeout(uint8_t timeout) {
+            /// execution.
+            /// For tick length \see tick_length_ms_
+            void set_default_timeout(uint8_t timeout)
+            {
                 default_timeout_ = timeout;
             }
 
             /// Get the default timeout. (Default: 5)
-            uint8_t get_default_timeout() const {
+            uint8_t get_default_timeout() const
+            {
                 return default_timeout_;
             }
 
             /// returns the length of one tick.
-            std::chrono::milliseconds get_tick_length() const {
+            std::chrono::milliseconds get_tick_length() const
+            {
                 return tick_length_ms_;
             }
 
@@ -495,38 +492,39 @@ namespace crow
                 time_type current_time = clock_type::now();
                 std::vector<identifier_type> finished_tasks;
 
-                for (const auto& task : tasks_)
+                for (const auto &task : tasks_)
                 {
                     if (task.second.first < current_time)
                     {
                         (task.second.second)();
                         finished_tasks.push_back(task.first);
-                        CROW_LOG_DEBUG << "task_timer called: " << this <<
-                                          ' ' << task.first;
+                        CROW_LOG_DEBUG << "task_timer called: " << this << ' ' << task.first;
                     }
                 }
 
-                for (const auto& task : finished_tasks)
+                for (const auto &task : finished_tasks)
                     tasks_.erase(task);
 
                 // If no task is currently scheduled, reset the issued ids back
                 // to 0.
-                if (tasks_.empty()) highest_id_ = 0;
+                if (tasks_.empty())
+                    highest_id_ = 0;
             }
 
-            void tick_handler(const error_code& ec)
+            void tick_handler(const error_code &ec)
             {
-                if (ec) return;
+                if (ec)
+                    return;
 
                 process_tasks();
 
                 timer_.expires_after(tick_length_ms_);
                 timer_.async_wait(
-                  std::bind(&task_timer::tick_handler, this, std::placeholders::_1));
+                    std::bind(&task_timer::tick_handler, this, std::placeholders::_1));
             }
 
         private:
-            asio::io_context& io_context_;
+            asio::io_context &io_context_;
             asio::basic_waitable_timer<clock_type> timer_;
             std::map<identifier_type, std::pair<time_type, task_type>> tasks_;
 
@@ -535,11 +533,9 @@ namespace crow
             identifier_type highest_id_{0};
             std::chrono::milliseconds tick_length_ms_;
             uint8_t default_timeout_{5};
-
         };
     } // namespace detail
 } // namespace crow
-
 
 #include <cstdint>
 #include <stdexcept>
@@ -554,7 +550,6 @@ namespace crow
 #include <unordered_map>
 #include <random>
 #include <algorithm>
-
 
 #include <filesystem>
 
@@ -587,13 +582,12 @@ namespace crow
         /// A constant string implementation.
         class const_str
         {
-            const char* const begin_;
+            const char *const begin_;
             unsigned size_;
 
         public:
-            template<unsigned N>
-            constexpr const_str(const char (&arr)[N]):
-              begin_(arr), size_(N - 1)
+            template <unsigned N>
+            constexpr const_str(const char (&arr)[N]) : begin_(arr), size_(N - 1)
             {
                 static_assert(N >= 1, "not a string literal");
             }
@@ -602,13 +596,13 @@ namespace crow
                 return requires_in_range(i, size_), begin_[i];
             }
 
-            constexpr operator const char*() const
+            constexpr operator const char *() const
             {
                 return begin_;
             }
 
-            constexpr const char* begin() const { return begin_; }
-            constexpr const char* end() const { return begin_ + size_; }
+            constexpr const char *begin() const { return begin_; }
+            constexpr const char *end() const { return begin_ + size_; }
 
             constexpr unsigned size() const
             {
@@ -624,28 +618,25 @@ namespace crow
         /// Check that the CROW_ROUTE string is valid
         constexpr bool is_valid(const_str s, unsigned i = 0, int f = 0)
         {
-            return i == s.size()   ? f == 0 :
-                   f < 0 || f >= 2 ? false :
-                   s[i] == '<'     ? is_valid(s, i + 1, f + 1) :
-                   s[i] == '>'     ? is_valid(s, i + 1, f - 1) :
-                                     is_valid(s, i + 1, f);
+            return i == s.size() ? f == 0 : f < 0 || f >= 2 ? false
+                                        : s[i] == '<'       ? is_valid(s, i + 1, f + 1)
+                                        : s[i] == '>'       ? is_valid(s, i + 1, f - 1)
+                                                            : is_valid(s, i + 1, f);
         }
 
-        constexpr bool is_equ_p(const char* a, const char* b, unsigned n)
+        constexpr bool is_equ_p(const char *a, const char *b, unsigned n)
         {
-            return *a == 0 && *b == 0 && n == 0 ? true :
-                   (*a == 0 || *b == 0)         ? false :
-                   n == 0                       ? true :
-                   *a != *b                     ? false :
-                                                  is_equ_p(a + 1, b + 1, n - 1);
+            return *a == 0 && *b == 0 && n == 0 ? true : (*a == 0 || *b == 0) ? false
+                                                     : n == 0                 ? true
+                                                     : *a != *b               ? false
+                                                                              : is_equ_p(a + 1, b + 1, n - 1);
         }
 
         constexpr bool is_equ_n(const_str a, unsigned ai, const_str b, unsigned bi, unsigned n)
         {
-            return ai + n > a.size() || bi + n > b.size() ? false :
-                   n == 0                                 ? true :
-                   a[ai] != b[bi]                         ? false :
-                                                            is_equ_n(a, ai + 1, b, bi + 1, n - 1);
+            return ai + n > a.size() || bi + n > b.size() ? false : n == 0       ? true
+                                                                : a[ai] != b[bi] ? false
+                                                                                 : is_equ_n(a, ai + 1, b, bi + 1, n - 1);
         }
 
         constexpr bool is_int(const_str s, unsigned i)
@@ -675,13 +666,13 @@ namespace crow
             return is_equ_n(s, i, "<path>", 0, 6);
         }
 #endif
-        template<typename T>
+        template <typename T>
         struct parameter_tag
         {
             static const int value = 0;
         };
 #define CROW_INTERNAL_PARAMETER_TAG(t, i) \
-    template<>                            \
+    template <>                           \
     struct parameter_tag<t>               \
     {                                     \
         static const int value = i;       \
@@ -699,22 +690,22 @@ namespace crow
         CROW_INTERNAL_PARAMETER_TAG(double, 3);
         CROW_INTERNAL_PARAMETER_TAG(std::string, 4);
 #undef CROW_INTERNAL_PARAMETER_TAG
-        template<typename... Args>
+        template <typename... Args>
         struct compute_parameter_tag_from_args_list;
 
-        template<>
+        template <>
         struct compute_parameter_tag_from_args_list<>
         {
             static const int value = 0;
         };
 
-        template<typename Arg, typename... Args>
+        template <typename Arg, typename... Args>
         struct compute_parameter_tag_from_args_list<Arg, Args...>
         {
             static const int sub_value =
-              compute_parameter_tag_from_args_list<Args...>::value;
+                compute_parameter_tag_from_args_list<Args...>::value;
             static const int value =
-              parameter_tag<typename std::decay<Arg>::type>::value ? sub_value * 6 + parameter_tag<typename std::decay<Arg>::type>::value : sub_value;
+                parameter_tag<typename std::decay<Arg>::type>::value ? sub_value * 6 + parameter_tag<typename std::decay<Arg>::type>::value : sub_value;
         };
 
         static inline bool is_parameter_tag_compatible(uint64_t a, uint64_t b)
@@ -725,276 +716,277 @@ namespace crow
                 return a == 0;
             int sa = a % 6;
             int sb = a % 6;
-            if (sa == 5) sa = 4;
-            if (sb == 5) sb = 4;
+            if (sa == 5)
+                sa = 4;
+            if (sb == 5)
+                sb = 4;
             if (sa != sb)
                 return false;
             return is_parameter_tag_compatible(a / 6, b / 6);
         }
 
-        static inline unsigned find_closing_tag_runtime(const char* s, unsigned p)
+        static inline unsigned find_closing_tag_runtime(const char *s, unsigned p)
         {
-            return s[p] == 0   ? throw std::runtime_error("unmatched tag <") :
-                   s[p] == '>' ? p :
-                                 find_closing_tag_runtime(s, p + 1);
+            return s[p] == 0 ? throw std::runtime_error("unmatched tag <") : s[p] == '>' ? p
+                                                                                         : find_closing_tag_runtime(s, p + 1);
         }
 
-        static inline uint64_t get_parameter_tag_runtime(const char* s, unsigned p = 0)
+        static inline uint64_t get_parameter_tag_runtime(const char *s, unsigned p = 0)
         {
-            return s[p] == 0   ? 0 :
-                   s[p] == '<' ? (
-                                   std::strncmp(s + p, "<int>", 5) == 0  ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 1 :
-                                   std::strncmp(s + p, "<uint>", 6) == 0 ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 2 :
-                                   (std::strncmp(s + p, "<float>", 7) == 0 ||
-                                    std::strncmp(s + p, "<double>", 8) == 0) ?
-                                                                           get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 3 :
-                                   (std::strncmp(s + p, "<str>", 5) == 0 ||
-                                    std::strncmp(s + p, "<string>", 8) == 0) ?
-                                                                           get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 4 :
-                                   std::strncmp(s + p, "<path>", 6) == 0 ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 5 :
-                                                                           throw std::runtime_error("invalid parameter type")) :
-                                 get_parameter_tag_runtime(s, p + 1);
+            return s[p] == 0 ? 0 : s[p] == '<' ? (std::strncmp(s + p, "<int>", 5) == 0 ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 1 : std::strncmp(s + p, "<uint>", 6) == 0                                             ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 2
+                                                                                                                                                            : (std::strncmp(s + p, "<float>", 7) == 0 || std::strncmp(s + p, "<double>", 8) == 0) ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 3
+                                                                                                                                                            : (std::strncmp(s + p, "<str>", 5) == 0 || std::strncmp(s + p, "<string>", 8) == 0)   ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 4
+                                                                                                                                                            : std::strncmp(s + p, "<path>", 6) == 0                                               ? get_parameter_tag_runtime(s, find_closing_tag_runtime(s, p)) * 6 + 5
+                                                                                                                                                                                                                                                  : throw std::runtime_error("invalid parameter type"))
+                                               : get_parameter_tag_runtime(s, p + 1);
         }
 #ifndef CROW_MSVC_WORKAROUND
         constexpr uint64_t get_parameter_tag(const_str s, unsigned p = 0)
         {
-            return p == s.size() ? 0 :
-                   s[p] == '<'   ? (
-                                   is_int(s, p)   ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 1 :
-                                     is_uint(s, p)  ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 2 :
-                                     is_float(s, p) ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 3 :
-                                     is_str(s, p)   ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 4 :
-                                     is_path(s, p)  ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 5 :
-                                                      throw std::runtime_error("invalid parameter type")) :
-                                 get_parameter_tag(s, p + 1);
+            return p == s.size() ? 0 : s[p] == '<' ? (is_int(s, p) ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 1 : is_uint(s, p) ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 2
+                                                                                                                        : is_float(s, p)  ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 3
+                                                                                                                        : is_str(s, p)    ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 4
+                                                                                                                        : is_path(s, p)   ? get_parameter_tag(s, find_closing_tag(s, p)) * 6 + 5
+                                                                                                                                          : throw std::runtime_error("invalid parameter type"))
+                                                   : get_parameter_tag(s, p + 1);
         }
 #endif
 
-        template<typename... T>
+        template <typename... T>
         struct S
         {
-            template<typename U>
+            template <typename U>
             using push = S<U, T...>;
-            template<typename U>
+            template <typename U>
             using push_back = S<T..., U>;
-            template<template<typename... Args> class U>
+            template <template <typename... Args> class U>
             using rebind = U<T...>;
         };
 
         // Check whether the template function can be called with specific arguments
-        template<typename F, typename Set>
+        template <typename F, typename Set>
         struct CallHelper;
-        template<typename F, typename... Args>
+        template <typename F, typename... Args>
         struct CallHelper<F, S<Args...>>
         {
-            template<typename F1, typename... Args1, typename = decltype(std::declval<F1>()(std::declval<Args1>()...))>
+            template <typename F1, typename... Args1, typename = decltype(std::declval<F1>()(std::declval<Args1>()...))>
             static char __test(int);
 
-            template<typename...>
+            template <typename...>
             static int __test(...);
 
             static constexpr bool value = sizeof(__test<F, Args...>(0)) == sizeof(char);
         };
 
         // Check Tuple contains type T
-        template<typename T, typename Tuple>
+        template <typename T, typename Tuple>
         struct has_type;
 
-        template<typename T>
+        template <typename T>
         struct has_type<T, std::tuple<>> : std::false_type
-        {};
+        {
+        };
 
-        template<typename T, typename U, typename... Ts>
+        template <typename T, typename U, typename... Ts>
         struct has_type<T, std::tuple<U, Ts...>> : has_type<T, std::tuple<Ts...>>
-        {};
+        {
+        };
 
-        template<typename T, typename... Ts>
+        template <typename T, typename... Ts>
         struct has_type<T, std::tuple<T, Ts...>> : std::true_type
-        {};
+        {
+        };
 
         // Find index of type in tuple
-        template<class T, class Tuple>
+        template <class T, class Tuple>
         struct tuple_index;
 
-        template<class T, class... Types>
+        template <class T, class... Types>
         struct tuple_index<T, std::tuple<T, Types...>>
         {
             static const int value = 0;
         };
 
-        template<class T, class U, class... Types>
+        template <class T, class U, class... Types>
         struct tuple_index<T, std::tuple<U, Types...>>
         {
             static const int value = 1 + tuple_index<T, std::tuple<Types...>>::value;
         };
 
         // Extract element from forward tuple or get default
-        template<typename T, typename Tup>
-        typename std::enable_if<has_type<T&, Tup>::value, typename std::decay<T>::type&&>::type
-          tuple_extract(Tup& tup)
+        template <typename T, typename Tup>
+        typename std::enable_if<has_type<T &, Tup>::value, typename std::decay<T>::type &&>::type
+        tuple_extract(Tup &tup)
         {
-            return std::move(std::get<T&>(tup));
+            return std::move(std::get<T &>(tup));
         }
 
-        template<typename T, typename Tup>
-        typename std::enable_if<!has_type<T&, Tup>::value, T>::type
-          tuple_extract(Tup&)
+        template <typename T, typename Tup>
+        typename std::enable_if<!has_type<T &, Tup>::value, T>::type
+        tuple_extract(Tup &)
         {
             return T{};
         }
 
         // Kind of fold expressions in C++11
-        template<bool...>
+        template <bool...>
         struct bool_pack;
-        template<bool... bs>
+        template <bool... bs>
         using all_true = std::is_same<bool_pack<bs..., true>, bool_pack<true, bs...>>;
 
-        template<int N>
+        template <int N>
         struct single_tag_to_type
-        {};
+        {
+        };
 
-        template<>
+        template <>
         struct single_tag_to_type<1>
         {
             using type = int64_t;
         };
 
-        template<>
+        template <>
         struct single_tag_to_type<2>
         {
             using type = uint64_t;
         };
 
-        template<>
+        template <>
         struct single_tag_to_type<3>
         {
             using type = double;
         };
 
-        template<>
+        template <>
         struct single_tag_to_type<4>
         {
             using type = std::string;
         };
 
-        template<>
+        template <>
         struct single_tag_to_type<5>
         {
             using type = std::string;
         };
 
-
-        template<uint64_t Tag>
+        template <uint64_t Tag>
         struct arguments
         {
             using subarguments = typename arguments<Tag / 6>::type;
             using type =
-              typename subarguments::template push<typename single_tag_to_type<Tag % 6>::type>;
+                typename subarguments::template push<typename single_tag_to_type<Tag % 6>::type>;
         };
 
-        template<>
+        template <>
         struct arguments<0>
         {
             using type = S<>;
         };
 
-        template<typename... T>
+        template <typename... T>
         struct last_element_type
         {
             using type = typename std::tuple_element<sizeof...(T) - 1, std::tuple<T...>>::type;
         };
 
-
-        template<>
+        template <>
         struct last_element_type<>
-        {};
-
+        {
+        };
 
         // from http://stackoverflow.com/questions/13072359/c11-compile-time-array-with-logarithmic-evaluation-depth
-        template<class T>
+        template <class T>
         using Invoke = typename T::type;
 
-        template<unsigned...>
+        template <unsigned...>
         struct seq
         {
             using type = seq;
         };
 
-        template<class S1, class S2>
+        template <class S1, class S2>
         struct concat;
 
-        template<unsigned... I1, unsigned... I2>
+        template <unsigned... I1, unsigned... I2>
         struct concat<seq<I1...>, seq<I2...>> : seq<I1..., (sizeof...(I1) + I2)...>
-        {};
+        {
+        };
 
-        template<class S1, class S2>
+        template <class S1, class S2>
         using Concat = Invoke<concat<S1, S2>>;
 
-        template<unsigned N>
+        template <unsigned N>
         struct gen_seq;
-        template<unsigned N>
+        template <unsigned N>
         using GenSeq = Invoke<gen_seq<N>>;
 
-        template<unsigned N>
+        template <unsigned N>
         struct gen_seq : Concat<GenSeq<N / 2>, GenSeq<N - N / 2>>
-        {};
+        {
+        };
 
-        template<>
+        template <>
         struct gen_seq<0> : seq<>
-        {};
-        template<>
+        {
+        };
+        template <>
         struct gen_seq<1> : seq<0>
-        {};
+        {
+        };
 
-        template<typename Seq, typename Tuple>
+        template <typename Seq, typename Tuple>
         struct pop_back_helper;
 
-        template<unsigned... N, typename Tuple>
+        template <unsigned... N, typename Tuple>
         struct pop_back_helper<seq<N...>, Tuple>
         {
-            template<template<typename... Args> class U>
+            template <template <typename... Args> class U>
             using rebind = U<typename std::tuple_element<N, Tuple>::type...>;
         };
 
-        template<typename... T>
+        template <typename... T>
         struct pop_back //: public pop_back_helper<typename gen_seq<sizeof...(T)-1>::type, std::tuple<T...>>
         {
-            template<template<typename... Args> class U>
+            template <template <typename... Args> class U>
             using rebind = typename pop_back_helper<typename gen_seq<sizeof...(T) - 1>::type, std::tuple<T...>>::template rebind<U>;
         };
 
-        template<>
+        template <>
         struct pop_back<>
         {
-            template<template<typename... Args> class U>
+            template <template <typename... Args> class U>
             using rebind = U<>;
         };
 
         // from http://stackoverflow.com/questions/2118541/check-if-c0x-parameter-pack-contains-a-type
-        template<typename Tp, typename... List>
+        template <typename Tp, typename... List>
         struct contains : std::true_type
-        {};
+        {
+        };
 
-        template<typename Tp, typename Head, typename... Rest>
+        template <typename Tp, typename Head, typename... Rest>
         struct contains<Tp, Head, Rest...> : std::conditional<std::is_same<Tp, Head>::value, std::true_type, contains<Tp, Rest...>>::type
-        {};
+        {
+        };
 
-        template<typename Tp>
+        template <typename Tp>
         struct contains<Tp> : std::false_type
-        {};
+        {
+        };
 
-        template<typename T>
+        template <typename T>
         struct empty_context
-        {};
+        {
+        };
 
-        template<typename T>
+        template <typename T>
         struct promote
         {
             using type = T;
         };
 
 #define CROW_INTERNAL_PROMOTE_TYPE(t1, t2) \
-    template<>                             \
+    template <>                            \
     struct promote<t1>                     \
     {                                      \
         using type = t2;                   \
@@ -1013,7 +1005,7 @@ namespace crow
         CROW_INTERNAL_PROMOTE_TYPE(float, double);
 #undef CROW_INTERNAL_PROMOTE_TYPE
 
-        template<typename T>
+        template <typename T>
         using promote_t = typename promote<T>::type;
 
     } // namespace black_magic
@@ -1021,19 +1013,19 @@ namespace crow
     namespace detail
     {
 
-        template<class T, std::size_t N, class... Args>
+        template <class T, std::size_t N, class... Args>
         struct get_index_of_element_from_tuple_by_type_impl
         {
             static constexpr auto value = N;
         };
 
-        template<class T, std::size_t N, class... Args>
+        template <class T, std::size_t N, class... Args>
         struct get_index_of_element_from_tuple_by_type_impl<T, N, T, Args...>
         {
             static constexpr auto value = N;
         };
 
-        template<class T, std::size_t N, class U, class... Args>
+        template <class T, std::size_t N, class U, class... Args>
         struct get_index_of_element_from_tuple_by_type_impl<T, N, U, Args...>
         {
             static constexpr auto value = get_index_of_element_from_tuple_by_type_impl<T, N + 1, Args...>::value;
@@ -1042,62 +1034,62 @@ namespace crow
 
     namespace utility
     {
-        template<class T, class... Args>
-        T& get_element_by_type(std::tuple<Args...>& t)
+        template <class T, class... Args>
+        T &get_element_by_type(std::tuple<Args...> &t)
         {
             return std::get<detail::get_index_of_element_from_tuple_by_type_impl<T, 0, Args...>::value>(t);
         }
 
-        template<typename T>
+        template <typename T>
         struct function_traits;
 
 #ifndef CROW_MSVC_WORKAROUND
-        template<typename T>
+        template <typename T>
         struct function_traits : public function_traits<decltype(&T::operator())>
         {
             using parent_t = function_traits<decltype(&T::operator())>;
             static const size_t arity = parent_t::arity;
             using result_type = typename parent_t::result_type;
-            template<size_t i>
+            template <size_t i>
             using arg = typename parent_t::template arg<i>;
         };
 #endif
 
-        template<typename ClassType, typename R, typename... Args>
+        template <typename ClassType, typename R, typename... Args>
         struct function_traits<R (ClassType::*)(Args...) const>
         {
             static const size_t arity = sizeof...(Args);
 
             typedef R result_type;
 
-            template<size_t i>
+            template <size_t i>
             using arg = typename std::tuple_element<i, std::tuple<Args...>>::type;
         };
 
-        template<typename ClassType, typename R, typename... Args>
+        template <typename ClassType, typename R, typename... Args>
         struct function_traits<R (ClassType::*)(Args...)>
         {
             static const size_t arity = sizeof...(Args);
 
             typedef R result_type;
 
-            template<size_t i>
+            template <size_t i>
             using arg = typename std::tuple_element<i, std::tuple<Args...>>::type;
         };
 
-        template<typename R, typename... Args>
+        template <typename R, typename... Args>
         struct function_traits<std::function<R(Args...)>>
         {
             static const size_t arity = sizeof...(Args);
 
             typedef R result_type;
 
-            template<size_t i>
+            template <size_t i>
             using arg = typename std::tuple_element<i, std::tuple<Args...>>::type;
         };
         /// @endcond
 
-        inline static std::string base64encode(const unsigned char* data, size_t size, const char* key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+        inline static std::string base64encode(const unsigned char *data, size_t size, const char *key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
         {
             std::string ret;
             ret.resize((size + 2) / 3 * 4);
@@ -1133,33 +1125,39 @@ namespace crow
             return ret;
         }
 
-        inline static std::string base64encode(std::string data, size_t size, const char* key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
+        inline static std::string base64encode(std::string data, size_t size, const char *key = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
         {
-            return base64encode((const unsigned char*)data.c_str(), size, key);
+            return base64encode((const unsigned char *)data.c_str(), size, key);
         }
 
-        inline static std::string base64encode_urlsafe(const unsigned char* data, size_t size)
+        inline static std::string base64encode_urlsafe(const unsigned char *data, size_t size)
         {
             return base64encode(data, size, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
         }
 
         inline static std::string base64encode_urlsafe(std::string data, size_t size)
         {
-            return base64encode((const unsigned char*)data.c_str(), size, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
+            return base64encode((const unsigned char *)data.c_str(), size, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_");
         }
 
-        inline static std::string base64decode(const char* data, size_t size)
+        inline static std::string base64decode(const char *data, size_t size)
         {
             // We accept both regular and url encoding here, as there does not seem to be any downside to that.
             // If we want to distinguish that we should use +/ for non-url and -_ for url.
 
             // Mapping logic from characters to [0-63]
-            auto key = [](char c) -> unsigned char {
-                if ((c >= 'A') && (c <= 'Z')) return c - 'A';
-                if ((c >= 'a') && (c <= 'z')) return c - 'a' + 26;
-                if ((c >= '0') && (c <= '9')) return c - '0' + 52;
-                if ((c == '+') || (c == '-')) return 62;
-                if ((c == '/') || (c == '_')) return 63;
+            auto key = [](char c) -> unsigned char
+            {
+                if ((c >= 'A') && (c <= 'Z'))
+                    return c - 'A';
+                if ((c >= 'a') && (c <= 'z'))
+                    return c - 'a' + 26;
+                if ((c >= '0') && (c <= '9'))
+                    return c - '0' + 52;
+                if ((c == '+') || (c == '-'))
+                    return 62;
+                if ((c == '/') || (c == '_'))
+                    return 63;
                 return 0;
             };
 
@@ -1223,17 +1221,17 @@ namespace crow
             return ret;
         }
 
-        inline static std::string base64decode(const std::string& data, size_t size)
+        inline static std::string base64decode(const std::string &data, size_t size)
         {
             return base64decode(data.data(), size);
         }
 
-        inline static std::string base64decode(const std::string& data)
+        inline static std::string base64decode(const std::string &data)
         {
             return base64decode(data.data(), data.length());
         }
 
-        inline static std::string normalize_path(const std::string& directoryPath)
+        inline static std::string normalize_path(const std::string &directoryPath)
         {
             std::string normalizedPath = directoryPath;
             std::replace(normalizedPath.begin(), normalizedPath.end(), '\\', '/');
@@ -1242,31 +1240,36 @@ namespace crow
             return normalizedPath;
         }
 
-        inline static void sanitize_filename(std::string& data, char replacement = '_')
+        inline static void sanitize_filename(std::string &data, char replacement = '_')
         {
             if (data.length() > 255)
                 data.resize(255);
 
-            static const auto toUpper = [](char c) {
+            static const auto toUpper = [](char c)
+            {
                 return ((c >= 'a') && (c <= 'z')) ? (c - ('a' - 'A')) : c;
             };
             // Check for special device names. The Windows behavior is really odd here, it will consider both AUX and AUX.txt
             // a special device. Thus we search for the string (case-insensitive), and then check if the string ends or if
             // is has a dangerous follow up character (.:\/)
-            auto sanitizeSpecialFile = [](std::string& source, unsigned ofs, const char* pattern, bool includeNumber, char replacement_) {
+            auto sanitizeSpecialFile = [](std::string &source, unsigned ofs, const char *pattern, bool includeNumber, char replacement_)
+            {
                 unsigned i = ofs;
                 size_t len = source.length();
-                const char* p = pattern;
+                const char *p = pattern;
                 while (*p)
                 {
-                    if (i >= len) return;
-                    if (toUpper(source[i]) != *p) return;
+                    if (i >= len)
+                        return;
+                    if (toUpper(source[i]) != *p)
+                        return;
                     ++i;
                     ++p;
                 }
                 if (includeNumber)
                 {
-                    if ((i >= len) || (source[i] < '1') || (source[i] > '9')) return;
+                    if ((i >= len) || (source[i] < '1') || (source[i] > '9'))
+                        return;
                     ++i;
                 }
                 if ((i >= len) || (source[i] == '.') || (source[i] == ':') || (source[i] == '/') || (source[i] == '\\'))
@@ -1284,25 +1287,25 @@ namespace crow
                     checkForSpecialEntries = false;
                     switch (toUpper(data[i]))
                     {
-                        case 'A':
-                            sanitizeSpecialFile(data, i, "AUX", false, replacement);
-                            break;
-                        case 'C':
-                            sanitizeSpecialFile(data, i, "CON", false, replacement);
-                            sanitizeSpecialFile(data, i, "COM", true, replacement);
-                            break;
-                        case 'L':
-                            sanitizeSpecialFile(data, i, "LPT", true, replacement);
-                            break;
-                        case 'N':
-                            sanitizeSpecialFile(data, i, "NUL", false, replacement);
-                            break;
-                        case 'P':
-                            sanitizeSpecialFile(data, i, "PRN", false, replacement);
-                            break;
-                        case '.':
-                            sanitizeSpecialFile(data, i, "..", false, replacement);
-                            break;
+                    case 'A':
+                        sanitizeSpecialFile(data, i, "AUX", false, replacement);
+                        break;
+                    case 'C':
+                        sanitizeSpecialFile(data, i, "CON", false, replacement);
+                        sanitizeSpecialFile(data, i, "COM", true, replacement);
+                        break;
+                    case 'L':
+                        sanitizeSpecialFile(data, i, "LPT", true, replacement);
+                        break;
+                    case 'N':
+                        sanitizeSpecialFile(data, i, "NUL", false, replacement);
+                        break;
+                    case 'P':
+                        sanitizeSpecialFile(data, i, "PRN", false, replacement);
+                        break;
+                    case '.':
+                        sanitizeSpecialFile(data, i, "..", false, replacement);
+                        break;
                     }
                 }
 
@@ -1314,7 +1317,7 @@ namespace crow
                 }
                 else if ((c == '/') || (c == '\\'))
                 {
-                    if (CROW_UNLIKELY(i == 0)) //Prevent Unix Absolute Paths (Windows Absolute Paths are prevented with `(c == ':')`)
+                    if (CROW_UNLIKELY(i == 0)) // Prevent Unix Absolute Paths (Windows Absolute Paths are prevented with `(c == ':')`)
                     {
                         data[i] = replacement;
                     }
@@ -1339,7 +1342,7 @@ namespace crow
             return out;
         }
 
-        inline static std::string join_path(std::string path, const std::string& fname)
+        inline static std::string join_path(std::string path, const std::string &fname)
         {
             return (std::filesystem::path(path) / fname).string();
         }
@@ -1371,8 +1374,8 @@ namespace crow
             return true;
         }
 
-        template<typename T, typename U>
-        inline static T lexical_cast(const U& v)
+        template <typename T, typename U>
+        inline static T lexical_cast(const U &v)
         {
             std::stringstream stream;
             T res;
@@ -1383,8 +1386,8 @@ namespace crow
             return res;
         }
 
-        template<typename T>
-        inline static T lexical_cast(const char* v, size_t count)
+        template <typename T>
+        inline static T lexical_cast(const char *v, size_t count)
         {
             std::stringstream stream;
             T res;
@@ -1395,10 +1398,9 @@ namespace crow
             return res;
         }
 
-
         /// Return a copy of the given string with its
         /// leading and trailing whitespaces removed.
-        inline static std::string trim(const std::string& v)
+        inline static std::string trim(const std::string &v)
         {
             if (v.empty())
                 return "";
@@ -1433,7 +1435,7 @@ namespace crow
         /**
          * @brief splits a string based on a separator
          */
-        inline static std::vector<std::string> split(const std::string& v, const std::string& separator)
+        inline static std::vector<std::string> split(const std::string &v, const std::string &separator)
         {
             std::vector<std::string> result;
             size_t startPos = 0;
@@ -1454,9 +1456,9 @@ namespace crow
          * @param last1 end() iterator of the first range
          * @param first2 begin() iterator of the second range
          * @param last2 end() iterator of the second range
-         * @return first occurence that matches between two ranges of iterators 
-        */
-        template<typename Iter1, typename Iter2>
+         * @return first occurence that matches between two ranges of iterators
+         */
+        template <typename Iter1, typename Iter2>
         inline static Iter1 find_first_of(Iter1 first1, Iter1 last1, Iter2 first2, Iter2 last2)
         {
             for (; first1 != last1; ++first1)
@@ -1471,11 +1473,9 @@ namespace crow
     } // namespace utility
 } // namespace crow
 
-
 #include <string_view>
 #include <locale>
 #include <unordered_map>
-
 
 namespace crow
 {
@@ -1494,7 +1494,7 @@ namespace crow
         }
 
     private:
-        static inline void hash_combine(std::size_t& seed, char v)
+        static inline void hash_combine(std::size_t &seed, char v)
         {
             std::hash<char> hasher;
             seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -1512,7 +1512,6 @@ namespace crow
 
     using ci_map = std::unordered_multimap<std::string, std::string, ci_hash, ci_key_eq>;
 } // namespace crow
-
 
 #include <vector>
 #include <string>
@@ -1615,56 +1614,54 @@ namespace crow
 
         Source,
 
-
         InternalMethodCount,
         // should not add an item below this line: used for array count
     };
 
-    constexpr const char* method_strings[] =
-      {
-        "DELETE",
-        "GET",
-        "HEAD",
-        "POST",
-        "PUT",
+    constexpr const char *method_strings[] =
+        {
+            "DELETE",
+            "GET",
+            "HEAD",
+            "POST",
+            "PUT",
 
-        "CONNECT",
-        "OPTIONS",
-        "TRACE",
+            "CONNECT",
+            "OPTIONS",
+            "TRACE",
 
-        "PATCH",
-        "PURGE",
+            "PATCH",
+            "PURGE",
 
-        "COPY",
-        "LOCK",
-        "MKCOL",
-        "MOVE",
-        "PROPFIND",
-        "PROPPATCH",
-        "SEARCH",
-        "UNLOCK",
-        "BIND",
-        "REBIND",
-        "UNBIND",
-        "ACL",
+            "COPY",
+            "LOCK",
+            "MKCOL",
+            "MOVE",
+            "PROPFIND",
+            "PROPPATCH",
+            "SEARCH",
+            "UNLOCK",
+            "BIND",
+            "REBIND",
+            "UNBIND",
+            "ACL",
 
-        "REPORT",
-        "MKACTIVITY",
-        "CHECKOUT",
-        "MERGE",
+            "REPORT",
+            "MKACTIVITY",
+            "CHECKOUT",
+            "MERGE",
 
-        "M-SEARCH",
-        "NOTIFY",
-        "SUBSCRIBE",
-        "UNSUBSCRIBE",
+            "M-SEARCH",
+            "NOTIFY",
+            "SUBSCRIBE",
+            "UNSUBSCRIBE",
 
-        "MKCALENDAR",
+            "MKCALENDAR",
 
-        "LINK",
-        "UNLINK",
+            "LINK",
+            "UNLINK",
 
-        "SOURCE"};
-
+            "SOURCE"};
 
     inline std::string method_name(HTTPMethod method)
     {
@@ -1756,34 +1753,34 @@ namespace crow
             for (auto i : double_params)
                 std::cerr << i << ", ";
             std::cerr << std::endl;
-            for (auto& i : string_params)
+            for (auto &i : string_params)
                 std::cerr << i << ", ";
             std::cerr << std::endl;
         }
 
-        template<typename T>
+        template <typename T>
         T get(unsigned) const;
     };
 
-    template<>
+    template <>
     inline int64_t routing_params::get<int64_t>(unsigned index) const
     {
         return int_params[index];
     }
 
-    template<>
+    template <>
     inline uint64_t routing_params::get<uint64_t>(unsigned index) const
     {
         return uint_params[index];
     }
 
-    template<>
+    template <>
     inline double routing_params::get<double>(unsigned index) const
     {
         return double_params[index];
     }
 
-    template<>
+    template <>
     inline std::string routing_params::get<std::string>(unsigned index) const
     {
         return string_params[index];
@@ -1799,16 +1796,14 @@ namespace crow
 
         routing_handle_result() {}
 
-        routing_handle_result(uint16_t rule_index_, std::vector<uint16_t> blueprint_indices_, routing_params r_params_):
-          rule_index(rule_index_),
-          blueprint_indices(blueprint_indices_),
-          r_params(r_params_) {}
+        routing_handle_result(uint16_t rule_index_, std::vector<uint16_t> blueprint_indices_, routing_params r_params_) : rule_index(rule_index_),
+                                                                                                                          blueprint_indices(blueprint_indices_),
+                                                                                                                          r_params(r_params_) {}
 
-        routing_handle_result(uint16_t rule_index_, std::vector<uint16_t> blueprint_indices_, routing_params r_params_, HTTPMethod method_):
-          rule_index(rule_index_),
-          blueprint_indices(blueprint_indices_),
-          r_params(r_params_),
-          method(method_) {}
+        routing_handle_result(uint16_t rule_index_, std::vector<uint16_t> blueprint_indices_, routing_params r_params_, HTTPMethod method_) : rule_index(rule_index_),
+                                                                                                                                              blueprint_indices(blueprint_indices_),
+                                                                                                                                              r_params(r_params_),
+                                                                                                                                              method(method_) {}
     };
 } // namespace crow
 
@@ -1867,7 +1862,6 @@ constexpr crow::HTTPMethod operator"" _method(const char* str, size_t /*len*/)
 #endif
 // clang-format on
 
-
 #ifdef CROW_USE_BOOST
 #include <boost/asio.hpp>
 #include <boost/asio/version.hpp>
@@ -1886,7 +1880,7 @@ constexpr crow::HTTPMethod operator"" _method(const char* str, size_t /*len*/)
 #endif
 
 #if (CROW_USE_BOOST && BOOST_VERSION >= 107000) || (ASIO_VERSION >= 101300)
-#define GET_IO_CONTEXT(s) ((asio::io_context&)(s).get_executor().context())
+#define GET_IO_CONTEXT(s) ((asio::io_context &)(s).get_executor().context())
 #else
 #define GET_IO_CONTEXT(s) ((s).get_io_service())
 #endif
@@ -1905,23 +1899,23 @@ namespace crow
     struct SocketAdaptor
     {
         using context = void;
-        SocketAdaptor(asio::io_context& io_context, context*):
-          socket_(io_context)
-        {}
+        SocketAdaptor(asio::io_context &io_context, context *) : socket_(io_context)
+        {
+        }
 
-        asio::io_context& get_io_context()
+        asio::io_context &get_io_context()
         {
             return GET_IO_CONTEXT(socket_);
         }
 
         /// Get the TCP socket handling data trasfers, regardless of what layer is handling transfers on top of the socket.
-        tcp::socket& raw_socket()
+        tcp::socket &raw_socket()
         {
             return socket_;
         }
 
         /// Get the object handling data transfers, this can be either a TCP socket or an SSL stream (if SSL is enabled).
-        tcp::socket& socket()
+        tcp::socket &socket()
         {
             return socket_;
         }
@@ -1960,7 +1954,7 @@ namespace crow
             socket_.shutdown(asio::socket_base::shutdown_type::shutdown_receive, ec);
         }
 
-        template<typename F>
+        template <typename F>
         void start(F f)
         {
             f(error_code());
@@ -1974,17 +1968,17 @@ namespace crow
     {
         using context = asio::ssl::context;
         using ssl_socket_t = asio::ssl::stream<tcp::socket>;
-        SSLAdaptor(asio::io_context& io_context, context* ctx):
-          ssl_socket_(new ssl_socket_t(io_context, *ctx))
-        {}
+        SSLAdaptor(asio::io_context &io_context, context *ctx) : ssl_socket_(new ssl_socket_t(io_context, *ctx))
+        {
+        }
 
-        asio::ssl::stream<tcp::socket>& socket()
+        asio::ssl::stream<tcp::socket> &socket()
         {
             return *ssl_socket_;
         }
 
-        tcp::socket::lowest_layer_type&
-          raw_socket()
+        tcp::socket::lowest_layer_type &
+        raw_socket()
         {
             return ssl_socket_->lowest_layer();
         }
@@ -2035,16 +2029,17 @@ namespace crow
             }
         }
 
-        asio::io_context& get_io_context()
+        asio::io_context &get_io_context()
         {
             return GET_IO_CONTEXT(raw_socket());
         }
 
-        template<typename F>
+        template <typename F>
         void start(F f)
         {
             ssl_socket_->async_handshake(asio::ssl::stream_base::server,
-                                         [f](const error_code& ec) {
+                                         [f](const error_code &ec)
+                                         {
                                              f(ec);
                                          });
         }
@@ -2061,117 +2056,117 @@ namespace crow
 namespace crow
 {
     const std::unordered_map<std::string, std::string> mime_types{
-      {"gz", "application/gzip"},
-      {"shtml", "text/html"},
-      {"htm", "text/html"},
-      {"html", "text/html"},
-      {"css", "text/css"},
-      {"xml", "text/xml"},
-      {"gif", "image/gif"},
-      {"jpg", "image/jpeg"},
-      {"jpeg", "image/jpeg"},
-      {"js", "application/javascript"},
-      {"atom", "application/atom+xml"},
-      {"rss", "application/rss+xml"},
-      {"mml", "text/mathml"},
-      {"txt", "text/plain"},
-      {"jad", "text/vnd.sun.j2me.app-descriptor"},
-      {"wml", "text/vnd.wap.wml"},
-      {"htc", "text/x-component"},
-      {"avif", "image/avif"},
-      {"png", "image/png"},
-      {"svgz", "image/svg+xml"},
-      {"svg", "image/svg+xml"},
-      {"tiff", "image/tiff"},
-      {"tif", "image/tiff"},
-      {"wbmp", "image/vnd.wap.wbmp"},
-      {"webp", "image/webp"},
-      {"ico", "image/x-icon"},
-      {"jng", "image/x-jng"},
-      {"bmp", "image/x-ms-bmp"},
-      {"woff", "font/woff"},
-      {"woff2", "font/woff2"},
-      {"ear", "application/java-archive"},
-      {"war", "application/java-archive"},
-      {"jar", "application/java-archive"},
-      {"json", "application/json"},
-      {"hqx", "application/mac-binhex40"},
-      {"doc", "application/msword"},
-      {"pdf", "application/pdf"},
-      {"ai", "application/postscript"},
-      {"eps", "application/postscript"},
-      {"ps", "application/postscript"},
-      {"rtf", "application/rtf"},
-      {"m3u8", "application/vnd.apple.mpegurl"},
-      {"kml", "application/vnd.google-earth.kml+xml"},
-      {"kmz", "application/vnd.google-earth.kmz"},
-      {"xls", "application/vnd.ms-excel"},
-      {"eot", "application/vnd.ms-fontobject"},
-      {"ppt", "application/vnd.ms-powerpoint"},
-      {"odg", "application/vnd.oasis.opendocument.graphics"},
-      {"odp", "application/vnd.oasis.opendocument.presentation"},
-      {"ods", "application/vnd.oasis.opendocument.spreadsheet"},
-      {"odt", "application/vnd.oasis.opendocument.text"},
-      {"pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
-      {"xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
-      {"docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
-      {"wmlc", "application/vnd.wap.wmlc"},
-      {"wasm", "application/wasm"},
-      {"7z", "application/x-7z-compressed"},
-      {"cco", "application/x-cocoa"},
-      {"jardiff", "application/x-java-archive-diff"},
-      {"jnlp", "application/x-java-jnlp-file"},
-      {"run", "application/x-makeself"},
-      {"pm", "application/x-perl"},
-      {"pl", "application/x-perl"},
-      {"pdb", "application/x-pilot"},
-      {"prc", "application/x-pilot"},
-      {"rar", "application/x-rar-compressed"},
-      {"rpm", "application/x-redhat-package-manager"},
-      {"sea", "application/x-sea"},
-      {"swf", "application/x-shockwave-flash"},
-      {"sit", "application/x-stuffit"},
-      {"tk", "application/x-tcl"},
-      {"tcl", "application/x-tcl"},
-      {"crt", "application/x-x509-ca-cert"},
-      {"pem", "application/x-x509-ca-cert"},
-      {"der", "application/x-x509-ca-cert"},
-      {"xpi", "application/x-xpinstall"},
-      {"xhtml", "application/xhtml+xml"},
-      {"xspf", "application/xspf+xml"},
-      {"zip", "application/zip"},
-      {"dll", "application/octet-stream"},
-      {"exe", "application/octet-stream"},
-      {"bin", "application/octet-stream"},
-      {"deb", "application/octet-stream"},
-      {"dmg", "application/octet-stream"},
-      {"img", "application/octet-stream"},
-      {"iso", "application/octet-stream"},
-      {"msm", "application/octet-stream"},
-      {"msp", "application/octet-stream"},
-      {"msi", "application/octet-stream"},
-      {"kar", "audio/midi"},
-      {"midi", "audio/midi"},
-      {"mid", "audio/midi"},
-      {"mp3", "audio/mpeg"},
-      {"ogg", "audio/ogg"},
-      {"m4a", "audio/x-m4a"},
-      {"ra", "audio/x-realaudio"},
-      {"3gp", "video/3gpp"},
-      {"3gpp", "video/3gpp"},
-      {"ts", "video/mp2t"},
-      {"mp4", "video/mp4"},
-      {"mpg", "video/mpeg"},
-      {"mpeg", "video/mpeg"},
-      {"mov", "video/quicktime"},
-      {"webm", "video/webm"},
-      {"flv", "video/x-flv"},
-      {"m4v", "video/x-m4v"},
-      {"mng", "video/x-mng"},
-      {"asf", "video/x-ms-asf"},
-      {"asx", "video/x-ms-asf"},
-      {"wmv", "video/x-ms-wmv"},
-      {"avi", "video/x-msvideo"}};
+        {"gz", "application/gzip"},
+        {"shtml", "text/html"},
+        {"htm", "text/html"},
+        {"html", "text/html"},
+        {"css", "text/css"},
+        {"xml", "text/xml"},
+        {"gif", "image/gif"},
+        {"jpg", "image/jpeg"},
+        {"jpeg", "image/jpeg"},
+        {"js", "application/javascript"},
+        {"atom", "application/atom+xml"},
+        {"rss", "application/rss+xml"},
+        {"mml", "text/mathml"},
+        {"txt", "text/plain"},
+        {"jad", "text/vnd.sun.j2me.app-descriptor"},
+        {"wml", "text/vnd.wap.wml"},
+        {"htc", "text/x-component"},
+        {"avif", "image/avif"},
+        {"png", "image/png"},
+        {"svgz", "image/svg+xml"},
+        {"svg", "image/svg+xml"},
+        {"tiff", "image/tiff"},
+        {"tif", "image/tiff"},
+        {"wbmp", "image/vnd.wap.wbmp"},
+        {"webp", "image/webp"},
+        {"ico", "image/x-icon"},
+        {"jng", "image/x-jng"},
+        {"bmp", "image/x-ms-bmp"},
+        {"woff", "font/woff"},
+        {"woff2", "font/woff2"},
+        {"ear", "application/java-archive"},
+        {"war", "application/java-archive"},
+        {"jar", "application/java-archive"},
+        {"json", "application/json"},
+        {"hqx", "application/mac-binhex40"},
+        {"doc", "application/msword"},
+        {"pdf", "application/pdf"},
+        {"ai", "application/postscript"},
+        {"eps", "application/postscript"},
+        {"ps", "application/postscript"},
+        {"rtf", "application/rtf"},
+        {"m3u8", "application/vnd.apple.mpegurl"},
+        {"kml", "application/vnd.google-earth.kml+xml"},
+        {"kmz", "application/vnd.google-earth.kmz"},
+        {"xls", "application/vnd.ms-excel"},
+        {"eot", "application/vnd.ms-fontobject"},
+        {"ppt", "application/vnd.ms-powerpoint"},
+        {"odg", "application/vnd.oasis.opendocument.graphics"},
+        {"odp", "application/vnd.oasis.opendocument.presentation"},
+        {"ods", "application/vnd.oasis.opendocument.spreadsheet"},
+        {"odt", "application/vnd.oasis.opendocument.text"},
+        {"pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
+        {"xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+        {"docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+        {"wmlc", "application/vnd.wap.wmlc"},
+        {"wasm", "application/wasm"},
+        {"7z", "application/x-7z-compressed"},
+        {"cco", "application/x-cocoa"},
+        {"jardiff", "application/x-java-archive-diff"},
+        {"jnlp", "application/x-java-jnlp-file"},
+        {"run", "application/x-makeself"},
+        {"pm", "application/x-perl"},
+        {"pl", "application/x-perl"},
+        {"pdb", "application/x-pilot"},
+        {"prc", "application/x-pilot"},
+        {"rar", "application/x-rar-compressed"},
+        {"rpm", "application/x-redhat-package-manager"},
+        {"sea", "application/x-sea"},
+        {"swf", "application/x-shockwave-flash"},
+        {"sit", "application/x-stuffit"},
+        {"tk", "application/x-tcl"},
+        {"tcl", "application/x-tcl"},
+        {"crt", "application/x-x509-ca-cert"},
+        {"pem", "application/x-x509-ca-cert"},
+        {"der", "application/x-x509-ca-cert"},
+        {"xpi", "application/x-xpinstall"},
+        {"xhtml", "application/xhtml+xml"},
+        {"xspf", "application/xspf+xml"},
+        {"zip", "application/zip"},
+        {"dll", "application/octet-stream"},
+        {"exe", "application/octet-stream"},
+        {"bin", "application/octet-stream"},
+        {"deb", "application/octet-stream"},
+        {"dmg", "application/octet-stream"},
+        {"img", "application/octet-stream"},
+        {"iso", "application/octet-stream"},
+        {"msm", "application/octet-stream"},
+        {"msp", "application/octet-stream"},
+        {"msi", "application/octet-stream"},
+        {"kar", "audio/midi"},
+        {"midi", "audio/midi"},
+        {"mid", "audio/midi"},
+        {"mp3", "audio/mpeg"},
+        {"ogg", "audio/ogg"},
+        {"m4a", "audio/x-m4a"},
+        {"ra", "audio/x-realaudio"},
+        {"3gp", "video/3gpp"},
+        {"3gpp", "video/3gpp"},
+        {"ts", "video/mp2t"},
+        {"mp4", "video/mp4"},
+        {"mpg", "video/mpeg"},
+        {"mpeg", "video/mpeg"},
+        {"mov", "video/quicktime"},
+        {"webm", "video/webm"},
+        {"flv", "video/x-flv"},
+        {"m4v", "video/x-m4v"},
+        {"mng", "video/x-mng"},
+        {"asf", "video/x-ms-asf"},
+        {"asx", "video/x-ms-asf"},
+        {"wmv", "video/x-ms-wmv"},
+        {"avi", "video/x-msvideo"}};
 }
 
 /*
@@ -2225,20 +2220,23 @@ namespace sha1
     public:
         typedef uint32_t digest32_t[5];
         typedef uint8_t digest8_t[20];
-        inline static uint32_t LeftRotate(uint32_t value, size_t count) {
-            return (value << count) ^ (value >> (32-count));
+        inline static uint32_t LeftRotate(uint32_t value, size_t count)
+        {
+            return (value << count) ^ (value >> (32 - count));
         }
-        SHA1(){ reset(); }
+        SHA1() { reset(); }
         virtual ~SHA1() {}
-        SHA1(const SHA1& s) { *this = s; }
-        const SHA1& operator = (const SHA1& s) {
+        SHA1(const SHA1 &s) { *this = s; }
+        const SHA1 &operator=(const SHA1 &s)
+        {
             memcpy(m_digest, s.m_digest, 5 * sizeof(uint32_t));
             memcpy(m_block, s.m_block, 64);
             m_blockByteIndex = s.m_blockByteIndex;
             m_byteCount = s.m_byteCount;
             return *this;
         }
-        SHA1& reset() {
+        SHA1 &reset()
+        {
             m_digest[0] = 0x67452301;
             m_digest[1] = 0xEFCDAB89;
             m_digest[2] = 0x98BADCFE;
@@ -2248,41 +2246,53 @@ namespace sha1
             m_byteCount = 0;
             return *this;
         }
-        SHA1& processByte(uint8_t octet) {
+        SHA1 &processByte(uint8_t octet)
+        {
             this->m_block[this->m_blockByteIndex++] = octet;
             ++this->m_byteCount;
-            if(m_blockByteIndex == 64) {
+            if (m_blockByteIndex == 64)
+            {
                 this->m_blockByteIndex = 0;
                 processBlock();
             }
             return *this;
         }
-        SHA1& processBlock(const void* const start, const void* const end) {
-            const uint8_t* begin = static_cast<const uint8_t*>(start);
-            const uint8_t* finish = static_cast<const uint8_t*>(end);
-            while(begin != finish) {
+        SHA1 &processBlock(const void *const start, const void *const end)
+        {
+            const uint8_t *begin = static_cast<const uint8_t *>(start);
+            const uint8_t *finish = static_cast<const uint8_t *>(end);
+            while (begin != finish)
+            {
                 processByte(*begin);
                 begin++;
             }
             return *this;
         }
-        SHA1& processBytes(const void* const data, size_t len) {
-            const uint8_t* block = static_cast<const uint8_t*>(data);
+        SHA1 &processBytes(const void *const data, size_t len)
+        {
+            const uint8_t *block = static_cast<const uint8_t *>(data);
             processBlock(block, block + len);
             return *this;
         }
-        const uint32_t* getDigest(digest32_t digest) {
+        const uint32_t *getDigest(digest32_t digest)
+        {
             size_t bitCount = this->m_byteCount * 8;
             processByte(0x80);
-            if (this->m_blockByteIndex > 56) {
-                while (m_blockByteIndex != 0) {
+            if (this->m_blockByteIndex > 56)
+            {
+                while (m_blockByteIndex != 0)
+                {
                     processByte(0);
                 }
-                while (m_blockByteIndex < 56) {
+                while (m_blockByteIndex < 56)
+                {
                     processByte(0);
                 }
-            } else {
-                while (m_blockByteIndex < 56) {
+            }
+            else
+            {
+                while (m_blockByteIndex < 56)
+                {
                     processByte(0);
                 }
             }
@@ -2290,15 +2300,16 @@ namespace sha1
             processByte(0);
             processByte(0);
             processByte(0);
-            processByte( static_cast<unsigned char>((bitCount>>24) & 0xFF));
-            processByte( static_cast<unsigned char>((bitCount>>16) & 0xFF));
-            processByte( static_cast<unsigned char>((bitCount>>8 ) & 0xFF));
-            processByte( static_cast<unsigned char>((bitCount)     & 0xFF));
+            processByte(static_cast<unsigned char>((bitCount >> 24) & 0xFF));
+            processByte(static_cast<unsigned char>((bitCount >> 16) & 0xFF));
+            processByte(static_cast<unsigned char>((bitCount >> 8) & 0xFF));
+            processByte(static_cast<unsigned char>((bitCount) & 0xFF));
 
             memcpy(digest, m_digest, 5 * sizeof(uint32_t));
             return digest;
         }
-        const uint8_t* getDigestBytes(digest8_t digest) {
+        const uint8_t *getDigestBytes(digest8_t digest)
+        {
             digest32_t d32;
             getDigest(d32);
             size_t di = 0;
@@ -2330,16 +2341,19 @@ namespace sha1
         }
 
     protected:
-        void processBlock() {
+        void processBlock()
+        {
             uint32_t w[80];
-            for (size_t i = 0; i < 16; i++) {
-                w[i]  = (m_block[i*4 + 0] << 24);
-                w[i] |= (m_block[i*4 + 1] << 16);
-                w[i] |= (m_block[i*4 + 2] << 8);
-                w[i] |= (m_block[i*4 + 3]);
+            for (size_t i = 0; i < 16; i++)
+            {
+                w[i] = (m_block[i * 4 + 0] << 24);
+                w[i] |= (m_block[i * 4 + 1] << 16);
+                w[i] |= (m_block[i * 4 + 2] << 8);
+                w[i] |= (m_block[i * 4 + 3]);
             }
-            for (size_t i = 16; i < 80; i++) {
-                w[i] = LeftRotate((w[i-3] ^ w[i-8] ^ w[i-14] ^ w[i-16]), 1);
+            for (size_t i = 16; i < 80; i++)
+            {
+                w[i] = LeftRotate((w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16]), 1);
             }
 
             uint32_t a = m_digest[0];
@@ -2348,20 +2362,28 @@ namespace sha1
             uint32_t d = m_digest[3];
             uint32_t e = m_digest[4];
 
-            for (std::size_t i=0; i<80; ++i) {
+            for (std::size_t i = 0; i < 80; ++i)
+            {
                 uint32_t f = 0;
                 uint32_t k = 0;
 
-                if (i<20) {
+                if (i < 20)
+                {
                     f = (b & c) | (~b & d);
                     k = 0x5A827999;
-                } else if (i<40) {
+                }
+                else if (i < 40)
+                {
                     f = b ^ c ^ d;
                     k = 0x6ED9EBA1;
-                } else if (i<60) {
+                }
+                else if (i < 60)
+                {
                     f = (b & c) | (b & d) | (c & d);
                     k = 0x8F1BBCDC;
-                } else {
+                }
+                else
+                {
                     f = b ^ c ^ d;
                     k = 0xCA62C1D6;
                 }
@@ -2379,6 +2401,7 @@ namespace sha1
             m_digest[3] += d;
             m_digest[4] += e;
         }
+
     private:
         digest32_t m_digest;
         uint8_t m_block[64];
@@ -4402,12 +4425,10 @@ http_parser_set_max_header_size(uint32_t size) {
 
 // clang-format on
 
-
 namespace crow
 {
     constexpr const char VERSION[] = "master";
 }
-
 
 #include <stdio.h>
 #include <string.h>
@@ -4420,280 +4441,295 @@ namespace crow
 namespace crow
 {
 
-// ----------------------------------------------------------------------------
-// qs_parse (modified)
-// https://github.com/bartgrantham/qs_parse
-// ----------------------------------------------------------------------------
-/*  Similar to strncmp, but handles URL-encoding for either string  */
-int qs_strncmp(const char* s, const char* qs, size_t n);
+    // ----------------------------------------------------------------------------
+    // qs_parse (modified)
+    // https://github.com/bartgrantham/qs_parse
+    // ----------------------------------------------------------------------------
+    /*  Similar to strncmp, but handles URL-encoding for either string  */
+    int qs_strncmp(const char *s, const char *qs, size_t n);
 
+    /*  Finds the beginning of each key/value pair and stores a pointer in qs_kv.
+     *  Also decodes the value portion of the k/v pair *in-place*.  In a future
+     *  enhancement it will also have a compile-time option of sorting qs_kv
+     *  alphabetically by key.  */
+    size_t qs_parse(char *qs, char *qs_kv[], size_t qs_kv_size, bool parse_url);
 
-/*  Finds the beginning of each key/value pair and stores a pointer in qs_kv.
- *  Also decodes the value portion of the k/v pair *in-place*.  In a future
- *  enhancement it will also have a compile-time option of sorting qs_kv
- *  alphabetically by key.  */
-size_t qs_parse(char* qs, char* qs_kv[], size_t qs_kv_size, bool parse_url);
+    /*  Used by qs_parse to decode the value portion of a k/v pair  */
+    int qs_decode(char *qs);
 
+    /*  Looks up the value according to the key on a pre-processed query string
+     *  A future enhancement will be a compile-time option to look up the key
+     *  in a pre-sorted qs_kv array via a binary search.  */
+    // char * qs_k2v(const char * key, char * qs_kv[], int qs_kv_size);
+    char *qs_k2v(const char *key, char *const *qs_kv, size_t qs_kv_size, int nth);
 
-/*  Used by qs_parse to decode the value portion of a k/v pair  */
-int qs_decode(char * qs);
-
-
-/*  Looks up the value according to the key on a pre-processed query string
- *  A future enhancement will be a compile-time option to look up the key
- *  in a pre-sorted qs_kv array via a binary search.  */
-//char * qs_k2v(const char * key, char * qs_kv[], int qs_kv_size);
- char * qs_k2v(const char * key, char * const * qs_kv, size_t qs_kv_size, int nth);
-
-
-/*  Non-destructive lookup of value, based on key.  User provides the
- *  destinaton string and length.  */
-char * qs_scanvalue(const char * key, const char * qs, char * val, size_t val_len);
+    /*  Non-destructive lookup of value, based on key.  User provides the
+     *  destinaton string and length.  */
+    char *qs_scanvalue(const char *key, const char *qs, char *val, size_t val_len);
 
 // TODO: implement sorting of the qs_kv array; for now ensure it's not compiled
 #undef _qsSORTING
 
 // isxdigit _is_ available in <ctype.h>, but let's avoid another header instead
-#define CROW_QS_ISHEX(x)    ((((x)>='0'&&(x)<='9') || ((x)>='A'&&(x)<='F') || ((x)>='a'&&(x)<='f')) ? 1 : 0)
-#define CROW_QS_HEX2DEC(x)  (((x)>='0'&&(x)<='9') ? (x)-48 : ((x)>='A'&&(x)<='F') ? (x)-55 : ((x)>='a'&&(x)<='f') ? (x)-87 : 0)
-#define CROW_QS_ISQSCHR(x) ((((x)=='=')||((x)=='#')||((x)=='&')||((x)=='\0')) ? 0 : 1)
+#define CROW_QS_ISHEX(x) ((((x) >= '0' && (x) <= '9') || ((x) >= 'A' && (x) <= 'F') || ((x) >= 'a' && (x) <= 'f')) ? 1 : 0)
+#define CROW_QS_HEX2DEC(x) (((x) >= '0' && (x) <= '9') ? (x) - 48 : ((x) >= 'A' && (x) <= 'F') ? (x) - 55 \
+                                                                : ((x) >= 'a' && (x) <= 'f')   ? (x) - 87 \
+                                                                                               : 0)
+#define CROW_QS_ISQSCHR(x) ((((x) == '=') || ((x) == '#') || ((x) == '&') || ((x) == '\0')) ? 0 : 1)
 
-inline int qs_strncmp(const char * s, const char * qs, size_t n)
-{
-    unsigned char u1, u2, unyb, lnyb;
-
-    while(n-- > 0)
+    inline int qs_strncmp(const char *s, const char *qs, size_t n)
     {
-        u1 = static_cast<unsigned char>(*s++);
-        u2 = static_cast<unsigned char>(*qs++);
+        unsigned char u1, u2, unyb, lnyb;
 
-        if ( ! CROW_QS_ISQSCHR(u1) ) {  u1 = '\0';  }
-        if ( ! CROW_QS_ISQSCHR(u2) ) {  u2 = '\0';  }
-
-        if ( u1 == '+' ) {  u1 = ' ';  }
-        if ( u1 == '%' ) // easier/safer than scanf
+        while (n-- > 0)
         {
-            unyb = static_cast<unsigned char>(*s++);
-            lnyb = static_cast<unsigned char>(*s++);
-            if ( CROW_QS_ISHEX(unyb) && CROW_QS_ISHEX(lnyb) )
-                u1 = (CROW_QS_HEX2DEC(unyb) * 16) + CROW_QS_HEX2DEC(lnyb);
-            else
+            u1 = static_cast<unsigned char>(*s++);
+            u2 = static_cast<unsigned char>(*qs++);
+
+            if (!CROW_QS_ISQSCHR(u1))
+            {
                 u1 = '\0';
-        }
-
-        if ( u2 == '+' ) {  u2 = ' ';  }
-        if ( u2 == '%' ) // easier/safer than scanf
-        {
-            unyb = static_cast<unsigned char>(*qs++);
-            lnyb = static_cast<unsigned char>(*qs++);
-            if ( CROW_QS_ISHEX(unyb) && CROW_QS_ISHEX(lnyb) )
-                u2 = (CROW_QS_HEX2DEC(unyb) * 16) + CROW_QS_HEX2DEC(lnyb);
-            else
+            }
+            if (!CROW_QS_ISQSCHR(u2))
+            {
                 u2 = '\0';
-        }
+            }
 
-        if ( u1 != u2 )
-            return u1 - u2;
-        if ( u1 == '\0' )
+            if (u1 == '+')
+            {
+                u1 = ' ';
+            }
+            if (u1 == '%') // easier/safer than scanf
+            {
+                unyb = static_cast<unsigned char>(*s++);
+                lnyb = static_cast<unsigned char>(*s++);
+                if (CROW_QS_ISHEX(unyb) && CROW_QS_ISHEX(lnyb))
+                    u1 = (CROW_QS_HEX2DEC(unyb) * 16) + CROW_QS_HEX2DEC(lnyb);
+                else
+                    u1 = '\0';
+            }
+
+            if (u2 == '+')
+            {
+                u2 = ' ';
+            }
+            if (u2 == '%') // easier/safer than scanf
+            {
+                unyb = static_cast<unsigned char>(*qs++);
+                lnyb = static_cast<unsigned char>(*qs++);
+                if (CROW_QS_ISHEX(unyb) && CROW_QS_ISHEX(lnyb))
+                    u2 = (CROW_QS_HEX2DEC(unyb) * 16) + CROW_QS_HEX2DEC(lnyb);
+                else
+                    u2 = '\0';
+            }
+
+            if (u1 != u2)
+                return u1 - u2;
+            if (u1 == '\0')
+                return 0;
+        }
+        if (CROW_QS_ISQSCHR(*qs))
+            return -1;
+        else
             return 0;
     }
-    if ( CROW_QS_ISQSCHR(*qs) )
-        return -1;
-    else
-        return 0;
-}
 
-
-inline size_t qs_parse(char* qs, char* qs_kv[], size_t qs_kv_size, bool parse_url = true)
-{
-    size_t i, j;
-    char * substr_ptr;
-
-    for(i=0; i<qs_kv_size; i++)  qs_kv[i] = NULL;
-
-    // find the beginning of the k/v substrings or the fragment
-    substr_ptr = parse_url ? qs + strcspn(qs, "?#") : qs;
-    if (parse_url)
+    inline size_t qs_parse(char *qs, char *qs_kv[], size_t qs_kv_size, bool parse_url = true)
     {
-        if (substr_ptr[0] != '\0')
-            substr_ptr++;
-        else
-            return 0; // no query or fragment
-    }
+        size_t i, j;
+        char *substr_ptr;
 
-    i=0;
-    while(i<qs_kv_size)
-    {
-        qs_kv[i] = substr_ptr;
-        j = strcspn(substr_ptr, "&");
-        if ( substr_ptr[j] == '\0' ) { i++; break;  } // x &'s -> means x iterations of this loop -> means *x+1* k/v pairs
-        substr_ptr += j + 1;
-        i++;
-    }
+        for (i = 0; i < qs_kv_size; i++)
+            qs_kv[i] = NULL;
 
-    // we only decode the values in place, the keys could have '='s in them
-    // which will hose our ability to distinguish keys from values later
-    for(j=0; j<i; j++)
-    {
-        substr_ptr = qs_kv[j] + strcspn(qs_kv[j], "=&#");
-        if ( substr_ptr[0] == '&' || substr_ptr[0] == '\0')  // blank value: skip decoding
-            substr_ptr[0] = '\0';
-        else
-            qs_decode(++substr_ptr);
-    }
+        // find the beginning of the k/v substrings or the fragment
+        substr_ptr = parse_url ? qs + strcspn(qs, "?#") : qs;
+        if (parse_url)
+        {
+            if (substr_ptr[0] != '\0')
+                substr_ptr++;
+            else
+                return 0; // no query or fragment
+        }
+
+        i = 0;
+        while (i < qs_kv_size)
+        {
+            qs_kv[i] = substr_ptr;
+            j = strcspn(substr_ptr, "&");
+            if (substr_ptr[j] == '\0')
+            {
+                i++;
+                break;
+            } // x &'s -> means x iterations of this loop -> means *x+1* k/v pairs
+            substr_ptr += j + 1;
+            i++;
+        }
+
+        // we only decode the values in place, the keys could have '='s in them
+        // which will hose our ability to distinguish keys from values later
+        for (j = 0; j < i; j++)
+        {
+            substr_ptr = qs_kv[j] + strcspn(qs_kv[j], "=&#");
+            if (substr_ptr[0] == '&' || substr_ptr[0] == '\0') // blank value: skip decoding
+                substr_ptr[0] = '\0';
+            else
+                qs_decode(++substr_ptr);
+        }
 
 #ifdef _qsSORTING
 // TODO: qsort qs_kv, using qs_strncmp() for the comparison
 #endif
 
-    return i;
-}
+        return i;
+    }
 
-
-inline int qs_decode(char * qs)
-{
-    int i=0, j=0;
-
-    while( CROW_QS_ISQSCHR(qs[j]) )
+    inline int qs_decode(char *qs)
     {
-        if ( qs[j] == '+' ) {  qs[i] = ' ';  }
-        else if ( qs[j] == '%' ) // easier/safer than scanf
+        int i = 0, j = 0;
+
+        while (CROW_QS_ISQSCHR(qs[j]))
         {
-            if ( ! CROW_QS_ISHEX(qs[j+1]) || ! CROW_QS_ISHEX(qs[j+2]) )
+            if (qs[j] == '+')
             {
-                qs[i] = '\0';
-                return i;
+                qs[i] = ' ';
             }
-            qs[i] = (CROW_QS_HEX2DEC(qs[j+1]) * 16) + CROW_QS_HEX2DEC(qs[j+2]);
-            j+=2;
+            else if (qs[j] == '%') // easier/safer than scanf
+            {
+                if (!CROW_QS_ISHEX(qs[j + 1]) || !CROW_QS_ISHEX(qs[j + 2]))
+                {
+                    qs[i] = '\0';
+                    return i;
+                }
+                qs[i] = (CROW_QS_HEX2DEC(qs[j + 1]) * 16) + CROW_QS_HEX2DEC(qs[j + 2]);
+                j += 2;
+            }
+            else
+            {
+                qs[i] = qs[j];
+            }
+            i++;
+            j++;
+        }
+        qs[i] = '\0';
+
+        return i;
+    }
+
+    inline char *qs_k2v(const char *key, char *const *qs_kv, size_t qs_kv_size, int nth = 0)
+    {
+        size_t i;
+        size_t key_len, skip;
+
+        key_len = strlen(key);
+
+#ifdef _qsSORTING
+// TODO: binary search for key in the sorted qs_kv
+#else  // _qsSORTING
+        for (i = 0; i < qs_kv_size; i++)
+        {
+            // we rely on the unambiguous '=' to find the value in our k/v pair
+            if (qs_strncmp(key, qs_kv[i], key_len) == 0)
+            {
+                skip = strcspn(qs_kv[i], "=");
+                if (qs_kv[i][skip] == '=')
+                    skip++;
+                // return (zero-char value) ? ptr to trailing '\0' : ptr to value
+                if (nth == 0)
+                    return qs_kv[i] + skip;
+                else
+                    --nth;
+            }
+        }
+#endif // _qsSORTING
+
+        return nullptr;
+    }
+
+    inline std::unique_ptr<std::pair<std::string, std::string>> qs_dict_name2kv(const char *dict_name, char *const *qs_kv, size_t qs_kv_size, int nth = 0)
+    {
+        size_t i;
+        size_t name_len, skip_to_eq, skip_to_brace_open, skip_to_brace_close;
+
+        name_len = strlen(dict_name);
+
+#ifdef _qsSORTING
+// TODO: binary search for key in the sorted qs_kv
+#else  // _qsSORTING
+        for (i = 0; i < qs_kv_size; i++)
+        {
+            if (strncmp(dict_name, qs_kv[i], name_len) == 0)
+            {
+                skip_to_eq = strcspn(qs_kv[i], "=");
+                if (qs_kv[i][skip_to_eq] == '=')
+                    skip_to_eq++;
+                skip_to_brace_open = strcspn(qs_kv[i], "[");
+                if (qs_kv[i][skip_to_brace_open] == '[')
+                    skip_to_brace_open++;
+                skip_to_brace_close = strcspn(qs_kv[i], "]");
+
+                if (skip_to_brace_open <= skip_to_brace_close &&
+                    skip_to_brace_open > 0 &&
+                    skip_to_brace_close > 0 &&
+                    nth == 0)
+                {
+                    auto key = std::string(qs_kv[i] + skip_to_brace_open, skip_to_brace_close - skip_to_brace_open);
+                    auto value = std::string(qs_kv[i] + skip_to_eq);
+                    return std::unique_ptr<std::pair<std::string, std::string>>(new std::pair<std::string, std::string>(key, value));
+                }
+                else
+                {
+                    --nth;
+                }
+            }
+        }
+#endif // _qsSORTING
+
+        return nullptr;
+    }
+
+    inline char *qs_scanvalue(const char *key, const char *qs, char *val, size_t val_len)
+    {
+        size_t i, key_len;
+        const char *tmp;
+
+        // find the beginning of the k/v substrings
+        if ((tmp = strchr(qs, '?')) != NULL)
+            qs = tmp + 1;
+
+        key_len = strlen(key);
+        while (qs[0] != '#' && qs[0] != '\0')
+        {
+            if (qs_strncmp(key, qs, key_len) == 0)
+                break;
+            qs += strcspn(qs, "&") + 1;
+        }
+
+        if (qs[0] == '\0')
+            return NULL;
+
+        qs += strcspn(qs, "=&#");
+        if (qs[0] == '=')
+        {
+            qs++;
+            i = strcspn(qs, "&=#");
+#ifdef _MSC_VER
+            strncpy_s(val, val_len, qs, (val_len - 1) < (i + 1) ? (val_len - 1) : (i + 1));
+#else
+            strncpy(val, qs, (val_len - 1) < (i + 1) ? (val_len - 1) : (i + 1));
+#endif
+            qs_decode(val);
         }
         else
         {
-            qs[i] = qs[j];
+            if (val_len > 0)
+                val[0] = '\0';
         }
-        i++;  j++;
+
+        return val;
     }
-    qs[i] = '\0';
-
-    return i;
-}
-
-
-inline char * qs_k2v(const char * key, char * const * qs_kv, size_t qs_kv_size, int nth = 0)
-{
-    size_t i;
-    size_t key_len, skip;
-
-    key_len = strlen(key);
-
-#ifdef _qsSORTING
-// TODO: binary search for key in the sorted qs_kv
-#else  // _qsSORTING
-    for(i=0; i<qs_kv_size; i++)
-    {
-        // we rely on the unambiguous '=' to find the value in our k/v pair
-        if ( qs_strncmp(key, qs_kv[i], key_len) == 0 )
-        {
-            skip = strcspn(qs_kv[i], "=");
-            if ( qs_kv[i][skip] == '=' )
-                skip++;
-            // return (zero-char value) ? ptr to trailing '\0' : ptr to value
-            if(nth == 0)
-                return qs_kv[i] + skip;
-            else
-                --nth;
-        }
-    }
-#endif  // _qsSORTING
-
-    return nullptr;
-}
-
-inline std::unique_ptr<std::pair<std::string, std::string>> qs_dict_name2kv(const char * dict_name, char * const * qs_kv, size_t qs_kv_size, int nth = 0)
-{
-    size_t i;
-    size_t name_len, skip_to_eq, skip_to_brace_open, skip_to_brace_close;
-
-    name_len = strlen(dict_name);
-
-#ifdef _qsSORTING
-// TODO: binary search for key in the sorted qs_kv
-#else  // _qsSORTING
-    for(i=0; i<qs_kv_size; i++)
-    {
-        if ( strncmp(dict_name, qs_kv[i], name_len) == 0 )
-        {
-            skip_to_eq = strcspn(qs_kv[i], "=");
-            if ( qs_kv[i][skip_to_eq] == '=' )
-                skip_to_eq++;
-            skip_to_brace_open = strcspn(qs_kv[i], "[");
-            if ( qs_kv[i][skip_to_brace_open] == '[' )
-                skip_to_brace_open++;
-            skip_to_brace_close = strcspn(qs_kv[i], "]");
-
-            if ( skip_to_brace_open <= skip_to_brace_close &&
-                 skip_to_brace_open > 0 &&
-                 skip_to_brace_close > 0 &&
-                 nth == 0 )
-            {
-                auto key = std::string(qs_kv[i] + skip_to_brace_open, skip_to_brace_close - skip_to_brace_open);
-                auto value = std::string(qs_kv[i] + skip_to_eq);
-                return std::unique_ptr<std::pair<std::string, std::string>>(new std::pair<std::string, std::string>(key, value));
-            }
-            else
-            {
-                --nth;
-            }
-        }
-    }
-#endif  // _qsSORTING
-
-    return nullptr;
-}
-
-
-inline char * qs_scanvalue(const char * key, const char * qs, char * val, size_t val_len)
-{
-    size_t i, key_len;
-    const char * tmp;
-
-    // find the beginning of the k/v substrings
-    if ( (tmp = strchr(qs, '?')) != NULL )
-        qs = tmp + 1;
-
-    key_len = strlen(key);
-    while(qs[0] != '#' && qs[0] != '\0')
-    {
-        if ( qs_strncmp(key, qs, key_len) == 0 )
-            break;
-        qs += strcspn(qs, "&") + 1;
-    }
-
-    if ( qs[0] == '\0' ) return NULL;
-
-    qs += strcspn(qs, "=&#");
-    if ( qs[0] == '=' )
-    {
-        qs++;
-        i = strcspn(qs, "&=#");
-#ifdef _MSC_VER
-        strncpy_s(val, val_len, qs, (val_len - 1)<(i + 1) ? (val_len - 1) : (i + 1));
-#else
-        strncpy(val, qs, (val_len - 1)<(i + 1) ? (val_len - 1) : (i + 1));
-#endif
-		qs_decode(val);
-    }
-    else
-    {
-        if ( val_len > 0 )
-            val[0] = '\0';
-    }
-
-    return val;
-}
 }
 // ----------------------------------------------------------------------------
-
 
 namespace crow
 {
@@ -4706,41 +4742,38 @@ namespace crow
 
         query_string() = default;
 
-        query_string(const query_string& qs):
-          url_(qs.url_)
+        query_string(const query_string &qs) : url_(qs.url_)
         {
             for (auto p : qs.key_value_pairs_)
             {
-                key_value_pairs_.push_back((char*)(p - qs.url_.c_str() + url_.c_str()));
+                key_value_pairs_.push_back((char *)(p - qs.url_.c_str() + url_.c_str()));
             }
         }
 
-        query_string& operator=(const query_string& qs)
+        query_string &operator=(const query_string &qs)
         {
             url_ = qs.url_;
             key_value_pairs_.clear();
             for (auto p : qs.key_value_pairs_)
             {
-                key_value_pairs_.push_back((char*)(p - qs.url_.c_str() + url_.c_str()));
+                key_value_pairs_.push_back((char *)(p - qs.url_.c_str() + url_.c_str()));
             }
             return *this;
         }
 
-        query_string& operator=(query_string&& qs) noexcept
+        query_string &operator=(query_string &&qs) noexcept
         {
             key_value_pairs_ = std::move(qs.key_value_pairs_);
-            char* old_data = (char*)qs.url_.c_str();
+            char *old_data = (char *)qs.url_.c_str();
             url_ = std::move(qs.url_);
-            for (auto& p : key_value_pairs_)
+            for (auto &p : key_value_pairs_)
             {
-                p += (char*)url_.c_str() - old_data;
+                p += (char *)url_.c_str() - old_data;
             }
             return *this;
         }
 
-
-        query_string(std::string params, bool url = true):
-          url_(std::move(params))
+        query_string(std::string params, bool url = true) : url_(std::move(params))
         {
             if (url_.empty())
                 return;
@@ -4758,7 +4791,7 @@ namespace crow
             url_.clear();
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const query_string& qs)
+        friend std::ostream &operator<<(std::ostream &os, const query_string &qs)
         {
             os << "[ ";
             for (size_t i = 0; i < qs.key_value_pairs_.size(); ++i)
@@ -4775,23 +4808,23 @@ namespace crow
 
         ///
         /// Note: this method returns the value of the first occurrence of the key only, to return all occurrences, see \ref get_list().
-        char* get(const std::string& name) const
+        char *get(const std::string &name) const
         {
-            char* ret = qs_k2v(name.c_str(), key_value_pairs_.data(), key_value_pairs_.size());
+            char *ret = qs_k2v(name.c_str(), key_value_pairs_.data(), key_value_pairs_.size());
             return ret;
         }
 
         /// Works similar to \ref get() except it removes the item from the query string.
-        char* pop(const std::string& name)
+        char *pop(const std::string &name)
         {
-            char* ret = get(name);
+            char *ret = get(name);
             if (ret != nullptr)
             {
                 const std::string key_name = name + '=';
                 for (unsigned int i = 0; i < key_value_pairs_.size(); i++)
                 {
                     std::string str_item(key_value_pairs_[i]);
-                    if (str_item.find(key_name)==0)
+                    if (str_item.find(key_name) == 0)
                     {
                         key_value_pairs_.erase(key_value_pairs_.begin() + i);
                         break;
@@ -4805,11 +4838,11 @@ namespace crow
 
         ///
         /// Note: Square brackets in the above example are controlled by `use_brackets` boolean (true by default). If set to false, the example becomes `?name=value1,name=value2...name=valuen`
-        std::vector<char*> get_list(const std::string& name, bool use_brackets = true) const
+        std::vector<char *> get_list(const std::string &name, bool use_brackets = true) const
         {
-            std::vector<char*> ret;
+            std::vector<char *> ret;
             std::string plus = name + (use_brackets ? "[]" : "");
-            char* element = nullptr;
+            char *element = nullptr;
 
             int count = 0;
             while (1)
@@ -4823,21 +4856,25 @@ namespace crow
         }
 
         /// Similar to \ref get_list() but it removes the
-        std::vector<char*> pop_list(const std::string& name, bool use_brackets = true)
+        std::vector<char *> pop_list(const std::string &name, bool use_brackets = true)
         {
-            std::vector<char*> ret = get_list(name, use_brackets);
+            std::vector<char *> ret = get_list(name, use_brackets);
             const size_t name_len = name.length();
             if (!ret.empty())
             {
                 for (unsigned int i = 0; i < key_value_pairs_.size(); i++)
                 {
                     std::string str_item(key_value_pairs_[i]);
-                    if (str_item.find(name)==0) {
-                      if (use_brackets && str_item.find("[]=",name_len)==name_len) {
-                        key_value_pairs_.erase(key_value_pairs_.begin() + i--);
-                      } else if (!use_brackets && str_item.find('=',name_len)==name_len ) {
-                           key_value_pairs_.erase(key_value_pairs_.begin() + i--);
-                       }
+                    if (str_item.find(name) == 0)
+                    {
+                        if (use_brackets && str_item.find("[]=", name_len) == name_len)
+                        {
+                            key_value_pairs_.erase(key_value_pairs_.begin() + i--);
+                        }
+                        else if (!use_brackets && str_item.find('=', name_len) == name_len)
+                        {
+                            key_value_pairs_.erase(key_value_pairs_.begin() + i--);
+                        }
                     }
                 }
             }
@@ -4850,7 +4887,7 @@ namespace crow
         /// For example calling `get_dict(yourname)` on `?yourname[sub1]=42&yourname[sub2]=84` would give a map containing `{sub1 : 42, sub2 : 84}`.
         ///
         /// if your query string has both empty brackets and ones with a key inside, use pop_list() to get all the values without a key before running this method.
-        std::unordered_map<std::string, std::string> get_dict(const std::string& name) const
+        std::unordered_map<std::string, std::string> get_dict(const std::string &name) const
         {
             std::unordered_map<std::string, std::string> ret;
 
@@ -4866,16 +4903,16 @@ namespace crow
         }
 
         /// Works the same as \ref get_dict() but removes the values from the query string.
-        std::unordered_map<std::string, std::string> pop_dict(const std::string& name)
+        std::unordered_map<std::string, std::string> pop_dict(const std::string &name)
         {
-            const std::string name_value = name +'[';
+            const std::string name_value = name + '[';
             std::unordered_map<std::string, std::string> ret = get_dict(name);
             if (!ret.empty())
             {
                 for (unsigned int i = 0; i < key_value_pairs_.size(); i++)
                 {
                     std::string str_item(key_value_pairs_[i]);
-                    if (str_item.find(name_value)==0)
+                    if (str_item.find(name_value) == 0)
                     {
                         key_value_pairs_.erase(key_value_pairs_.begin() + i--);
                     }
@@ -4889,9 +4926,9 @@ namespace crow
             std::vector<std::string> keys;
             keys.reserve(key_value_pairs_.size());
 
-            for (const char* const element : key_value_pairs_)
+            for (const char *const element : key_value_pairs_)
             {
-                const char* delimiter = strchr(element, '=');
+                const char *delimiter = strchr(element, '=');
                 if (delimiter)
                     keys.emplace_back(element, delimiter);
                 else
@@ -4903,11 +4940,10 @@ namespace crow
 
     private:
         std::string url_;
-        std::vector<char*> key_value_pairs_;
+        std::vector<char *> key_value_pairs_;
     };
 
 } // namespace crow
-
 
 #ifdef CROW_USE_BOOST
 #include <boost/asio.hpp>
@@ -4918,7 +4954,6 @@ namespace crow
 #include <asio.hpp>
 #endif
 
-
 namespace crow // NOTE: Already documented in "crow/app.h"
 {
 #ifdef CROW_USE_BOOST
@@ -4926,8 +4961,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #endif
 
     /// Find and return the value associated with the key. (returns an empty string if nothing is found)
-    template<typename T>
-    inline const std::string& get_header_value(const T& headers, const std::string& key)
+    template <typename T>
+    inline const std::string &get_header_value(const T &headers, const std::string &key)
     {
         if (headers.count(key))
         {
@@ -4948,30 +4983,30 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         std::string body;
         std::string remote_ip_address; ///< The IP address from which the request was sent.
         unsigned char http_ver_major, http_ver_minor;
-        bool keep_alive,    ///< Whether or not the server should send a `connection: Keep-Alive` header to the client.
-          close_connection, ///< Whether or not the server should shut down the TCP connection once a response is sent.
-          upgrade;          ///< Whether or noth the server should change the HTTP connection to a different connection.
+        bool keep_alive,      ///< Whether or not the server should send a `connection: Keep-Alive` header to the client.
+            close_connection, ///< Whether or not the server should shut down the TCP connection once a response is sent.
+            upgrade;          ///< Whether or noth the server should change the HTTP connection to a different connection.
 
-        void* middleware_context{};
-        void* middleware_container{};
-        asio::io_context* io_context{};
+        void *middleware_context{};
+        void *middleware_container{};
+        asio::io_context *io_context{};
 
         /// Construct an empty request. (sets the method to `GET`)
-        request():
-          method(HTTPMethod::Get)
-        {}
+        request() : method(HTTPMethod::Get)
+        {
+        }
 
         /// Construct a request with all values assigned.
-        request(HTTPMethod method_, std::string raw_url_, std::string url_, query_string url_params_, ci_map headers_, std::string body_, unsigned char http_major, unsigned char http_minor, bool has_keep_alive, bool has_close_connection, bool is_upgrade):
-          method(method_), raw_url(std::move(raw_url_)), url(std::move(url_)), url_params(std::move(url_params_)), headers(std::move(headers_)), body(std::move(body_)), http_ver_major(http_major), http_ver_minor(http_minor), keep_alive(has_keep_alive), close_connection(has_close_connection), upgrade(is_upgrade)
-        {}
+        request(HTTPMethod method_, std::string raw_url_, std::string url_, query_string url_params_, ci_map headers_, std::string body_, unsigned char http_major, unsigned char http_minor, bool has_keep_alive, bool has_close_connection, bool is_upgrade) : method(method_), raw_url(std::move(raw_url_)), url(std::move(url_)), url_params(std::move(url_params_)), headers(std::move(headers_)), body(std::move(body_)), http_ver_major(http_major), http_ver_minor(http_minor), keep_alive(has_keep_alive), close_connection(has_close_connection), upgrade(is_upgrade)
+        {
+        }
 
         void add_header(std::string key, std::string value)
         {
             headers.emplace(std::move(key), std::move(value));
         }
 
-        const std::string& get_header_value(const std::string& key) const
+        const std::string &get_header_value(const std::string &key) const
         {
             return crow::get_header_value(headers, key);
         }
@@ -4991,14 +5026,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         }
 
         /// Send data to whoever made this request with a completion handler and return immediately.
-        template<typename CompletionHandler>
+        template <typename CompletionHandler>
         void post(CompletionHandler handler)
         {
             asio::post(io_context, handler);
         }
 
         /// Send data to whoever made this request with a completion handler.
-        template<typename CompletionHandler>
+        template <typename CompletionHandler>
         void dispatch(CompletionHandler handler)
         {
             asio::dispatch(io_context, handler);
@@ -5021,11 +5056,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
-
-
 namespace crow
 {
-    template<typename Adaptor, typename Handler, typename... Middlewares>
+    template <typename Adaptor, typename Handler, typename... Middlewares>
     class Connection;
 
     class Router;
@@ -5033,7 +5066,7 @@ namespace crow
     /// HTTP response
     struct response
     {
-        template<typename Adaptor, typename Handler, typename... Middlewares>
+        template <typename Adaptor, typename Handler, typename... Middlewares>
         friend class crow::Connection;
 
         friend class Router;
@@ -5061,21 +5094,21 @@ namespace crow
             headers.emplace(std::move(key), std::move(value));
         }
 
-        const std::string& get_header_value(const std::string& key)
+        const std::string &get_header_value(const std::string &key)
         {
             return crow::get_header_value(headers, key);
         }
 
         // naive validation of a mime-type string
-        static bool validate_mime_type(const std::string& candidate) noexcept
+        static bool validate_mime_type(const std::string &candidate) noexcept
         {
             // Here we simply check that the candidate type starts with
             // a valid parent type, and has at least one character afterwards.
             std::array<std::string, 10> valid_parent_types = {
-              "application/", "audio/", "font/", "example/",
-              "image/", "message/", "model/", "multipart/",
-              "text/", "video/"};
-            for (const std::string& parent : valid_parent_types)
+                "application/", "audio/", "font/", "example/",
+                "image/", "message/", "model/", "multipart/",
+                "text/", "video/"};
+            for (const std::string &parent : valid_parent_types)
             {
                 // ensure the candidate is *longer* than the parent,
                 // to avoid unnecessary string comparison and to
@@ -5098,7 +5131,7 @@ namespace crow
         // Find the mime type from the content type either by lookup,
         // or by the content type itself, if it is a valid a mime type.
         // Defaults to text/plain.
-        static std::string get_mime_type(const std::string& contentType)
+        static std::string get_mime_type(const std::string &contentType)
         {
             const auto mimeTypeIterator = mime_types.find(contentType);
             if (mimeTypeIterator != mime_types.end())
@@ -5116,55 +5149,50 @@ namespace crow
             }
         }
 
-
         // clang-format off
         response() {}
         explicit response(int code_) : code(code_) {}
         response(std::string body_) : body(std::move(body_)) {}
         response(int code_, std::string body_) : code(code_), body(std::move(body_)) {}
         // clang-format on
-        response(returnable&& value)
+        response(returnable &&value)
         {
             body = value.dump();
             set_header("Content-Type", value.content_type);
         }
-        response(returnable& value)
+        response(returnable &value)
         {
             body = value.dump();
             set_header("Content-Type", value.content_type);
         }
-        response(int code_, returnable& value):
-          code(code_)
+        response(int code_, returnable &value) : code(code_)
         {
             body = value.dump();
             set_header("Content-Type", value.content_type);
         }
-        response(int code_, returnable&& value):
-          code(code_), body(value.dump())
+        response(int code_, returnable &&value) : code(code_), body(value.dump())
         {
             set_header("Content-Type", std::move(value.content_type));
         }
 
-        response(response&& r)
+        response(response &&r)
         {
             *this = std::move(r);
         }
 
-        response(std::string contentType, std::string body_):
-          body(std::move(body_))
+        response(std::string contentType, std::string body_) : body(std::move(body_))
         {
             set_header("Content-Type", get_mime_type(contentType));
         }
 
-        response(int code_, std::string contentType, std::string body_):
-          code(code_), body(std::move(body_))
+        response(int code_, std::string contentType, std::string body_) : code(code_), body(std::move(body_))
         {
             set_header("Content-Type", get_mime_type(contentType));
         }
 
-        response& operator=(const response& r) = delete;
+        response &operator=(const response &r) = delete;
 
-        response& operator=(response&& r) noexcept
+        response &operator=(response &&r) noexcept
         {
             body = std::move(r.body);
             code = r.code;
@@ -5193,7 +5221,7 @@ namespace crow
 
         ///
         /// Location can either be a route or a full URL.
-        void redirect(const std::string& location)
+        void redirect(const std::string &location)
         {
             code = 307;
             set_header("Location", location);
@@ -5203,7 +5231,7 @@ namespace crow
 
         ///
         /// Location can either be a route or a full URL.
-        void redirect_perm(const std::string& location)
+        void redirect_perm(const std::string &location)
         {
             code = 308;
             set_header("Location", location);
@@ -5213,7 +5241,7 @@ namespace crow
 
         ///
         /// Location can either be a route or a full URL.
-        void moved(const std::string& location)
+        void moved(const std::string &location)
         {
             code = 302;
             set_header("Location", location);
@@ -5223,13 +5251,13 @@ namespace crow
 
         ///
         /// Location can either be a route or a full URL.
-        void moved_perm(const std::string& location)
+        void moved_perm(const std::string &location)
         {
             code = 301;
             set_header("Location", location);
         }
 
-        void write(const std::string& body_part)
+        void write(const std::string &body_part)
         {
             body += body_part;
         }
@@ -5256,7 +5284,7 @@ namespace crow
         }
 
         /// Same as end() except it adds a body part right before ending.
-        void end(const std::string& body_part)
+        void end(const std::string &body_part)
         {
             body += body_part;
             end();
@@ -5327,19 +5355,20 @@ namespace crow
     };
 } // namespace crow
 
-
 namespace crow
 {
 
     struct UTF8
     {
         struct context
-        {};
+        {
+        };
 
-        void before_handle(request& /*req*/, response& /*res*/, context& /*ctx*/)
-        {}
+        void before_handle(request & /*req*/, response & /*res*/, context & /*ctx*/)
+        {
+        }
 
-        void after_handle(request& /*req*/, response& res, context& /*ctx*/)
+        void after_handle(request & /*req*/, response &res, context & /*ctx*/)
         {
             if (get_header_value(res.headers, "Content-Type").empty())
             {
@@ -5390,21 +5419,19 @@ namespace crow
                 None
             };
 
-            template<typename U>
-            Cookie(const std::string& key, U&& value):
-              Cookie()
+            template <typename U>
+            Cookie(const std::string &key, U &&value) : Cookie()
             {
                 key_ = key;
                 value_ = std::forward<U>(value);
             }
 
-            Cookie(const std::string& key):
-              Cookie(key, "") {}
+            Cookie(const std::string &key) : Cookie(key, "") {}
 
             // format cookie to HTTP header format
             std::string dump() const
             {
-                const static char* HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT";
+                const static char *HTTP_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S GMT";
 
                 std::stringstream ss;
                 ss << key_ << '=';
@@ -5427,88 +5454,87 @@ namespace crow
                     ss << DIVIDER << "SameSite=";
                     switch (*same_site_)
                     {
-                        case SameSitePolicy::Strict:
-                            ss << "Strict";
-                            break;
-                        case SameSitePolicy::Lax:
-                            ss << "Lax";
-                            break;
-                        case SameSitePolicy::None:
-                            ss << "None";
-                            break;
+                    case SameSitePolicy::Strict:
+                        ss << "Strict";
+                        break;
+                    case SameSitePolicy::Lax:
+                        ss << "Lax";
+                        break;
+                    case SameSitePolicy::None:
+                        ss << "None";
+                        break;
                     }
                 }
                 return ss.str();
             }
 
-            const std::string& name()
+            const std::string &name()
             {
                 return key_;
             }
 
-            template<typename U>
-            Cookie& value(U&& value)
+            template <typename U>
+            Cookie &value(U &&value)
             {
                 value_ = std::forward<U>(value);
                 return *this;
             }
 
             // Expires attribute
-            Cookie& expires(const std::tm& time)
+            Cookie &expires(const std::tm &time)
             {
                 expires_at_ = std::unique_ptr<std::tm>(new std::tm(time));
                 return *this;
             }
 
             // Max-Age attribute
-            Cookie& max_age(long long seconds)
+            Cookie &max_age(long long seconds)
             {
                 max_age_ = std::unique_ptr<long long>(new long long(seconds));
                 return *this;
             }
 
             // Domain attribute
-            Cookie& domain(const std::string& name)
+            Cookie &domain(const std::string &name)
             {
                 domain_ = name;
                 return *this;
             }
 
             // Path attribute
-            Cookie& path(const std::string& path)
+            Cookie &path(const std::string &path)
             {
                 path_ = path;
                 return *this;
             }
 
             // Secured attribute
-            Cookie& secure()
+            Cookie &secure()
             {
                 secure_ = true;
                 return *this;
             }
 
             // HttpOnly attribute
-            Cookie& httponly()
+            Cookie &httponly()
             {
                 httponly_ = true;
                 return *this;
             }
 
             // SameSite attribute
-            Cookie& same_site(SameSitePolicy ssp)
+            Cookie &same_site(SameSitePolicy ssp)
             {
                 same_site_ = std::unique_ptr<SameSitePolicy>(new SameSitePolicy(ssp));
                 return *this;
             }
 
-            Cookie(const Cookie& c):
-              key_(c.key_),
-              value_(c.value_),
-              domain_(c.domain_),
-              path_(c.path_),
-              secure_(c.secure_),
-              httponly_(c.httponly_)
+            Cookie(const Cookie &c) : key_(c.key_),
+                                      value_(c.value_),
+                                      domain_(c.domain_),
+                                      path_(c.path_),
+                                      secure_(c.secure_),
+                                      httponly_(c.httponly_)
             {
                 if (c.max_age_)
                     max_age_ = std::unique_ptr<long long>(new long long(*c.max_age_));
@@ -5523,8 +5549,8 @@ namespace crow
         private:
             Cookie() = default;
 
-            static void dumpString(std::stringstream& ss, bool cond, const char* prefix,
-                                   const std::string& value = "")
+            static void dumpString(std::stringstream &ss, bool cond, const char *prefix,
+                                   const std::string &value = "")
             {
                 if (cond)
                 {
@@ -5543,15 +5569,14 @@ namespace crow
             std::unique_ptr<std::tm> expires_at_{};
             std::unique_ptr<SameSitePolicy> same_site_{};
 
-            static constexpr const char* DIVIDER = "; ";
+            static constexpr const char *DIVIDER = "; ";
         };
-
 
         struct context
         {
             std::unordered_map<std::string, std::string> jar;
 
-            std::string get_cookie(const std::string& key) const
+            std::string get_cookie(const std::string &key) const
             {
                 auto cookie = jar.find(key);
                 if (cookie != jar.end())
@@ -5559,14 +5584,14 @@ namespace crow
                 return {};
             }
 
-            template<typename U>
-            Cookie& set_cookie(const std::string& key, U&& value)
+            template <typename U>
+            Cookie &set_cookie(const std::string &key, U &&value)
             {
                 cookies_to_add.emplace_back(key, std::forward<U>(value));
                 return cookies_to_add.back();
             }
 
-            Cookie& set_cookie(Cookie cookie)
+            Cookie &set_cookie(Cookie cookie)
             {
                 cookies_to_add.push_back(std::move(cookie));
                 return cookies_to_add.back();
@@ -5577,7 +5602,7 @@ namespace crow
             std::vector<Cookie> cookies_to_add;
         };
 
-        void before_handle(request& req, response& res, context& ctx)
+        void before_handle(request &req, response &res, context &ctx)
         {
             // TODO(dranikpg): remove copies, use string_view with c++17
             int count = req.headers.count("Cookie");
@@ -5620,9 +5645,9 @@ namespace crow
             }
         }
 
-        void after_handle(request& /*req*/, response& res, context& ctx)
+        void after_handle(request & /*req*/, response &res, context &ctx)
         {
-            for (const auto& cookie : ctx.cookies_to_add)
+            for (const auto &cookie : ctx.cookies_to_add)
             {
                 res.add_header("Set-Cookie", cookie.dump());
             }
@@ -5654,8 +5679,6 @@ namespace crow
     */
 } // namespace crow
 
-
-
 #include <tuple>
 #include <type_traits>
 #include <iostream>
@@ -5672,123 +5695,127 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
     namespace detail
     {
-        template<typename MW>
+        template <typename MW>
         struct check_before_handle_arity_3_const
         {
-            template<typename T, void (T::*)(request&, response&, typename MW::context&) const = &T::before_handle>
+            template <typename T, void (T::*)(request &, response &, typename MW::context &) const = &T::before_handle>
             struct get
-            {};
+            {
+            };
         };
 
-        template<typename MW>
+        template <typename MW>
         struct check_before_handle_arity_3
         {
-            template<typename T, void (T::*)(request&, response&, typename MW::context&) = &T::before_handle>
+            template <typename T, void (T::*)(request &, response &, typename MW::context &) = &T::before_handle>
             struct get
-            {};
+            {
+            };
         };
 
-        template<typename MW>
+        template <typename MW>
         struct check_after_handle_arity_3_const
         {
-            template<typename T, void (T::*)(request&, response&, typename MW::context&) const = &T::after_handle>
+            template <typename T, void (T::*)(request &, response &, typename MW::context &) const = &T::after_handle>
             struct get
-            {};
+            {
+            };
         };
 
-        template<typename MW>
+        template <typename MW>
         struct check_after_handle_arity_3
         {
-            template<typename T, void (T::*)(request&, response&, typename MW::context&) = &T::after_handle>
+            template <typename T, void (T::*)(request &, response &, typename MW::context &) = &T::after_handle>
             struct get
-            {};
+            {
+            };
         };
 
-        template<typename MW>
+        template <typename MW>
         struct check_global_call_false
         {
-            template<typename T, typename std::enable_if<T::call_global::value == false, bool>::type = true>
+            template <typename T, typename std::enable_if<T::call_global::value == false, bool>::type = true>
             struct get
-            {};
+            {
+            };
         };
 
-        template<typename T>
+        template <typename T>
         struct is_before_handle_arity_3_impl
         {
-            template<typename C>
-            static std::true_type f(typename check_before_handle_arity_3_const<T>::template get<C>*);
+            template <typename C>
+            static std::true_type f(typename check_before_handle_arity_3_const<T>::template get<C> *);
 
-            template<typename C>
-            static std::true_type f(typename check_before_handle_arity_3<T>::template get<C>*);
+            template <typename C>
+            static std::true_type f(typename check_before_handle_arity_3<T>::template get<C> *);
 
-            template<typename C>
+            template <typename C>
             static std::false_type f(...);
 
         public:
             static const bool value = decltype(f<T>(nullptr))::value;
         };
 
-        template<typename T>
+        template <typename T>
         struct is_after_handle_arity_3_impl
         {
-            template<typename C>
-            static std::true_type f(typename check_after_handle_arity_3_const<T>::template get<C>*);
+            template <typename C>
+            static std::true_type f(typename check_after_handle_arity_3_const<T>::template get<C> *);
 
-            template<typename C>
-            static std::true_type f(typename check_after_handle_arity_3<T>::template get<C>*);
+            template <typename C>
+            static std::true_type f(typename check_after_handle_arity_3<T>::template get<C> *);
 
-            template<typename C>
+            template <typename C>
             static std::false_type f(...);
 
         public:
             static constexpr bool value = decltype(f<T>(nullptr))::value;
         };
 
-        template<typename MW>
+        template <typename MW>
         struct is_middleware_global
         {
-            template<typename C>
-            static std::false_type f(typename check_global_call_false<MW>::template get<C>*);
+            template <typename C>
+            static std::false_type f(typename check_global_call_false<MW>::template get<C> *);
 
-            template<typename C>
+            template <typename C>
             static std::true_type f(...);
 
             static const bool value = decltype(f<MW>(nullptr))::value;
         };
 
-        template<typename MW, typename Context, typename ParentContext>
+        template <typename MW, typename Context, typename ParentContext>
         typename std::enable_if<!is_before_handle_arity_3_impl<MW>::value>::type
-          before_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+        before_handler_call(MW &mw, request &req, response &res, Context &ctx, ParentContext & /*parent_ctx*/)
         {
             mw.before_handle(req, res, ctx.template get<MW>(), ctx);
         }
 
-        template<typename MW, typename Context, typename ParentContext>
+        template <typename MW, typename Context, typename ParentContext>
         typename std::enable_if<is_before_handle_arity_3_impl<MW>::value>::type
-          before_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+        before_handler_call(MW &mw, request &req, response &res, Context &ctx, ParentContext & /*parent_ctx*/)
         {
             mw.before_handle(req, res, ctx.template get<MW>());
         }
 
-        template<typename MW, typename Context, typename ParentContext>
+        template <typename MW, typename Context, typename ParentContext>
         typename std::enable_if<!is_after_handle_arity_3_impl<MW>::value>::type
-          after_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+        after_handler_call(MW &mw, request &req, response &res, Context &ctx, ParentContext & /*parent_ctx*/)
         {
             mw.after_handle(req, res, ctx.template get<MW>(), ctx);
         }
 
-        template<typename MW, typename Context, typename ParentContext>
+        template <typename MW, typename Context, typename ParentContext>
         typename std::enable_if<is_after_handle_arity_3_impl<MW>::value>::type
-          after_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+        after_handler_call(MW &mw, request &req, response &res, Context &ctx, ParentContext & /*parent_ctx*/)
         {
             mw.after_handle(req, res, ctx.template get<MW>());
         }
 
-
-        template<typename CallCriteria,
-                 int N, typename Context, typename Container>
+        template <typename CallCriteria,
+                  int N, typename Context, typename Container>
         typename std::enable_if<(N < std::tuple_size<typename std::remove_reference<Container>::type>::value), bool>::type
-          middleware_call_helper(const CallCriteria& cc, Container& middlewares, request& req, response& res, Context& ctx)
+        middleware_call_helper(const CallCriteria &cc, Container &middlewares, request &req, response &res, Context &ctx)
         {
 
             using CurrentMW = typename std::tuple_element<N, typename std::remove_reference<Container>::type>::type;
@@ -5799,54 +5826,54 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
             using parent_context_t = typename Context::template partial<N - 1>;
-            before_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t&>(ctx));
+            before_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t &>(ctx));
             if (res.is_completed())
             {
-                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t&>(ctx));
+                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t &>(ctx));
                 return true;
             }
 
             if (middleware_call_helper<CallCriteria, N + 1, Context, Container>(cc, middlewares, req, res, ctx))
             {
-                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t&>(ctx));
+                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t &>(ctx));
                 return true;
             }
 
             return false;
         }
 
-        template<typename CallCriteria, int N, typename Context, typename Container>
+        template <typename CallCriteria, int N, typename Context, typename Container>
         typename std::enable_if<(N >= std::tuple_size<typename std::remove_reference<Container>::type>::value), bool>::type
-          middleware_call_helper(const CallCriteria& /*cc*/, Container& /*middlewares*/, request& /*req*/, response& /*res*/, Context& /*ctx*/)
+        middleware_call_helper(const CallCriteria & /*cc*/, Container & /*middlewares*/, request & /*req*/, response & /*res*/, Context & /*ctx*/)
         {
             return false;
         }
 
-        template<typename CallCriteria, int N, typename Context, typename Container>
+        template <typename CallCriteria, int N, typename Context, typename Container>
         typename std::enable_if<(N < 0)>::type
-          after_handlers_call_helper(const CallCriteria& /*cc*/, Container& /*middlewares*/, Context& /*context*/, request& /*req*/, response& /*res*/)
+        after_handlers_call_helper(const CallCriteria & /*cc*/, Container & /*middlewares*/, Context & /*context*/, request & /*req*/, response & /*res*/)
         {
         }
 
-        template<typename CallCriteria, int N, typename Context, typename Container>
-        typename std::enable_if<(N == 0)>::type after_handlers_call_helper(const CallCriteria& cc, Container& middlewares, Context& ctx, request& req, response& res)
+        template <typename CallCriteria, int N, typename Context, typename Container>
+        typename std::enable_if<(N == 0)>::type after_handlers_call_helper(const CallCriteria &cc, Container &middlewares, Context &ctx, request &req, response &res)
         {
             using parent_context_t = typename Context::template partial<N - 1>;
             using CurrentMW = typename std::tuple_element<N, typename std::remove_reference<Container>::type>::type;
             if (cc.template enabled<CurrentMW>(N))
             {
-                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t&>(ctx));
+                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t &>(ctx));
             }
         }
 
-        template<typename CallCriteria, int N, typename Context, typename Container>
-        typename std::enable_if<(N > 0)>::type after_handlers_call_helper(const CallCriteria& cc, Container& middlewares, Context& ctx, request& req, response& res)
+        template <typename CallCriteria, int N, typename Context, typename Container>
+        typename std::enable_if<(N > 0)>::type after_handlers_call_helper(const CallCriteria &cc, Container &middlewares, Context &ctx, request &req, response &res)
         {
             using parent_context_t = typename Context::template partial<N - 1>;
             using CurrentMW = typename std::tuple_element<N, typename std::remove_reference<Container>::type>::type;
             if (cc.template enabled<CurrentMW>(N))
             {
-                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t&>(ctx));
+                after_handler_call<CurrentMW, Context, parent_context_t>(std::get<N>(middlewares), req, res, ctx, static_cast<parent_context_t &>(ctx));
             }
             after_handlers_call_helper<CallCriteria, N - 1, Context, Container>(cc, middlewares, ctx, req, res);
         }
@@ -5854,16 +5881,16 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         // A CallCriteria that accepts only global middleware
         struct middleware_call_criteria_only_global
         {
-            template<typename MW>
+            template <typename MW>
             constexpr bool enabled(int) const
             {
                 return is_middleware_global<MW>::value;
             }
         };
 
-        template<typename F, typename... Args>
+        template <typename F, typename... Args>
         typename std::enable_if<black_magic::CallHelper<F, black_magic::S<Args...>>::value, void>::type
-          wrapped_handler_call(crow::request& /*req*/, crow::response& res, const F& f, Args&&... args)
+        wrapped_handler_call(crow::request & /*req*/, crow::response &res, const F &f, Args &&...args)
         {
             static_assert(!std::is_same<void, decltype(f(std::declval<Args>()...))>::value,
                           "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
@@ -5872,12 +5899,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             res.end();
         }
 
-        template<typename F, typename... Args>
+        template <typename F, typename... Args>
         typename std::enable_if<
-          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
-            black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value,
-          void>::type
-          wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
+            !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
+                black_magic::CallHelper<F, black_magic::S<crow::request &, Args...>>::value,
+            void>::type
+        wrapped_handler_call(crow::request &req, crow::response &res, const F &f, Args &&...args)
         {
             static_assert(!std::is_same<void, decltype(f(std::declval<crow::request>(), std::declval<Args>()...))>::value,
                           "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
@@ -5886,62 +5913,62 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             res.end();
         }
 
-        template<typename F, typename... Args>
+        template <typename F, typename... Args>
         typename std::enable_if<
-          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value &&
-            black_magic::CallHelper<F, black_magic::S<crow::response&, Args...>>::value,
-          void>::type
-          wrapped_handler_call(crow::request& /*req*/, crow::response& res, const F& f, Args&&... args)
+            !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
+                !black_magic::CallHelper<F, black_magic::S<crow::request &, Args...>>::value &&
+                black_magic::CallHelper<F, black_magic::S<crow::response &, Args...>>::value,
+            void>::type
+        wrapped_handler_call(crow::request & /*req*/, crow::response &res, const F &f, Args &&...args)
         {
-            static_assert(std::is_same<void, decltype(f(std::declval<crow::response&>(), std::declval<Args>()...))>::value,
+            static_assert(std::is_same<void, decltype(f(std::declval<crow::response &>(), std::declval<Args>()...))>::value,
                           "Handler function with response argument should have void return type");
 
             f(res, std::forward<Args>(args)...);
         }
 
-        template<typename F, typename... Args>
+        template <typename F, typename... Args>
         typename std::enable_if<
-          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<crow::response&, Args...>>::value &&
-            black_magic::CallHelper<F, black_magic::S<const crow::request&, crow::response&, Args...>>::value,
-          void>::type
-          wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
+            !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
+                !black_magic::CallHelper<F, black_magic::S<crow::request &, Args...>>::value &&
+                !black_magic::CallHelper<F, black_magic::S<crow::response &, Args...>>::value &&
+                black_magic::CallHelper<F, black_magic::S<const crow::request &, crow::response &, Args...>>::value,
+            void>::type
+        wrapped_handler_call(crow::request &req, crow::response &res, const F &f, Args &&...args)
         {
-            static_assert(std::is_same<void, decltype(f(std::declval<crow::request&>(), std::declval<crow::response&>(), std::declval<Args>()...))>::value,
+            static_assert(std::is_same<void, decltype(f(std::declval<crow::request &>(), std::declval<crow::response &>(), std::declval<Args>()...))>::value,
                           "Handler function with response argument should have void return type");
 
             f(req, res, std::forward<Args>(args)...);
         }
 
         // wrapped_handler_call transparently wraps a handler call behind (req, res, args...)
-        template<typename F, typename... Args>
+        template <typename F, typename... Args>
         typename std::enable_if<
-          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<crow::response&, Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<const crow::request&, crow::response&, Args...>>::value,
-          void>::type
-          wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
+            !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
+                !black_magic::CallHelper<F, black_magic::S<crow::request &, Args...>>::value &&
+                !black_magic::CallHelper<F, black_magic::S<crow::response &, Args...>>::value &&
+                !black_magic::CallHelper<F, black_magic::S<const crow::request &, crow::response &, Args...>>::value,
+            void>::type
+        wrapped_handler_call(crow::request &req, crow::response &res, const F &f, Args &&...args)
         {
-            static_assert(std::is_same<void, decltype(f(std::declval<crow::request&>(), std::declval<crow::response&>(), std::declval<Args>()...))>::value,
+            static_assert(std::is_same<void, decltype(f(std::declval<crow::request &>(), std::declval<crow::response &>(), std::declval<Args>()...))>::value,
                           "Handler function with response argument should have void return type");
 
             f(req, res, std::forward<Args>(args)...);
         }
 
-        template<bool Reversed>
+        template <bool Reversed>
         struct middleware_call_criteria_dynamic
-        {};
+        {
+        };
 
-        template<>
+        template <>
         struct middleware_call_criteria_dynamic<false>
         {
-            middleware_call_criteria_dynamic(const std::vector<int>& indices_):
-              indices(indices_), slider(0) {}
+            middleware_call_criteria_dynamic(const std::vector<int> &indices_) : indices(indices_), slider(0) {}
 
-            template<typename>
+            template <typename>
             bool enabled(int mw_index) const
             {
                 if (slider < int(indices.size()) && indices[slider] == mw_index)
@@ -5953,17 +5980,16 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
         private:
-            const std::vector<int>& indices;
+            const std::vector<int> &indices;
             mutable int slider;
         };
 
-        template<>
+        template <>
         struct middleware_call_criteria_dynamic<true>
         {
-            middleware_call_criteria_dynamic(const std::vector<int>& indices_):
-              indices(indices_), slider(int(indices_.size()) - 1) {}
+            middleware_call_criteria_dynamic(const std::vector<int> &indices_) : indices(indices_), slider(int(indices_.size()) - 1) {}
 
-            template<typename>
+            template <typename>
             bool enabled(int mw_index) const
             {
                 if (slider >= 0 && indices[slider] == mw_index)
@@ -5975,75 +6001,67 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
         private:
-            const std::vector<int>& indices;
+            const std::vector<int> &indices;
             mutable int slider;
         };
 
     } // namespace detail
 } // namespace crow
 
-
-
 namespace crow
 {
     namespace detail
     {
 
-
-        template<typename... Middlewares>
+        template <typename... Middlewares>
         struct partial_context : public black_magic::pop_back<Middlewares...>::template rebind<partial_context>, public black_magic::last_element_type<Middlewares...>::type::context
         {
             using parent_context = typename black_magic::pop_back<Middlewares...>::template rebind<::crow::detail::partial_context>;
-            template<int N>
+            template <int N>
             using partial = typename std::conditional<N == sizeof...(Middlewares) - 1, partial_context, typename parent_context::template partial<N>>::type;
 
-            template<typename T>
-            typename T::context& get()
+            template <typename T>
+            typename T::context &get()
             {
-                return static_cast<typename T::context&>(*this);
+                return static_cast<typename T::context &>(*this);
             }
         };
 
-
-
-        template<>
+        template <>
         struct partial_context<>
         {
-            template<int>
+            template <int>
             using partial = partial_context;
         };
 
-
-        template<typename... Middlewares>
+        template <typename... Middlewares>
         struct context : private partial_context<Middlewares...>
-        //struct context : private Middlewares::context... // simple but less type-safe
+        // struct context : private Middlewares::context... // simple but less type-safe
         {
-            template<typename CallCriteria, int N, typename Context, typename Container>
-            friend typename std::enable_if<(N == 0)>::type after_handlers_call_helper(const CallCriteria& cc, Container& middlewares, Context& ctx, request& req, response& res);
-            template<typename CallCriteria, int N, typename Context, typename Container>
-            friend typename std::enable_if<(N > 0)>::type after_handlers_call_helper(const CallCriteria& cc, Container& middlewares, Context& ctx, request& req, response& res);
+            template <typename CallCriteria, int N, typename Context, typename Container>
+            friend typename std::enable_if<(N == 0)>::type after_handlers_call_helper(const CallCriteria &cc, Container &middlewares, Context &ctx, request &req, response &res);
+            template <typename CallCriteria, int N, typename Context, typename Container>
+            friend typename std::enable_if<(N > 0)>::type after_handlers_call_helper(const CallCriteria &cc, Container &middlewares, Context &ctx, request &req, response &res);
 
-            template<typename CallCriteria, int N, typename Context, typename Container>
+            template <typename CallCriteria, int N, typename Context, typename Container>
             friend typename std::enable_if<(N < std::tuple_size<typename std::remove_reference<Container>::type>::value), bool>::type
-              middleware_call_helper(const CallCriteria& cc, Container& middlewares, request& req, response& res, Context& ctx);
+            middleware_call_helper(const CallCriteria &cc, Container &middlewares, request &req, response &res, Context &ctx);
 
-            template<typename T>
-            typename T::context& get()
+            template <typename T>
+            typename T::context &get()
             {
-                return static_cast<typename T::context&>(*this);
+                return static_cast<typename T::context &>(*this);
             }
 
-            template<int N>
+            template <int N>
             using partial = typename partial_context<Middlewares...>::template partial<N>;
         };
     } // namespace detail
 } // namespace crow
 
-
 #include <string>
 #include <unordered_map>
 #include <algorithm>
-
 
 namespace crow
 {
@@ -6051,23 +6069,23 @@ namespace crow
 
     ///
     /// Used to generate a \ref crow.request from the TCP socket buffer.
-    template<typename Handler>
+    template <typename Handler>
     struct HTTPParser : public http_parser
     {
-        static int on_message_begin(http_parser*)
+        static int on_message_begin(http_parser *)
         {
             return 0;
         }
-        static int on_method(http_parser* self_)
+        static int on_method(http_parser *self_)
         {
-            HTTPParser* self = static_cast<HTTPParser*>(self_);
+            HTTPParser *self = static_cast<HTTPParser *>(self_);
             self->req.method = static_cast<HTTPMethod>(self->method);
 
             return 0;
         }
-        static int on_url(http_parser* self_, const char* at, size_t length)
+        static int on_url(http_parser *self_, const char *at, size_t length)
         {
-            HTTPParser* self = static_cast<HTTPParser*>(self_);
+            HTTPParser *self = static_cast<HTTPParser *>(self_);
             self->req.raw_url.insert(self->req.raw_url.end(), at, at + length);
             self->req.url_params = query_string(self->req.raw_url);
             self->req.url = self->req.raw_url.substr(0, self->qs_point != 0 ? self->qs_point : std::string::npos);
@@ -6076,43 +6094,43 @@ namespace crow
 
             return 0;
         }
-        static int on_header_field(http_parser* self_, const char* at, size_t length)
+        static int on_header_field(http_parser *self_, const char *at, size_t length)
         {
-            HTTPParser* self = static_cast<HTTPParser*>(self_);
+            HTTPParser *self = static_cast<HTTPParser *>(self_);
             switch (self->header_building_state)
             {
-                case 0:
-                    if (!self->header_value.empty())
-                    {
-                        self->req.headers.emplace(std::move(self->header_field), std::move(self->header_value));
-                    }
-                    self->header_field.assign(at, at + length);
-                    self->header_building_state = 1;
-                    break;
-                case 1:
-                    self->header_field.insert(self->header_field.end(), at, at + length);
-                    break;
+            case 0:
+                if (!self->header_value.empty())
+                {
+                    self->req.headers.emplace(std::move(self->header_field), std::move(self->header_value));
+                }
+                self->header_field.assign(at, at + length);
+                self->header_building_state = 1;
+                break;
+            case 1:
+                self->header_field.insert(self->header_field.end(), at, at + length);
+                break;
             }
             return 0;
         }
-        static int on_header_value(http_parser* self_, const char* at, size_t length)
+        static int on_header_value(http_parser *self_, const char *at, size_t length)
         {
-            HTTPParser* self = static_cast<HTTPParser*>(self_);
+            HTTPParser *self = static_cast<HTTPParser *>(self_);
             switch (self->header_building_state)
             {
-                case 0:
-                    self->header_value.insert(self->header_value.end(), at, at + length);
-                    break;
-                case 1:
-                    self->header_building_state = 0;
-                    self->header_value.assign(at, at + length);
-                    break;
+            case 0:
+                self->header_value.insert(self->header_value.end(), at, at + length);
+                break;
+            case 1:
+                self->header_building_state = 0;
+                self->header_value.assign(at, at + length);
+                break;
             }
             return 0;
         }
-        static int on_headers_complete(http_parser* self_)
+        static int on_headers_complete(http_parser *self_)
         {
-            HTTPParser* self = static_cast<HTTPParser*>(self_);
+            HTTPParser *self = static_cast<HTTPParser *>(self_);
             if (!self->header_field.empty())
             {
                 self->req.headers.emplace(std::move(self->header_field), std::move(self->header_value));
@@ -6123,43 +6141,42 @@ namespace crow
             self->process_header();
             return 0;
         }
-        static int on_body(http_parser* self_, const char* at, size_t length)
+        static int on_body(http_parser *self_, const char *at, size_t length)
         {
-            HTTPParser* self = static_cast<HTTPParser*>(self_);
+            HTTPParser *self = static_cast<HTTPParser *>(self_);
             self->req.body.insert(self->req.body.end(), at, at + length);
             return 0;
         }
-        static int on_message_complete(http_parser* self_)
+        static int on_message_complete(http_parser *self_)
         {
-            HTTPParser* self = static_cast<HTTPParser*>(self_);
+            HTTPParser *self = static_cast<HTTPParser *>(self_);
 
             self->message_complete = true;
             self->process_message();
             return 0;
         }
-        HTTPParser(Handler* handler):
-          http_parser(),
-          handler_(handler)
+        HTTPParser(Handler *handler) : http_parser(),
+                                       handler_(handler)
         {
             http_parser_init(this);
         }
 
         // return false on error
         /// Parse a buffer into the different sections of an HTTP request.
-        bool feed(const char* buffer, int length)
+        bool feed(const char *buffer, int length)
         {
             if (message_complete)
                 return true;
 
             const static http_parser_settings settings_{
-              on_message_begin,
-              on_method,
-              on_url,
-              on_header_field,
-              on_header_value,
-              on_headers_complete,
-              on_body,
-              on_message_complete,
+                on_message_begin,
+                on_method,
+                on_url,
+                on_header_field,
+                on_header_value,
+                on_headers_complete,
+                on_body,
+                on_message_complete,
             };
 
             int nparsed = http_parser_execute(this, &settings_, buffer, length);
@@ -6206,17 +6223,13 @@ namespace crow
             req.http_ver_major = http_major;
             req.http_ver_minor = http_minor;
 
-            //NOTE(EDev): it seems that the problem is with crow's policy on closing the connection for HTTP_VERSION < 1.0, the behaviour for that in crow is "don't close the connection, but don't send a keep-alive either"
+            // NOTE(EDev): it seems that the problem is with crow's policy on closing the connection for HTTP_VERSION < 1.0, the behaviour for that in crow is "don't close the connection, but don't send a keep-alive either"
 
             // HTTP1.1 = always send keep_alive, HTTP1.0 = only send if header exists, HTTP?.? = never send
-            req.keep_alive = (http_major == 1 && http_minor == 0) ?
-                               ((flags & F_CONNECTION_KEEP_ALIVE) ? true : false) :
-                               ((http_major == 1 && http_minor == 1) ? true : false);
+            req.keep_alive = (http_major == 1 && http_minor == 0) ? ((flags & F_CONNECTION_KEEP_ALIVE) ? true : false) : ((http_major == 1 && http_minor == 1) ? true : false);
 
             // HTTP1.1 = only close if close header exists, HTTP1.0 = always close unless keep_alive header exists, HTTP?.?= never close
-            req.close_connection = (http_major == 1 && http_minor == 0) ?
-                                     ((flags & F_CONNECTION_KEEP_ALIVE) ? false : true) :
-                                     ((http_major == 1 && http_minor == 1) ? ((flags & F_CONNECTION_CLOSE) ? true : false) : false);
+            req.close_connection = (http_major == 1 && http_minor == 0) ? ((flags & F_CONNECTION_KEEP_ALIVE) ? false : true) : ((http_major == 1 && http_minor == 1) ? ((flags & F_CONNECTION_CLOSE) ? true : false) : false);
             req.upgrade = static_cast<bool>(upgrade);
         }
 
@@ -6231,13 +6244,12 @@ namespace crow
         std::string header_field;
         std::string header_value;
 
-        Handler* handler_; ///< This is currently an HTTP connection object (\ref crow.Connection).
+        Handler *handler_; ///< This is currently an HTTP connection object (\ref crow.Connection).
     };
 } // namespace crow
 
 #undef CROW_NEW_MESSAGE
 #undef CROW_start_state
-
 
 #ifdef CROW_USE_BOOST
 #include <boost/asio.hpp>
@@ -6254,7 +6266,6 @@ namespace crow
 #include <memory>
 #include <vector>
 
-
 namespace crow
 {
 #ifdef CROW_USE_BOOST
@@ -6270,31 +6281,30 @@ namespace crow
 #endif
 
     /// An HTTP connection.
-    template<typename Adaptor, typename Handler, typename... Middlewares>
+    template <typename Adaptor, typename Handler, typename... Middlewares>
     class Connection : public std::enable_shared_from_this<Connection<Adaptor, Handler, Middlewares...>>
     {
         friend struct crow::response;
 
     public:
         Connection(
-          asio::io_context& io_context,
-          Handler* handler,
-          const std::string& server_name,
-          std::tuple<Middlewares...>* middlewares,
-          std::function<std::string()>& get_cached_date_str_f,
-          detail::task_timer& task_timer,
-          typename Adaptor::context* adaptor_ctx_,
-          std::atomic<unsigned int>& queue_length):
-          adaptor_(io_context, adaptor_ctx_),
-          handler_(handler),
-          parser_(this),
-          req_(parser_.req),
-          server_name_(server_name),
-          middlewares_(middlewares),
-          get_cached_date_str(get_cached_date_str_f),
-          task_timer_(task_timer),
-          res_stream_threshold_(handler->stream_threshold()),
-          queue_length_(queue_length)
+            asio::io_context &io_context,
+            Handler *handler,
+            const std::string &server_name,
+            std::tuple<Middlewares...> *middlewares,
+            std::function<std::string()> &get_cached_date_str_f,
+            detail::task_timer &task_timer,
+            typename Adaptor::context *adaptor_ctx_,
+            std::atomic<unsigned int> &queue_length) : adaptor_(io_context, adaptor_ctx_),
+                                                       handler_(handler),
+                                                       parser_(this),
+                                                       req_(parser_.req),
+                                                       server_name_(server_name),
+                                                       middlewares_(middlewares),
+                                                       get_cached_date_str(get_cached_date_str_f),
+                                                       task_timer_(task_timer),
+                                                       res_stream_threshold_(handler->stream_threshold()),
+                                                       queue_length_(queue_length)
         {
 #ifdef CROW_ENABLE_DEBUG
             connectionCount++;
@@ -6311,7 +6321,7 @@ namespace crow
         }
 
         /// The TCP socket on top of which the connection is established.
-        decltype(std::declval<Adaptor>().raw_socket())& socket()
+        decltype(std::declval<Adaptor>().raw_socket()) &socket()
         {
             return adaptor_.raw_socket();
         }
@@ -6319,7 +6329,8 @@ namespace crow
         void start()
         {
             auto self = this->shared_from_this();
-            adaptor_.start([self](const error_code& ec) {
+            adaptor_.start([self](const error_code &ec)
+                           {
                 if (!ec)
                 {
                     self->start_deadline();
@@ -6330,8 +6341,7 @@ namespace crow
                 else
                 {
                     CROW_LOG_ERROR << "Could not start adaptor: " << ec.message();
-                }
-            });
+                } });
         }
 
         void handle_url()
@@ -6368,8 +6378,8 @@ namespace crow
 
             // Create context
             ctx_ = detail::context<Middlewares...>();
-            req_.middleware_context = static_cast<void*>(&ctx_);
-            req_.middleware_container = static_cast<void*>(middlewares_);
+            req_.middleware_context = static_cast<void *>(&ctx_);
+            req_.middleware_container = static_cast<void *>(middlewares_);
             req_.io_context = &adaptor_.get_io_context();
 
             req_.remote_ip_address = adaptor_.remote_endpoint().address().to_string();
@@ -6387,7 +6397,7 @@ namespace crow
                 else if (req_.upgrade)
                 {
                     // h2 or h2c headers
-                    if (req_.get_header_value("upgrade").find("h2")==0)
+                    if (req_.get_header_value("upgrade").find("h2") == 0)
                     {
                         // TODO(ipkn): HTTP/2
                         // currently, ignore upgrade header
@@ -6406,13 +6416,13 @@ namespace crow
 
             CROW_LOG_INFO << "Request: " << utility::lexical_cast<std::string>(adaptor_.remote_endpoint()) << " " << this << " HTTP/" << (char)(req_.http_ver_major + '0') << "." << (char)(req_.http_ver_minor + '0') << ' ' << method_name(req_.method) << " " << req_.url;
 
-
             need_to_call_after_handlers_ = false;
             if (!is_invalid_request)
             {
                 res.complete_request_handler_ = nullptr;
                 auto self = this->shared_from_this();
-                res.is_alive_helper_ = [self]() -> bool {
+                res.is_alive_helper_ = [self]() -> bool
+                {
                     return self->adaptor_.is_open();
                 };
 
@@ -6421,7 +6431,8 @@ namespace crow
 
                 if (!res.completed_)
                 {
-                    res.complete_request_handler_ = [self] {
+                    res.complete_request_handler_ = [self]
+                    {
                         self->complete_request();
                     };
                     need_to_call_after_handlers_ = true;
@@ -6452,10 +6463,10 @@ namespace crow
 
                 // call all after_handler of middlewares
                 detail::after_handlers_call_helper<
-                  detail::middleware_call_criteria_only_global,
-                  (static_cast<int>(sizeof...(Middlewares)) - 1),
-                  decltype(ctx_),
-                  decltype(*middlewares_)>({}, *middlewares_, ctx_, req_, res);
+                    detail::middleware_call_criteria_only_global,
+                    (static_cast<int>(sizeof...(Middlewares)) - 1),
+                    decltype(ctx_),
+                    decltype(*middlewares_)>({}, *middlewares_, ctx_, req_, res);
             }
 #ifdef CROW_ENABLE_COMPRESSION
             if (!res.body.empty() && handler_->compression_used())
@@ -6465,22 +6476,22 @@ namespace crow
                 {
                     switch (handler_->compression_algorithm())
                     {
-                        case compression::DEFLATE:
-                            if (accept_encoding.find("deflate") != std::string::npos)
-                            {
-                                res.body = compression::compress_string(res.body, compression::algorithm::DEFLATE);
-                                res.set_header("Content-Encoding", "deflate");
-                            }
-                            break;
-                        case compression::GZIP:
-                            if (accept_encoding.find("gzip") != std::string::npos)
-                            {
-                                res.body = compression::compress_string(res.body, compression::algorithm::GZIP);
-                                res.set_header("Content-Encoding", "gzip");
-                            }
-                            break;
-                        default:
-                            break;
+                    case compression::DEFLATE:
+                        if (accept_encoding.find("deflate") != std::string::npos)
+                        {
+                            res.body = compression::compress_string(res.body, compression::algorithm::DEFLATE);
+                            res.set_header("Content-Encoding", "deflate");
+                        }
+                        break;
+                    case compression::GZIP:
+                        if (accept_encoding.find("gzip") != std::string::npos)
+                        {
+                            res.body = compression::compress_string(res.body, compression::algorithm::GZIP);
+                            res.set_header("Content-Encoding", "gzip");
+                        }
+                        break;
+                    default:
+                        break;
                     }
                 }
             }
@@ -6506,55 +6517,55 @@ namespace crow
 
             if (!adaptor_.is_open())
             {
-                //CROW_LOG_DEBUG << this << " delete (socket is closed) " << is_reading << ' ' << is_writing;
-                //delete this;
+                // CROW_LOG_DEBUG << this << " delete (socket is closed) " << is_reading << ' ' << is_writing;
+                // delete this;
                 return;
             }
             // TODO(EDev): HTTP version in status codes should be dynamic
             // Keep in sync with common.h/status
             static std::unordered_map<int, std::string> statusCodes = {
-              {status::CONTINUE, "HTTP/1.1 100 Continue\r\n"},
-              {status::SWITCHING_PROTOCOLS, "HTTP/1.1 101 Switching Protocols\r\n"},
+                {status::CONTINUE, "HTTP/1.1 100 Continue\r\n"},
+                {status::SWITCHING_PROTOCOLS, "HTTP/1.1 101 Switching Protocols\r\n"},
 
-              {status::OK, "HTTP/1.1 200 OK\r\n"},
-              {status::CREATED, "HTTP/1.1 201 Created\r\n"},
-              {status::ACCEPTED, "HTTP/1.1 202 Accepted\r\n"},
-              {status::NON_AUTHORITATIVE_INFORMATION, "HTTP/1.1 203 Non-Authoritative Information\r\n"},
-              {status::NO_CONTENT, "HTTP/1.1 204 No Content\r\n"},
-              {status::RESET_CONTENT, "HTTP/1.1 205 Reset Content\r\n"},
-              {status::PARTIAL_CONTENT, "HTTP/1.1 206 Partial Content\r\n"},
+                {status::OK, "HTTP/1.1 200 OK\r\n"},
+                {status::CREATED, "HTTP/1.1 201 Created\r\n"},
+                {status::ACCEPTED, "HTTP/1.1 202 Accepted\r\n"},
+                {status::NON_AUTHORITATIVE_INFORMATION, "HTTP/1.1 203 Non-Authoritative Information\r\n"},
+                {status::NO_CONTENT, "HTTP/1.1 204 No Content\r\n"},
+                {status::RESET_CONTENT, "HTTP/1.1 205 Reset Content\r\n"},
+                {status::PARTIAL_CONTENT, "HTTP/1.1 206 Partial Content\r\n"},
 
-              {status::MULTIPLE_CHOICES, "HTTP/1.1 300 Multiple Choices\r\n"},
-              {status::MOVED_PERMANENTLY, "HTTP/1.1 301 Moved Permanently\r\n"},
-              {status::FOUND, "HTTP/1.1 302 Found\r\n"},
-              {status::SEE_OTHER, "HTTP/1.1 303 See Other\r\n"},
-              {status::NOT_MODIFIED, "HTTP/1.1 304 Not Modified\r\n"},
-              {status::TEMPORARY_REDIRECT, "HTTP/1.1 307 Temporary Redirect\r\n"},
-              {status::PERMANENT_REDIRECT, "HTTP/1.1 308 Permanent Redirect\r\n"},
+                {status::MULTIPLE_CHOICES, "HTTP/1.1 300 Multiple Choices\r\n"},
+                {status::MOVED_PERMANENTLY, "HTTP/1.1 301 Moved Permanently\r\n"},
+                {status::FOUND, "HTTP/1.1 302 Found\r\n"},
+                {status::SEE_OTHER, "HTTP/1.1 303 See Other\r\n"},
+                {status::NOT_MODIFIED, "HTTP/1.1 304 Not Modified\r\n"},
+                {status::TEMPORARY_REDIRECT, "HTTP/1.1 307 Temporary Redirect\r\n"},
+                {status::PERMANENT_REDIRECT, "HTTP/1.1 308 Permanent Redirect\r\n"},
 
-              {status::BAD_REQUEST, "HTTP/1.1 400 Bad Request\r\n"},
-              {status::UNAUTHORIZED, "HTTP/1.1 401 Unauthorized\r\n"},
-              {status::FORBIDDEN, "HTTP/1.1 403 Forbidden\r\n"},
-              {status::NOT_FOUND, "HTTP/1.1 404 Not Found\r\n"},
-              {status::METHOD_NOT_ALLOWED, "HTTP/1.1 405 Method Not Allowed\r\n"},
-              {status::NOT_ACCEPTABLE, "HTTP/1.1 406 Not Acceptable\r\n"},
-              {status::PROXY_AUTHENTICATION_REQUIRED, "HTTP/1.1 407 Proxy Authentication Required\r\n"},
-              {status::CONFLICT, "HTTP/1.1 409 Conflict\r\n"},
-              {status::GONE, "HTTP/1.1 410 Gone\r\n"},
-              {status::PAYLOAD_TOO_LARGE, "HTTP/1.1 413 Payload Too Large\r\n"},
-              {status::UNSUPPORTED_MEDIA_TYPE, "HTTP/1.1 415 Unsupported Media Type\r\n"},
-              {status::RANGE_NOT_SATISFIABLE, "HTTP/1.1 416 Range Not Satisfiable\r\n"},
-              {status::EXPECTATION_FAILED, "HTTP/1.1 417 Expectation Failed\r\n"},
-              {status::PRECONDITION_REQUIRED, "HTTP/1.1 428 Precondition Required\r\n"},
-              {status::TOO_MANY_REQUESTS, "HTTP/1.1 429 Too Many Requests\r\n"},
-              {status::UNAVAILABLE_FOR_LEGAL_REASONS, "HTTP/1.1 451 Unavailable For Legal Reasons\r\n"},
+                {status::BAD_REQUEST, "HTTP/1.1 400 Bad Request\r\n"},
+                {status::UNAUTHORIZED, "HTTP/1.1 401 Unauthorized\r\n"},
+                {status::FORBIDDEN, "HTTP/1.1 403 Forbidden\r\n"},
+                {status::NOT_FOUND, "HTTP/1.1 404 Not Found\r\n"},
+                {status::METHOD_NOT_ALLOWED, "HTTP/1.1 405 Method Not Allowed\r\n"},
+                {status::NOT_ACCEPTABLE, "HTTP/1.1 406 Not Acceptable\r\n"},
+                {status::PROXY_AUTHENTICATION_REQUIRED, "HTTP/1.1 407 Proxy Authentication Required\r\n"},
+                {status::CONFLICT, "HTTP/1.1 409 Conflict\r\n"},
+                {status::GONE, "HTTP/1.1 410 Gone\r\n"},
+                {status::PAYLOAD_TOO_LARGE, "HTTP/1.1 413 Payload Too Large\r\n"},
+                {status::UNSUPPORTED_MEDIA_TYPE, "HTTP/1.1 415 Unsupported Media Type\r\n"},
+                {status::RANGE_NOT_SATISFIABLE, "HTTP/1.1 416 Range Not Satisfiable\r\n"},
+                {status::EXPECTATION_FAILED, "HTTP/1.1 417 Expectation Failed\r\n"},
+                {status::PRECONDITION_REQUIRED, "HTTP/1.1 428 Precondition Required\r\n"},
+                {status::TOO_MANY_REQUESTS, "HTTP/1.1 429 Too Many Requests\r\n"},
+                {status::UNAVAILABLE_FOR_LEGAL_REASONS, "HTTP/1.1 451 Unavailable For Legal Reasons\r\n"},
 
-              {status::INTERNAL_SERVER_ERROR, "HTTP/1.1 500 Internal Server Error\r\n"},
-              {status::NOT_IMPLEMENTED, "HTTP/1.1 501 Not Implemented\r\n"},
-              {status::BAD_GATEWAY, "HTTP/1.1 502 Bad Gateway\r\n"},
-              {status::SERVICE_UNAVAILABLE, "HTTP/1.1 503 Service Unavailable\r\n"},
-              {status::GATEWAY_TIMEOUT, "HTTP/1.1 504 Gateway Timeout\r\n"},
-              {status::VARIANT_ALSO_NEGOTIATES, "HTTP/1.1 506 Variant Also Negotiates\r\n"},
+                {status::INTERNAL_SERVER_ERROR, "HTTP/1.1 500 Internal Server Error\r\n"},
+                {status::NOT_IMPLEMENTED, "HTTP/1.1 501 Not Implemented\r\n"},
+                {status::BAD_GATEWAY, "HTTP/1.1 502 Bad Gateway\r\n"},
+                {status::SERVICE_UNAVAILABLE, "HTTP/1.1 503 Service Unavailable\r\n"},
+                {status::GATEWAY_TIMEOUT, "HTTP/1.1 504 Gateway Timeout\r\n"},
+                {status::VARIANT_ALSO_NEGOTIATES, "HTTP/1.1 506 Variant Also Negotiates\r\n"},
             };
 
             static const std::string seperator = ": ";
@@ -6570,13 +6581,13 @@ namespace crow
                 res.code = 500;
             }
 
-            auto& status = statusCodes.find(res.code)->second;
+            auto &status = statusCodes.find(res.code)->second;
             buffers_.emplace_back(status.data(), status.size());
 
             if (res.code >= 400 && res.body.empty())
                 res.body = statusCodes[res.code].substr(9);
 
-            for (auto& kv : res.headers)
+            for (auto &kv : res.headers)
             {
                 buffers_.emplace_back(kv.first.data(), kv.first.size());
                 buffers_.emplace_back(seperator.data(), seperator.size());
@@ -6670,7 +6681,7 @@ namespace crow
                 if (res.body.length() > 0)
                 {
                     std::vector<asio::const_buffer> buffers{1};
-                    const uint8_t* data = reinterpret_cast<const uint8_t*>(res.body.data());
+                    const uint8_t *data = reinterpret_cast<const uint8_t *>(res.body.data());
                     size_t length = res.body.length();
                     for (size_t transferred = 0; transferred < length;)
                     {
@@ -6698,79 +6709,81 @@ namespace crow
         {
             auto self = this->shared_from_this();
             adaptor_.socket().async_read_some(
-              asio::buffer(buffer_),
-              [self](const error_code& ec, std::size_t bytes_transferred) {
-                  bool error_while_reading = true;
-                  if (!ec)
-                  {
-                      bool ret = self->parser_.feed(self->buffer_.data(), bytes_transferred);
-                      if (ret && self->adaptor_.is_open())
-                      {
-                          error_while_reading = false;
-                      }
-                  }
+                asio::buffer(buffer_),
+                [self](const error_code &ec, std::size_t bytes_transferred)
+                {
+                    bool error_while_reading = true;
+                    if (!ec)
+                    {
+                        bool ret = self->parser_.feed(self->buffer_.data(), bytes_transferred);
+                        if (ret && self->adaptor_.is_open())
+                        {
+                            error_while_reading = false;
+                        }
+                    }
 
-                  if (error_while_reading)
-                  {
-                      self->cancel_deadline_timer();
-                      self->parser_.done();
-                      self->adaptor_.shutdown_read();
-                      self->adaptor_.close();
-                      CROW_LOG_DEBUG << self << " from read(1) with description: \"" << http_errno_description(static_cast<http_errno>(self->parser_.http_errno)) << '\"';
-                  }
-                  else if (self->close_connection_)
-                  {
-                      self->cancel_deadline_timer();
-                      self->parser_.done();
-                      // adaptor will close after write
-                  }
-                  else if (!self->need_to_call_after_handlers_)
-                  {
-                      self->start_deadline();
-                      self->do_read();
-                  }
-                  else
-                  {
-                      // res will be completed later by user
-                      self->need_to_start_read_after_complete_ = true;
-                  }
-              });
+                    if (error_while_reading)
+                    {
+                        self->cancel_deadline_timer();
+                        self->parser_.done();
+                        self->adaptor_.shutdown_read();
+                        self->adaptor_.close();
+                        CROW_LOG_DEBUG << self << " from read(1) with description: \"" << http_errno_description(static_cast<http_errno>(self->parser_.http_errno)) << '\"';
+                    }
+                    else if (self->close_connection_)
+                    {
+                        self->cancel_deadline_timer();
+                        self->parser_.done();
+                        // adaptor will close after write
+                    }
+                    else if (!self->need_to_call_after_handlers_)
+                    {
+                        self->start_deadline();
+                        self->do_read();
+                    }
+                    else
+                    {
+                        // res will be completed later by user
+                        self->need_to_start_read_after_complete_ = true;
+                    }
+                });
         }
 
         void do_write()
         {
             auto self = this->shared_from_this();
             asio::async_write(
-              adaptor_.socket(), buffers_,
-              [self](const error_code& ec, std::size_t /*bytes_transferred*/) {
-                  self->res.clear();
-                  self->res_body_copy_.clear();
-                  if (!self->continue_requested)
-                  {
-                      self->parser_.clear();
-                  }
-                  else
-                  {
-                      self->continue_requested = false;
-                  }
+                adaptor_.socket(), buffers_,
+                [self](const error_code &ec, std::size_t /*bytes_transferred*/)
+                {
+                    self->res.clear();
+                    self->res_body_copy_.clear();
+                    if (!self->continue_requested)
+                    {
+                        self->parser_.clear();
+                    }
+                    else
+                    {
+                        self->continue_requested = false;
+                    }
 
-                  if (!ec)
-                  {
-                      if (self->close_connection_)
-                      {
-                          self->adaptor_.shutdown_write();
-                          self->adaptor_.close();
-                          CROW_LOG_DEBUG << self << " from write(1)";
-                      }
-                  }
-                  else
-                  {
-                      CROW_LOG_DEBUG << self << " from write(2)";
-                  }
-              });
+                    if (!ec)
+                    {
+                        if (self->close_connection_)
+                        {
+                            self->adaptor_.shutdown_write();
+                            self->adaptor_.close();
+                            CROW_LOG_DEBUG << self << " from write(1)";
+                        }
+                    }
+                    else
+                    {
+                        CROW_LOG_DEBUG << self << " from write(2)";
+                    }
+                });
         }
 
-        inline void do_write_sync(std::vector<asio::const_buffer>& buffers)
+        inline void do_write_sync(std::vector<asio::const_buffer> &buffers)
         {
             error_code ec;
             asio::write(adaptor_.socket(), buffers, ec);
@@ -6804,31 +6817,31 @@ namespace crow
             cancel_deadline_timer();
 
             auto self = this->shared_from_this();
-            task_id_ = task_timer_.schedule([self] {
+            task_id_ = task_timer_.schedule([self]
+                                            {
                 if (!self->adaptor_.is_open())
                 {
                     return;
                 }
                 self->adaptor_.shutdown_readwrite();
-                self->adaptor_.close();
-            });
+                self->adaptor_.close(); });
             CROW_LOG_DEBUG << this << " timer added: " << &task_timer_ << ' ' << task_id_;
         }
 
     private:
         Adaptor adaptor_;
-        Handler* handler_;
+        Handler *handler_;
 
         std::array<char, 4096> buffer_;
 
         HTTPParser<Connection> parser_;
         std::unique_ptr<routing_handle_result> routing_handle_result_;
-        request& req_;
+        request &req_;
         response res;
 
         bool close_connection_ = false;
 
-        const std::string& server_name_;
+        const std::string &server_name_;
         std::vector<asio::const_buffer> buffers_;
 
         std::string content_length_;
@@ -6842,19 +6855,18 @@ namespace crow
         bool need_to_start_read_after_complete_{};
         bool add_keep_alive_{};
 
-        std::tuple<Middlewares...>* middlewares_;
+        std::tuple<Middlewares...> *middlewares_;
         detail::context<Middlewares...> ctx_;
 
-        std::function<std::string()>& get_cached_date_str;
-        detail::task_timer& task_timer_;
+        std::function<std::string()> &get_cached_date_str;
+        detail::task_timer &task_timer_;
 
         size_t res_stream_threshold_;
 
-        std::atomic<unsigned int>& queue_length_;
+        std::atomic<unsigned int> &queue_length_;
     };
 
 } // namespace crow
-
 
 #ifdef CROW_USE_BOOST
 #include <boost/asio.hpp>
@@ -6878,8 +6890,6 @@ namespace crow
 #include <memory>
 #include <vector>
 
-
-
 namespace crow // NOTE: Already documented in "crow/app.h"
 {
 #ifdef CROW_USE_BOOST
@@ -6890,28 +6900,28 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #endif
     using tcp = asio::ip::tcp;
 
-    template<typename Handler, typename Adaptor = SocketAdaptor, typename... Middlewares>
+    template <typename Handler, typename Adaptor = SocketAdaptor, typename... Middlewares>
     class Server
     {
     public:
-      Server(Handler* handler,
-             const tcp::endpoint& endpoint,
-             std::string server_name = std::string("Crow/") + VERSION,
-             std::tuple<Middlewares...>* middlewares = nullptr,
-             uint16_t concurrency = 1,
-             uint8_t timeout = 5,
-             typename Adaptor::context* adaptor_ctx = nullptr):
-          acceptor_(io_context_,endpoint),
-          signals_(io_context_),
-          tick_timer_(io_context_),
-          handler_(handler),
-          concurrency_(concurrency),
-          timeout_(timeout),
-          server_name_(server_name),
-          task_queue_length_pool_(concurrency_ - 1),
-          middlewares_(middlewares),
-          adaptor_ctx_(adaptor_ctx)
-        {}
+        Server(Handler *handler,
+               const tcp::endpoint &endpoint,
+               std::string server_name = std::string("Crow/") + VERSION,
+               std::tuple<Middlewares...> *middlewares = nullptr,
+               uint16_t concurrency = 1,
+               uint8_t timeout = 5,
+               typename Adaptor::context *adaptor_ctx = nullptr) : acceptor_(io_context_, endpoint),
+                                                                   signals_(io_context_),
+                                                                   tick_timer_(io_context_),
+                                                                   handler_(handler),
+                                                                   concurrency_(concurrency),
+                                                                   timeout_(timeout),
+                                                                   server_name_(server_name),
+                                                                   task_queue_length_pool_(concurrency_ - 1),
+                                                                   middlewares_(middlewares),
+                                                                   adaptor_ctx_(adaptor_ctx)
+        {
+        }
 
         void set_tick_function(std::chrono::milliseconds d, std::function<void()> f)
         {
@@ -6923,11 +6933,11 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             tick_function_();
             tick_timer_.expires_after(std::chrono::milliseconds(tick_interval_.count()));
-            tick_timer_.async_wait([this](const error_code& ec) {
+            tick_timer_.async_wait([this](const error_code &ec)
+                                   {
                 if (ec)
                     return;
-                on_tick();
-            });
+                on_tick(); });
         }
 
         void run()
@@ -6942,8 +6952,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             std::atomic<int> init_count(0);
             for (uint16_t i = 0; i < worker_thread_count; i++)
                 v.push_back(
-                  std::async(
-                    std::launch::async, [this, i, &init_count] {
+                    std::async(
+                        std::launch::async, [this, i, &init_count]
+                        {
                         // thread local date string get function
                         auto last = std::chrono::steady_clock::now();
 
@@ -6992,22 +7003,21 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                             {
                                 CROW_LOG_ERROR << "Worker Crash: An uncaught exception occurred: " << e.what();
                             }
-                        }
-                    }));
+                        } }));
 
             if (tick_function_ && tick_interval_.count() > 0)
             {
                 tick_timer_.expires_after(std::chrono::milliseconds(tick_interval_.count()));
                 tick_timer_.async_wait(
-                  [this](const error_code& ec) {
-                      if (ec)
-                          return;
-                      on_tick();
-                  });
+                    [this](const error_code &ec)
+                    {
+                        if (ec)
+                            return;
+                        on_tick();
+                    });
             }
 
             handler_->port(acceptor_.local_endpoint().port());
-
 
             CROW_LOG_INFO << server_name_
                           << " server is running at " << (handler_->ssl_used() ? "https://" : "http://")
@@ -7015,9 +7025,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             CROW_LOG_INFO << "Call `app.loglevel(crow::LogLevel::Warning)` to hide Info level logs.";
 
             signals_.async_wait(
-              [&](const error_code& /*error*/, int /*signal_number*/) {
-                  stop();
-              });
+                [&](const error_code & /*error*/, int /*signal_number*/)
+                {
+                    stop();
+                });
 
             while (worker_thread_count != init_count)
                 std::this_thread::yield();
@@ -7025,18 +7036,19 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             do_accept();
 
             std::thread(
-              [this] {
-                  notify_start();
-                  io_context_.run();
-                  CROW_LOG_INFO << "Exiting.";
-              })
-              .join();
+                [this]
+                {
+                    notify_start();
+                    io_context_.run();
+                    CROW_LOG_INFO << "Exiting.";
+                })
+                .join();
         }
 
         void stop()
         {
             shutting_down_ = true; // Prevent the acceptor from taking new connections
-            for (auto& io_context : io_context_pool_)
+            for (auto &io_context : io_context_pool_)
             {
                 if (io_context != nullptr)
                 {
@@ -7049,7 +7061,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             io_context_.stop(); // Close main io_service
         }
 
-        uint16_t port() const {
+        uint16_t port() const
+        {
             return acceptor_.local_endpoint().port();
         }
 
@@ -7057,10 +7070,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         std::cv_status wait_for_start(std::chrono::steady_clock::time_point wait_until)
         {
             std::unique_lock<std::mutex> lock(start_mutex_);
-            
+
             std::cv_status status = std::cv_status::no_timeout;
-            while (!server_started_ && ( status==std::cv_status::no_timeout ))
-                status = cv_started_.wait_until(lock,wait_until);
+            while (!server_started_ && (status == std::cv_status::no_timeout))
+                status = cv_started_.wait_until(lock, wait_until);
             return status;
         }
 
@@ -7096,31 +7109,33 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             if (!shutting_down_)
             {
                 uint16_t context_idx = pick_io_context_idx();
-                asio::io_context& ic = *io_context_pool_[context_idx];
+                asio::io_context &ic = *io_context_pool_[context_idx];
                 task_queue_length_pool_[context_idx]++;
                 CROW_LOG_DEBUG << &ic << " {" << context_idx << "} queue length: " << task_queue_length_pool_[context_idx];
 
                 auto p = std::make_shared<Connection<Adaptor, Handler, Middlewares...>>(
-                  ic, handler_, server_name_, middlewares_,
-                  get_cached_date_str_pool_[context_idx], *task_timer_pool_[context_idx], adaptor_ctx_, task_queue_length_pool_[context_idx]);
+                    ic, handler_, server_name_, middlewares_,
+                    get_cached_date_str_pool_[context_idx], *task_timer_pool_[context_idx], adaptor_ctx_, task_queue_length_pool_[context_idx]);
 
                 acceptor_.async_accept(
-                  p->socket(),
-                  [this, p, &ic, context_idx](error_code ec) {
-                      if (!ec)
-                      {
-                          asio::post(ic,
-                            [p] {
-                                p->start();
-                            });
-                      }
-                      else
-                      {
-                          task_queue_length_pool_[context_idx]--;
-                          CROW_LOG_DEBUG << &ic << " {" << context_idx << "} queue length: " << task_queue_length_pool_[context_idx];
-                      }
-                      do_accept();
-                  });
+                    p->socket(),
+                    [this, p, &ic, context_idx](error_code ec)
+                    {
+                        if (!ec)
+                        {
+                            asio::post(ic,
+                                       [p]
+                                       {
+                                           p->start();
+                                       });
+                        }
+                        else
+                        {
+                            task_queue_length_pool_[context_idx]--;
+                            CROW_LOG_DEBUG << &ic << " {" << context_idx << "} queue length: " << task_queue_length_pool_[context_idx];
+                        }
+                        do_accept();
+                    });
             }
         }
 
@@ -7135,7 +7150,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
     private:
         std::vector<std::unique_ptr<asio::io_context>> io_context_pool_;
         asio::io_context io_context_;
-        std::vector<detail::task_timer*> task_timer_pool_;
+        std::vector<detail::task_timer *> task_timer_pool_;
         std::vector<std::function<std::string()>> get_cached_date_str_pool_;
         tcp::acceptor acceptor_;
         bool shutting_down_ = false;
@@ -7146,7 +7161,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         asio::basic_waitable_timer<std::chrono::high_resolution_clock> tick_timer_;
 
-        Handler* handler_;
+        Handler *handler_;
         uint16_t concurrency_{2};
         std::uint8_t timeout_;
         std::string server_name_;
@@ -7155,17 +7170,15 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         std::chrono::milliseconds tick_interval_;
         std::function<void()> tick_function_;
 
-        std::tuple<Middlewares...>* middlewares_;
+        std::tuple<Middlewares...> *middlewares_;
 
-        typename Adaptor::context* adaptor_ctx_;
+        typename Adaptor::context *adaptor_ctx_;
     };
 } // namespace crow
-
 
 #include <string>
 #include <vector>
 #include <sstream>
-
 
 namespace crow
 {
@@ -7190,8 +7203,8 @@ namespace crow
         using mph_map = std::unordered_multimap<std::string, header, ci_hash, ci_key_eq>;
 
         /// Find and return the value object associated with the key. (returns an empty class if nothing is found)
-        template<typename O, typename T>
-        inline const O& get_header_value_object(const T& headers, const std::string& key)
+        template <typename O, typename T>
+        inline const O &get_header_value_object(const T &headers, const std::string &key)
         {
             if (headers.count(key))
             {
@@ -7202,13 +7215,13 @@ namespace crow
         }
 
         /// Same as \ref get_header_value_object() but for \ref multipart.header
-        template<typename T>
-        inline const header& get_header_object(const T& headers, const std::string& key)
+        template <typename T>
+        inline const header &get_header_object(const T &headers, const std::string &key)
         {
             return get_header_value_object<header>(headers, key);
         }
 
-        ///One part of the multipart message
+        /// One part of the multipart message
 
         ///
         /// It is usually separated from other sections by a `boundary`
@@ -7220,7 +7233,7 @@ namespace crow
             operator int() const { return std::stoi(body); }    ///< Returns \ref body as integer
             operator double() const { return std::stod(body); } ///< Returns \ref body as double
 
-            const header& get_header_object(const std::string& key) const
+            const header &get_header_object(const std::string &key) const
             {
                 return multipart::get_header_object(headers, key);
             }
@@ -7237,12 +7250,12 @@ namespace crow
             std::vector<part> parts; ///< The individual parts of the message
             mp_map part_map;         ///< The individual parts of the message, organized in a map with the `name` header parameter being the key
 
-            const std::string& get_header_value(const std::string& key) const
+            const std::string &get_header_value(const std::string &key) const
             {
                 return crow::get_header_value(headers, key);
             }
 
-            part get_part_by_name(const std::string& name)
+            part get_part_by_name(const std::string &name)
             {
                 mp_map::iterator result = part_map.find(name);
                 if (result != part_map.end())
@@ -7271,10 +7284,10 @@ namespace crow
             {
                 std::stringstream str;
                 part item = parts[part_];
-                for (auto& item_h : item.headers)
+                for (auto &item_h : item.headers)
                 {
                     str << item_h.first << ": " << item_h.second.value;
-                    for (auto& it : item_h.second.params)
+                    for (auto &it : item_h.second.params)
                     {
                         str << "; " << it.first << '=' << pad(it.second);
                     }
@@ -7286,24 +7299,22 @@ namespace crow
             }
 
             /// Default constructor using default values
-            message(const ci_map& headers_, const std::string& boundary_, const std::vector<part>& sections):
-              returnable("multipart/form-data; boundary=CROW-BOUNDARY"), headers(headers_), boundary(boundary_), parts(sections)
+            message(const ci_map &headers_, const std::string &boundary_, const std::vector<part> &sections) : returnable("multipart/form-data; boundary=CROW-BOUNDARY"), headers(headers_), boundary(boundary_), parts(sections)
             {
                 if (!boundary.empty())
                     content_type = "multipart/form-data; boundary=" + boundary;
-                for (auto& item : parts)
+                for (auto &item : parts)
                 {
                     part_map.emplace(
-                      (get_header_object(item.headers, "Content-Disposition").params.find("name")->second),
-                      item);
+                        (get_header_object(item.headers, "Content-Disposition").params.find("name")->second),
+                        item);
                 }
             }
 
             /// Create a multipart message from a request data
-            explicit message(const request& req):
-              returnable("multipart/form-data; boundary=CROW-BOUNDARY"),
-              headers(req.headers),
-              boundary(get_boundary(get_header_value("Content-Type")))
+            explicit message(const request &req) : returnable("multipart/form-data; boundary=CROW-BOUNDARY"),
+                                                   headers(req.headers),
+                                                   boundary(get_boundary(get_header_value("Content-Type")))
             {
                 if (!boundary.empty())
                 {
@@ -7317,7 +7328,7 @@ namespace crow
             }
 
         private:
-            std::string get_boundary(const std::string& header) const
+            std::string get_boundary(const std::string &header) const
             {
                 constexpr char boundary_text[] = "boundary=";
                 size_t found = header.find(boundary_text);
@@ -7355,14 +7366,14 @@ namespace crow
                     {
                         part parsed_section(parse_section(section));
                         part_map.emplace(
-                          (get_header_object(parsed_section.headers, "Content-Disposition").params.find("name")->second),
-                          parsed_section);
+                            (get_header_object(parsed_section.headers, "Content-Disposition").params.find("name")->second),
+                            parsed_section);
                         parts.push_back(std::move(parsed_section));
                     }
                 }
             }
 
-            part parse_section(std::string& section)
+            part parse_section(std::string &section)
             {
                 struct part to_return;
 
@@ -7375,7 +7386,7 @@ namespace crow
                 return to_return;
             }
 
-            void parse_section_head(std::string& lines, part& part)
+            void parse_section_head(std::string &lines, part &part)
             {
                 while (!lines.empty())
                 {
@@ -7421,21 +7432,20 @@ namespace crow
                 }
             }
 
-            inline std::string trim(std::string& string, const char& excess = '"') const
+            inline std::string trim(std::string &string, const char &excess = '"') const
             {
                 if (string.length() > 1 && string[0] == excess && string[string.length() - 1] == excess)
                     return string.substr(1, string.length() - 2);
                 return string;
             }
 
-            inline std::string pad(std::string& string, const char& padding = '"') const
+            inline std::string pad(std::string &string, const char &padding = '"') const
             {
                 return (padding + string + padding);
             }
         };
     } // namespace multipart
 } // namespace crow
-
 
 #include <charconv>
 #include <string>
@@ -7477,7 +7487,7 @@ namespace crow
         using mph_view_map = std::unordered_multimap<std::string_view, header_view, ci_hash, ci_key_eq>;
 
         /// Finds and returns the header with the specified key. (returns an empty header if nothing is found)
-        inline const header_view& get_header_object(const mph_view_map& headers, const std::string_view key)
+        inline const header_view &get_header_object(const mph_view_map &headers, const std::string_view key)
         {
             const auto header = headers.find(key);
             if (header != headers.cend())
@@ -7496,13 +7506,13 @@ namespace crow
             const char padding = '"'; ///< Padding to use
 
             /// Outputs padded value to the stream
-            friend std::ostream& operator<<(std::ostream& stream, const padded value_)
+            friend std::ostream &operator<<(std::ostream &stream, const padded value_)
             {
                 return stream << value_.padding << value_.value << value_.padding;
             }
         };
 
-        ///One part of the multipart message
+        /// One part of the multipart message
 
         ///
         /// It is usually separated from other sections by a `boundary`
@@ -7526,17 +7536,17 @@ namespace crow
                 return std::stod(static_cast<std::string>(body));
             }
 
-            const header_view& get_header_object(const std::string_view key) const
+            const header_view &get_header_object(const std::string_view key) const
             {
                 return multipart::get_header_object(headers, key);
             }
 
-            friend std::ostream& operator<<(std::ostream& stream, const part_view& part)
+            friend std::ostream &operator<<(std::ostream &stream, const part_view &part)
             {
-                for (const auto& [header_key, header_value] : part.headers)
+                for (const auto &[header_key, header_value] : part.headers)
                 {
                     stream << header_key << ": " << header_value.value;
-                    for (const auto& [param_key, param_value] : header_value.params)
+                    for (const auto &[param_key, param_value] : header_value.params)
                     {
                         stream << "; " << param_key << '=' << padded{param_value};
                     }
@@ -7559,7 +7569,7 @@ namespace crow
             std::vector<part_view> parts;                 ///< The individual parts of the message
             mp_view_map part_map;                         ///< The individual parts of the message, organized in a map with the `name` header parameter being the key
 
-            const std::string& get_header_value(const std::string& key) const
+            const std::string &get_header_value(const std::string &key) const
             {
                 return crow::get_header_value(headers.get(), key);
             }
@@ -7573,11 +7583,11 @@ namespace crow
                     return {};
             }
 
-            friend std::ostream& operator<<(std::ostream& stream, const message_view message)
+            friend std::ostream &operator<<(std::ostream &stream, const message_view message)
             {
                 std::string delimiter = dd + message.boundary;
 
-                for (const part_view& part : message.parts)
+                for (const part_view &part : message.parts)
                 {
                     stream << delimiter << crlf;
                     stream << part;
@@ -7604,21 +7614,19 @@ namespace crow
             }
 
             /// Default constructor using default values
-            message_view(const ci_map& headers_, const std::string& boundary_, const std::vector<part_view>& sections):
-              headers(headers_), boundary(boundary_), parts(sections)
+            message_view(const ci_map &headers_, const std::string &boundary_, const std::vector<part_view> &sections) : headers(headers_), boundary(boundary_), parts(sections)
             {
-                for (const part_view& item : parts)
+                for (const part_view &item : parts)
                 {
                     part_map.emplace(
-                      (get_header_object(item.headers, "Content-Disposition").params.find("name")->second),
-                      item);
+                        (get_header_object(item.headers, "Content-Disposition").params.find("name")->second),
+                        item);
                 }
             }
 
             /// Create a multipart message from a request data
-            explicit message_view(const request& req):
-              headers(req.headers),
-              boundary(get_boundary(get_header_value("Content-Type")))
+            explicit message_view(const request &req) : headers(req.headers),
+                                                        boundary(get_boundary(get_header_value("Content-Type")))
             {
                 parse_body(req.body);
             }
@@ -7664,8 +7672,8 @@ namespace crow
                     {
                         part_view parsed_section = parse_section(section);
                         part_map.emplace(
-                          (get_header_object(parsed_section.headers, "Content-Disposition").params.find("name")->second),
-                          parsed_section);
+                            (get_header_object(parsed_section.headers, "Content-Disposition").params.find("name")->second),
+                            parsed_section);
                         parts.push_back(std::move(parsed_section));
                     }
                 }
@@ -7680,8 +7688,8 @@ namespace crow
                 section = section.substr(found + 4);
 
                 return part_view{
-                  parse_section_head(head_line),
-                  section.substr(0, section.length() - 2),
+                    parse_section_head(head_line),
+                    section.substr(0, section.length() - 2),
                 };
             }
 
@@ -7775,7 +7783,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         };
 
         // Codes taken from https://www.rfc-editor.org/rfc/rfc6455#section-7.4.1
-        enum CloseStatusCode : uint16_t {
+        enum CloseStatusCode : uint16_t
+        {
             NormalClosure = 1000,
             EndpointGoingAway = 1001,
             ProtocolError = 1002,
@@ -7805,16 +7814,16 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             virtual void send_text(std::string msg) = 0;
             virtual void send_ping(std::string msg) = 0;
             virtual void send_pong(std::string msg) = 0;
-            virtual void close(std::string const& msg = "quit", uint16_t status_code = CloseStatusCode::NormalClosure) = 0;
+            virtual void close(std::string const &msg = "quit", uint16_t status_code = CloseStatusCode::NormalClosure) = 0;
             virtual std::string get_remote_ip() = 0;
             virtual std::string get_subprotocol() const = 0;
             virtual ~connection() = default;
 
-            void userdata(void* u) { userdata_ = u; }
-            void* userdata() { return userdata_; }
+            void userdata(void *u) { userdata_ = u; }
+            void *userdata() { return userdata_; }
 
         private:
-            void* userdata_;
+            void *userdata_;
         };
 
         // Modified version of the illustration in RFC6455 Section-5.2
@@ -7842,7 +7851,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         /// A websocket connection.
 
-        template<typename Adaptor, typename Handler>
+        template <typename Adaptor, typename Handler>
         class Connection : public connection
         {
         public:
@@ -7851,22 +7860,21 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             ///
             /// Requires a request with an "Upgrade: websocket" header.<br>
             /// Automatically handles the handshake.
-            Connection(const crow::request& req, Adaptor&& adaptor, Handler* handler,
-                       uint64_t max_payload, const std::vector<std::string>& subprotocols,
-                       std::function<void(crow::websocket::connection&)> open_handler,
-                       std::function<void(crow::websocket::connection&, const std::string&, bool)> message_handler,
-                       std::function<void(crow::websocket::connection&, const std::string&, uint16_t)> close_handler,
-                       std::function<void(crow::websocket::connection&, const std::string&)> error_handler,
-                       std::function<bool(const crow::request&, void**)> accept_handler,
-                       bool mirror_protocols):
-              adaptor_(std::move(adaptor)),
-              handler_(handler),
-              max_payload_bytes_(max_payload),
-              open_handler_(std::move(open_handler)),
-              message_handler_(std::move(message_handler)),
-              close_handler_(std::move(close_handler)),
-              error_handler_(std::move(error_handler)),
-              accept_handler_(std::move(accept_handler))
+            Connection(const crow::request &req, Adaptor &&adaptor, Handler *handler,
+                       uint64_t max_payload, const std::vector<std::string> &subprotocols,
+                       std::function<void(crow::websocket::connection &)> open_handler,
+                       std::function<void(crow::websocket::connection &, const std::string &, bool)> message_handler,
+                       std::function<void(crow::websocket::connection &, const std::string &, uint16_t)> close_handler,
+                       std::function<void(crow::websocket::connection &, const std::string &)> error_handler,
+                       std::function<bool(const crow::request &, void **)> accept_handler,
+                       bool mirror_protocols) : adaptor_(std::move(adaptor)),
+                                                handler_(handler),
+                                                max_payload_bytes_(max_payload),
+                                                open_handler_(std::move(open_handler)),
+                                                message_handler_(std::move(message_handler)),
+                                                close_handler_(std::move(close_handler)),
+                                                error_handler_(std::move(error_handler)),
+                                                accept_handler_(std::move(accept_handler))
             {
                 if (!utility::string_equals(req.get_header_value("upgrade"), "websocket"))
                 {
@@ -7894,7 +7902,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
                 if (accept_handler_)
                 {
-                    void* ud = nullptr;
+                    void *ud = nullptr;
                     if (!accept_handler_(req, &ud))
                     {
                         adaptor_.close();
@@ -7913,7 +7921,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 uint8_t digest[20];
                 s.getDigestBytes(digest);
 
-                start(crow::utility::base64encode((unsigned char*)digest, 20));
+                start(crow::utility::base64encode((unsigned char *)digest, 20));
             }
 
             ~Connection() noexcept override
@@ -7930,7 +7938,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             }
 
-            template<typename Callable>
+            template <typename Callable>
             struct WeakWrappedMessage
             {
                 Callable callable;
@@ -7946,21 +7954,21 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             };
 
             /// Send data through the socket.
-            template<typename CompletionHandler>
-            void dispatch(CompletionHandler&& handler)
+            template <typename CompletionHandler>
+            void dispatch(CompletionHandler &&handler)
             {
                 asio::dispatch(adaptor_.get_io_context(),
                                WeakWrappedMessage<typename std::decay<CompletionHandler>::type>{
-                                 std::forward<CompletionHandler>(handler), anchor_});
+                                   std::forward<CompletionHandler>(handler), anchor_});
             }
 
             /// Send data through the socket and return immediately.
-            template<typename CompletionHandler>
-            void post(CompletionHandler&& handler)
+            template <typename CompletionHandler>
+            void post(CompletionHandler &&handler)
             {
                 asio::post(adaptor_.get_io_context(),
                            WeakWrappedMessage<typename std::decay<CompletionHandler>::type>{
-                             std::forward<CompletionHandler>(handler), anchor_});
+                               std::forward<CompletionHandler>(handler), anchor_});
             }
 
             /// Send a "Ping" message.
@@ -7997,9 +8005,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
             ///
             /// Sets a flag to destroy the object once the message is sent.
-            void close(std::string const& msg, uint16_t status_code) override
+            void close(std::string const &msg, uint16_t status_code) override
             {
-                dispatch([this, msg, status_code]() mutable {
+                dispatch([this, msg, status_code]() mutable
+                         {
                     has_sent_close_ = true;
                     if (has_recv_close_ && !is_close_handler_called_)
                     {
@@ -8014,8 +8023,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     write_buffers_.emplace_back(std::move(header));
                     write_buffers_.emplace_back(std::string(status_buf, 2));
                     write_buffers_.emplace_back(msg);
-                    do_write();
-                });
+                    do_write(); });
             }
 
             std::string get_remote_ip() override
@@ -8028,7 +8036,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 max_payload_bytes_ = payload;
             }
 
-            /// Returns the matching client/server subprotocol, empty string if none matched. 
+            /// Returns the matching client/server subprotocol, empty string if none matched.
             std::string get_subprotocol() const override
             {
                 return subprotocol_;
@@ -8048,13 +8056,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 else if (size < 0x10000)
                 {
                     buf[1] += 126;
-                    *(uint16_t*)(buf + 2) = htons(static_cast<uint16_t>(size));
+                    *(uint16_t *)(buf + 2) = htons(static_cast<uint16_t>(size));
                     return {buf, buf + 4};
                 }
                 else
                 {
                     buf[1] += 127;
-                    *reinterpret_cast<uint64_t*>(buf + 2) = ((1 == htonl(1)) ? static_cast<uint64_t>(size) : (static_cast<uint64_t>(htonl((size)&0xFFFFFFFF)) << 32) | htonl(static_cast<uint64_t>(size) >> 32));
+                    *reinterpret_cast<uint64_t *>(buf + 2) = ((1 == htonl(1)) ? static_cast<uint64_t>(size) : (static_cast<uint64_t>(htonl((size) & 0xFFFFFFFF)) << 32) | htonl(static_cast<uint64_t>(size) >> 32));
                     return {buf, buf + 10};
                 }
             }
@@ -8063,13 +8071,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
             ///
             /// Finishes the handshake process, then starts reading messages from the socket.
-            void start(std::string&& hello)
+            void start(std::string &&hello)
             {
                 static const std::string header =
-                  "HTTP/1.1 101 Switching Protocols\r\n"
-                  "Upgrade: websocket\r\n"
-                  "Connection: Upgrade\r\n"
-                  "Sec-WebSocket-Accept: ";
+                    "HTTP/1.1 101 Switching Protocols\r\n"
+                    "Upgrade: websocket\r\n"
+                    "Connection: Upgrade\r\n"
+                    "Sec-WebSocket-Accept: ";
                 write_buffers_.emplace_back(header);
                 write_buffers_.emplace_back(std::move(hello));
                 write_buffers_.emplace_back(crlf);
@@ -8107,232 +8115,236 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 is_reading = true;
                 switch (state_)
                 {
-                    case WebSocketReadState::MiniHeader:
-                    {
-                        mini_header_ = 0;
-                        //asio::async_read(adaptor_.socket(), asio::buffer(&mini_header_, 1),
-                        adaptor_.socket().async_read_some(
-                          asio::buffer(&mini_header_, 2),
-                          [this](const error_code& ec, std::size_t
+                case WebSocketReadState::MiniHeader:
+                {
+                    mini_header_ = 0;
+                    // asio::async_read(adaptor_.socket(), asio::buffer(&mini_header_, 1),
+                    adaptor_.socket().async_read_some(
+                        asio::buffer(&mini_header_, 2),
+                        [this](const error_code &ec, std::size_t
 #ifdef CROW_ENABLE_DEBUG
-                                                               bytes_transferred
+                                                         bytes_transferred
 #endif
-                          )
+                        )
 
-                          {
-                              is_reading = false;
-                              mini_header_ = ntohs(mini_header_);
+                        {
+                            is_reading = false;
+                            mini_header_ = ntohs(mini_header_);
 #ifdef CROW_ENABLE_DEBUG
 
-                              if (!ec && bytes_transferred != 2)
-                              {
-                                  throw std::runtime_error("WebSocket:MiniHeader:async_read fail:asio bug?");
-                              }
+                            if (!ec && bytes_transferred != 2)
+                            {
+                                throw std::runtime_error("WebSocket:MiniHeader:async_read fail:asio bug?");
+                            }
 #endif
 
-                              if (!ec)
-                              {
-                                  if ((mini_header_ & 0x80) == 0x80)
-                                      has_mask_ = true;
-                                  else //if the websocket specification is enforced and the message isn't masked, terminate the connection
-                                  {
+                            if (!ec)
+                            {
+                                if ((mini_header_ & 0x80) == 0x80)
+                                    has_mask_ = true;
+                                else // if the websocket specification is enforced and the message isn't masked, terminate the connection
+                                {
 #ifndef CROW_ENFORCE_WS_SPEC
-                                      has_mask_ = false;
+                                    has_mask_ = false;
 #else
-                                      close_connection_ = true;
-                                      adaptor_.shutdown_readwrite();
-                                      adaptor_.close();
-                                      if (error_handler_)
-                                          error_handler_(*this, "Client connection not masked.");
-                                      check_destroy(CloseStatusCode::UnacceptableData);
+                                    close_connection_ = true;
+                                    adaptor_.shutdown_readwrite();
+                                    adaptor_.close();
+                                    if (error_handler_)
+                                        error_handler_(*this, "Client connection not masked.");
+                                    check_destroy(CloseStatusCode::UnacceptableData);
 #endif
-                                  }
+                                }
 
-                                  if ((mini_header_ & 0x7f) == 127)
-                                  {
-                                      state_ = WebSocketReadState::Len64;
-                                  }
-                                  else if ((mini_header_ & 0x7f) == 126)
-                                  {
-                                      state_ = WebSocketReadState::Len16;
-                                  }
-                                  else
-                                  {
-                                      remaining_length_ = mini_header_ & 0x7f;
-                                      state_ = WebSocketReadState::Mask;
-                                  }
-                                  do_read();
-                              }
-                              else
-                              {
-                                  close_connection_ = true;
-                                  adaptor_.shutdown_readwrite();
-                                  adaptor_.close();
-                                  if (error_handler_)
-                                      error_handler_(*this, ec.message());
-                                  check_destroy();
-                              }
-                          });
-                    }
-                    break;
-                    case WebSocketReadState::Len16:
+                                if ((mini_header_ & 0x7f) == 127)
+                                {
+                                    state_ = WebSocketReadState::Len64;
+                                }
+                                else if ((mini_header_ & 0x7f) == 126)
+                                {
+                                    state_ = WebSocketReadState::Len16;
+                                }
+                                else
+                                {
+                                    remaining_length_ = mini_header_ & 0x7f;
+                                    state_ = WebSocketReadState::Mask;
+                                }
+                                do_read();
+                            }
+                            else
+                            {
+                                close_connection_ = true;
+                                adaptor_.shutdown_readwrite();
+                                adaptor_.close();
+                                if (error_handler_)
+                                    error_handler_(*this, ec.message());
+                                check_destroy();
+                            }
+                        });
+                }
+                break;
+                case WebSocketReadState::Len16:
+                {
+                    remaining_length_ = 0;
+                    remaining_length16_ = 0;
+                    asio::async_read(
+                        adaptor_.socket(), asio::buffer(&remaining_length16_, 2),
+                        [this](const error_code &ec, std::size_t
+#ifdef CROW_ENABLE_DEBUG
+                                                         bytes_transferred
+#endif
+                        )
+                        {
+                            is_reading = false;
+                            remaining_length16_ = ntohs(remaining_length16_);
+                            remaining_length_ = remaining_length16_;
+#ifdef CROW_ENABLE_DEBUG
+                            if (!ec && bytes_transferred != 2)
+                            {
+                                throw std::runtime_error("WebSocket:Len16:async_read fail:asio bug?");
+                            }
+#endif
+
+                            if (!ec)
+                            {
+                                state_ = WebSocketReadState::Mask;
+                                do_read();
+                            }
+                            else
+                            {
+                                close_connection_ = true;
+                                adaptor_.shutdown_readwrite();
+                                adaptor_.close();
+                                if (error_handler_)
+                                    error_handler_(*this, ec.message());
+                                check_destroy();
+                            }
+                        });
+                }
+                break;
+                case WebSocketReadState::Len64:
+                {
+                    asio::async_read(
+                        adaptor_.socket(), asio::buffer(&remaining_length_, 8),
+                        [this](const error_code &ec, std::size_t
+#ifdef CROW_ENABLE_DEBUG
+                                                         bytes_transferred
+#endif
+                        )
+                        {
+                            is_reading = false;
+                            remaining_length_ = ((1 == ntohl(1)) ? (remaining_length_) : (static_cast<uint64_t>(ntohl((remaining_length_) & 0xFFFFFFFF)) << 32) | ntohl((remaining_length_) >> 32));
+#ifdef CROW_ENABLE_DEBUG
+                            if (!ec && bytes_transferred != 8)
+                            {
+                                throw std::runtime_error("WebSocket:Len16:async_read fail:asio bug?");
+                            }
+#endif
+
+                            if (!ec)
+                            {
+                                state_ = WebSocketReadState::Mask;
+                                do_read();
+                            }
+                            else
+                            {
+                                close_connection_ = true;
+                                adaptor_.shutdown_readwrite();
+                                adaptor_.close();
+                                if (error_handler_)
+                                    error_handler_(*this, ec.message());
+                                check_destroy();
+                            }
+                        });
+                }
+                break;
+                case WebSocketReadState::Mask:
+                    if (remaining_length_ > max_payload_bytes_)
                     {
-                        remaining_length_ = 0;
-                        remaining_length16_ = 0;
+                        close_connection_ = true;
+                        adaptor_.close();
+                        if (error_handler_)
+                            error_handler_(*this, "Message length exceeds maximum payload.");
+                        check_destroy(MessageTooBig);
+                    }
+                    else if (has_mask_)
+                    {
                         asio::async_read(
-                          adaptor_.socket(), asio::buffer(&remaining_length16_, 2),
-                          [this](const error_code& ec, std::size_t
+                            adaptor_.socket(), asio::buffer((char *)&mask_, 4),
+                            [this](const error_code &ec, std::size_t
 #ifdef CROW_ENABLE_DEBUG
-                                                               bytes_transferred
+                                                             bytes_transferred
 #endif
-                          ) {
-                              is_reading = false;
-                              remaining_length16_ = ntohs(remaining_length16_);
-                              remaining_length_ = remaining_length16_;
+                            )
+                            {
+                                is_reading = false;
 #ifdef CROW_ENABLE_DEBUG
-                              if (!ec && bytes_transferred != 2)
-                              {
-                                  throw std::runtime_error("WebSocket:Len16:async_read fail:asio bug?");
-                              }
+                                if (!ec && bytes_transferred != 4)
+                                {
+                                    throw std::runtime_error("WebSocket:Mask:async_read fail:asio bug?");
+                                }
 #endif
 
-                              if (!ec)
-                              {
-                                  state_ = WebSocketReadState::Mask;
-                                  do_read();
-                              }
-                              else
-                              {
-                                  close_connection_ = true;
-                                  adaptor_.shutdown_readwrite();
-                                  adaptor_.close();
-                                  if (error_handler_)
-                                      error_handler_(*this, ec.message());
-                                  check_destroy();
-                              }
-                          });
+                                if (!ec)
+                                {
+                                    state_ = WebSocketReadState::Payload;
+                                    do_read();
+                                }
+                                else
+                                {
+                                    close_connection_ = true;
+                                    if (error_handler_)
+                                        error_handler_(*this, ec.message());
+                                    adaptor_.shutdown_readwrite();
+                                    adaptor_.close();
+                                    check_destroy();
+                                }
+                            });
                     }
-                    break;
-                    case WebSocketReadState::Len64:
+                    else
                     {
-                        asio::async_read(
-                          adaptor_.socket(), asio::buffer(&remaining_length_, 8),
-                          [this](const error_code& ec, std::size_t
-#ifdef CROW_ENABLE_DEBUG
-                                                               bytes_transferred
-#endif
-                          ) {
-                              is_reading = false;
-                              remaining_length_ = ((1 == ntohl(1)) ? (remaining_length_) : (static_cast<uint64_t>(ntohl((remaining_length_)&0xFFFFFFFF)) << 32) | ntohl((remaining_length_) >> 32));
-#ifdef CROW_ENABLE_DEBUG
-                              if (!ec && bytes_transferred != 8)
-                              {
-                                  throw std::runtime_error("WebSocket:Len16:async_read fail:asio bug?");
-                              }
-#endif
-
-                              if (!ec)
-                              {
-                                  state_ = WebSocketReadState::Mask;
-                                  do_read();
-                              }
-                              else
-                              {
-                                  close_connection_ = true;
-                                  adaptor_.shutdown_readwrite();
-                                  adaptor_.close();
-                                  if (error_handler_)
-                                      error_handler_(*this, ec.message());
-                                  check_destroy();
-                              }
-                          });
+                        state_ = WebSocketReadState::Payload;
+                        do_read();
                     }
                     break;
-                    case WebSocketReadState::Mask:
-                        if (remaining_length_ > max_payload_bytes_)
+                case WebSocketReadState::Payload:
+                {
+                    auto to_read = static_cast<std::uint64_t>(buffer_.size());
+                    if (remaining_length_ < to_read)
+                        to_read = remaining_length_;
+                    adaptor_.socket().async_read_some(
+                        asio::buffer(buffer_, static_cast<std::size_t>(to_read)),
+                        [this](const error_code &ec, std::size_t bytes_transferred)
                         {
-                            close_connection_ = true;
-                            adaptor_.close();
-                            if (error_handler_)
-                                error_handler_(*this, "Message length exceeds maximum payload.");
-                            check_destroy(MessageTooBig);
-                        }
-                        else if (has_mask_)
-                        {
-                            asio::async_read(
-                              adaptor_.socket(), asio::buffer((char*)&mask_, 4),
-                              [this](const error_code& ec, std::size_t
-#ifdef CROW_ENABLE_DEBUG
-                                                                   bytes_transferred
-#endif
-                              ) {
-                                  is_reading = false;
-#ifdef CROW_ENABLE_DEBUG
-                                  if (!ec && bytes_transferred != 4)
-                                  {
-                                      throw std::runtime_error("WebSocket:Mask:async_read fail:asio bug?");
-                                  }
-#endif
+                            is_reading = false;
 
-                                  if (!ec)
-                                  {
-                                      state_ = WebSocketReadState::Payload;
-                                      do_read();
-                                  }
-                                  else
-                                  {
-                                      close_connection_ = true;
-                                      if (error_handler_)
-                                          error_handler_(*this, ec.message());
-                                      adaptor_.shutdown_readwrite();
-                                      adaptor_.close();
-                                      check_destroy();
-                                  }
-                              });
-                        }
-                        else
-                        {
-                            state_ = WebSocketReadState::Payload;
-                            do_read();
-                        }
-                        break;
-                    case WebSocketReadState::Payload:
-                    {
-                        auto to_read = static_cast<std::uint64_t>(buffer_.size());
-                        if (remaining_length_ < to_read)
-                            to_read = remaining_length_;
-                        adaptor_.socket().async_read_some(
-                          asio::buffer(buffer_, static_cast<std::size_t>(to_read)),
-                          [this](const error_code& ec, std::size_t bytes_transferred) {
-                              is_reading = false;
-
-                              if (!ec)
-                              {
-                                  fragment_.insert(fragment_.end(), buffer_.begin(), buffer_.begin() + bytes_transferred);
-                                  remaining_length_ -= bytes_transferred;
-                                  if (remaining_length_ == 0)
-                                  {
-                                      if (handle_fragment())
-                                      {
-                                          state_ = WebSocketReadState::MiniHeader;
-                                          do_read();
-                                      }
-                                  }
-                                  else
-                                      do_read();
-                              }
-                              else
-                              {
-                                  close_connection_ = true;
-                                  if (error_handler_)
-                                      error_handler_(*this, ec.message());
-                                  adaptor_.shutdown_readwrite();
-                                  adaptor_.close();
-                                  check_destroy();
-                              }
-                          });
-                    }
-                    break;
+                            if (!ec)
+                            {
+                                fragment_.insert(fragment_.end(), buffer_.begin(), buffer_.begin() + bytes_transferred);
+                                remaining_length_ -= bytes_transferred;
+                                if (remaining_length_ == 0)
+                                {
+                                    if (handle_fragment())
+                                    {
+                                        state_ = WebSocketReadState::MiniHeader;
+                                        do_read();
+                                    }
+                                }
+                                else
+                                    do_read();
+                            }
+                            else
+                            {
+                                close_connection_ = true;
+                                if (error_handler_)
+                                    error_handler_(*this, ec.message());
+                                adaptor_.shutdown_readwrite();
+                                adaptor_.close();
+                                check_destroy();
+                            }
+                        });
+                }
+                break;
                 }
             }
 
@@ -8358,94 +8370,95 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 {
                     for (decltype(fragment_.length()) i = 0; i < fragment_.length(); i++)
                     {
-                        fragment_[i] ^= ((char*)&mask_)[i % 4];
+                        fragment_[i] ^= ((char *)&mask_)[i % 4];
                     }
                 }
                 switch (opcode())
                 {
-                    case 0: // Continuation
+                case 0: // Continuation
+                {
+                    message_ += fragment_;
+                    if (is_FIN())
                     {
-                        message_ += fragment_;
-                        if (is_FIN())
-                        {
-                            if (message_handler_)
-                                message_handler_(*this, message_, is_binary_);
-                            message_.clear();
-                        }
+                        if (message_handler_)
+                            message_handler_(*this, message_, is_binary_);
+                        message_.clear();
                     }
-                    break;
-                    case 1: // Text
+                }
+                break;
+                case 1: // Text
+                {
+                    is_binary_ = false;
+                    message_ += fragment_;
+                    if (is_FIN())
                     {
-                        is_binary_ = false;
-                        message_ += fragment_;
-                        if (is_FIN())
-                        {
-                            if (message_handler_)
-                                message_handler_(*this, message_, is_binary_);
-                            message_.clear();
-                        }
+                        if (message_handler_)
+                            message_handler_(*this, message_, is_binary_);
+                        message_.clear();
                     }
-                    break;
-                    case 2: // Binary
+                }
+                break;
+                case 2: // Binary
+                {
+                    is_binary_ = true;
+                    message_ += fragment_;
+                    if (is_FIN())
                     {
-                        is_binary_ = true;
-                        message_ += fragment_;
-                        if (is_FIN())
-                        {
-                            if (message_handler_)
-                                message_handler_(*this, message_, is_binary_);
-                            message_.clear();
-                        }
+                        if (message_handler_)
+                            message_handler_(*this, message_, is_binary_);
+                        message_.clear();
                     }
-                    break;
-                    case 0x8: // Close
-                    {
-                        has_recv_close_ = true;
+                }
+                break;
+                case 0x8: // Close
+                {
+                    has_recv_close_ = true;
 
-
-                        uint16_t status_code = NoStatusCodePresent;
-                        std::string::size_type message_start = 2;
-                        if (fragment_.size() >= 2)
-                        {
-                            status_code = ntohs(((uint16_t*)fragment_.data())[0]);
-                        } else {
-                            // no message will crash substr
-                            message_start = 0;
-                        }
-
-                        if (!has_sent_close_)
-                        {
-                            close(fragment_.substr(message_start), status_code);
-                        }
-                        else
-                        {
-
-                            close_connection_ = true;
-                            if (!is_close_handler_called_)
-                            {
-                                if (close_handler_)
-                                    close_handler_(*this, fragment_.substr(message_start), status_code);
-                                is_close_handler_called_ = true;
-                            }
-                            adaptor_.shutdown_readwrite();
-                            adaptor_.close();
-
-                            // Close handler must have been called at this point so code does not matter
-                            check_destroy();
-                            return false;
-                        }
-                    }
-                    break;
-                    case 0x9: // Ping
+                    uint16_t status_code = NoStatusCodePresent;
+                    std::string::size_type message_start = 2;
+                    if (fragment_.size() >= 2)
                     {
-                        send_pong(fragment_);
+                        status_code = ntohs(((uint16_t *)fragment_.data())[0]);
                     }
-                    break;
-                    case 0xA: // Pong
+                    else
                     {
-                        pong_received_ = true;
+                        // no message will crash substr
+                        message_start = 0;
                     }
-                    break;
+
+                    if (!has_sent_close_)
+                    {
+                        close(fragment_.substr(message_start), status_code);
+                    }
+                    else
+                    {
+
+                        close_connection_ = true;
+                        if (!is_close_handler_called_)
+                        {
+                            if (close_handler_)
+                                close_handler_(*this, fragment_.substr(message_start), status_code);
+                            is_close_handler_called_ = true;
+                        }
+                        adaptor_.shutdown_readwrite();
+                        adaptor_.close();
+
+                        // Close handler must have been called at this point so code does not matter
+                        check_destroy();
+                        return false;
+                    }
+                }
+                break;
+                case 0x9: // Ping
+                {
+                    send_pong(fragment_);
+                }
+                break;
+                case 0xA: // Pong
+                {
+                    pong_received_ = true;
+                }
+                break;
                 }
 
                 fragment_.clear();
@@ -8463,32 +8476,36 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     sending_buffers_.swap(write_buffers_);
                     std::vector<asio::const_buffer> buffers;
                     buffers.reserve(sending_buffers_.size());
-                    for (auto& s : sending_buffers_)
+                    for (auto &s : sending_buffers_)
                     {
                         buffers.emplace_back(asio::buffer(s));
                     }
                     auto watch = std::weak_ptr<void>{anchor_};
                     asio::async_write(
-                      adaptor_.socket(), buffers,
-                      [&, watch](const error_code& ec, std::size_t /*bytes_transferred*/) {
-                          if (!ec && !close_connection_)
-                          {
-                              sending_buffers_.clear();
-                              if (!write_buffers_.empty())
-                                  do_write();
-                              if (has_sent_close_)
-                                  close_connection_ = true;
-                          }
-                          else
-                          {
-                              auto anchor = watch.lock();
-                              if (anchor == nullptr) { return; }
+                        adaptor_.socket(), buffers,
+                        [&, watch](const error_code &ec, std::size_t /*bytes_transferred*/)
+                        {
+                            if (!ec && !close_connection_)
+                            {
+                                sending_buffers_.clear();
+                                if (!write_buffers_.empty())
+                                    do_write();
+                                if (has_sent_close_)
+                                    close_connection_ = true;
+                            }
+                            else
+                            {
+                                auto anchor = watch.lock();
+                                if (anchor == nullptr)
+                                {
+                                    return;
+                                }
 
-                              sending_buffers_.clear();
-                              close_connection_ = true;
-                              check_destroy();
-                          }
-                      });
+                                sending_buffers_.clear();
+                                close_connection_ = true;
+                                check_destroy();
+                            }
+                        });
                 }
             }
 
@@ -8505,11 +8522,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     delete this;
             }
 
-
             struct SendMessageType
             {
                 std::string payload;
-                Connection* self;
+                Connection *self;
                 int opcode;
 
                 void operator()()
@@ -8518,7 +8534,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             };
 
-            void send_data_impl(SendMessageType* s)
+            void send_data_impl(SendMessageType *s)
             {
                 auto header = build_header(s->opcode, s->payload.size());
                 write_buffers_.emplace_back(std::move(header));
@@ -8526,19 +8542,19 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 do_write();
             }
 
-            void send_data(int opcode, std::string&& msg)
+            void send_data(int opcode, std::string &&msg)
             {
                 SendMessageType event_arg{
-                  std::move(msg),
-                  this,
-                  opcode};
+                    std::move(msg),
+                    this,
+                    opcode};
 
                 post(std::move(event_arg));
             }
 
         private:
             Adaptor adaptor_;
-            Handler* handler_;
+            Handler *handler_;
 
             std::vector<std::string> sending_buffers_;
             std::vector<std::string> write_buffers_;
@@ -8565,18 +8581,17 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
             std::shared_ptr<void> anchor_ = std::make_shared<int>(); // Value is just for placeholding
 
-            std::function<void(crow::websocket::connection&)> open_handler_;
-            std::function<void(crow::websocket::connection&, const std::string&, bool)> message_handler_;
-            std::function<void(crow::websocket::connection&, const std::string&, uint16_t status_code)> close_handler_;
-            std::function<void(crow::websocket::connection&, const std::string&)> error_handler_;
-            std::function<bool(const crow::request&, void**)> accept_handler_;
+            std::function<void(crow::websocket::connection &)> open_handler_;
+            std::function<void(crow::websocket::connection &, const std::string &, bool)> message_handler_;
+            std::function<void(crow::websocket::connection &, const std::string &, uint16_t status_code)> close_handler_;
+            std::function<void(crow::websocket::connection &, const std::string &)> error_handler_;
+            std::function<bool(const crow::request &, void **)> accept_handler_;
         };
     } // namespace websocket
 } // namespace crow
 
-
-//#define CROW_JSON_NO_ERROR_CHECK
-//#define CROW_JSON_USE_MAP
+// #define CROW_JSON_NO_ERROR_CHECK
+// #define CROW_JSON_USE_MAP
 
 #include <string>
 #ifdef CROW_JSON_USE_MAP
@@ -8591,10 +8606,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #include <cmath>
 #include <cfloat>
 
-
 using std::isinf;
 using std::isnan;
-
 
 namespace crow // NOTE: Already documented in "crow/app.h"
 {
@@ -8613,34 +8626,48 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return 'a' + c - 10;
         }
 
-        inline void escape(const std::string& str, std::string& ret)
+        inline void escape(const std::string &str, std::string &ret)
         {
             ret.reserve(ret.size() + str.size() + str.size() / 4);
             for (auto c : str)
             {
                 switch (c)
                 {
-                    case '"': ret += "\\\""; break;
-                    case '\\': ret += "\\\\"; break;
-                    case '\n': ret += "\\n"; break;
-                    case '\b': ret += "\\b"; break;
-                    case '\f': ret += "\\f"; break;
-                    case '\r': ret += "\\r"; break;
-                    case '\t': ret += "\\t"; break;
-                    default:
-                        if (c >= 0 && c < 0x20)
-                        {
-                            ret += "\\u00";
-                            ret += to_hex(c / 16);
-                            ret += to_hex(c % 16);
-                        }
-                        else
-                            ret += c;
-                        break;
+                case '"':
+                    ret += "\\\"";
+                    break;
+                case '\\':
+                    ret += "\\\\";
+                    break;
+                case '\n':
+                    ret += "\\n";
+                    break;
+                case '\b':
+                    ret += "\\b";
+                    break;
+                case '\f':
+                    ret += "\\f";
+                    break;
+                case '\r':
+                    ret += "\\r";
+                    break;
+                case '\t':
+                    ret += "\\t";
+                    break;
+                default:
+                    if (c >= 0 && c < 0x20)
+                    {
+                        ret += "\\u00";
+                        ret += to_hex(c / 16);
+                        ret += to_hex(c % 16);
+                    }
+                    else
+                        ret += c;
+                    break;
                 }
             }
         }
-        inline std::string escape(const std::string& str)
+        inline std::string escape(const std::string &str)
         {
             std::string ret;
             escape(str, ret);
@@ -8659,18 +8686,26 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             Function
         };
 
-        inline const char* get_type_str(type t)
+        inline const char *get_type_str(type t)
         {
             switch (t)
             {
-                case type::Number: return "Number";
-                case type::False: return "False";
-                case type::True: return "True";
-                case type::List: return "List";
-                case type::String: return "String";
-                case type::Object: return "Object";
-                case type::Function: return "Function";
-                default: return "Unknown";
+            case type::Number:
+                return "Number";
+            case type::False:
+                return "False";
+            case type::True:
+                return "True";
+            case type::List:
+                return "List";
+            case type::String:
+                return "String";
+            case type::Object:
+                return "Object";
+            case type::Function:
+                return "Function";
+            default:
+                return "Unknown";
             }
         }
 
@@ -8684,33 +8719,32 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         };
 
         class rvalue;
-        rvalue load(const char* data, size_t size);
+        rvalue load(const char *data, size_t size);
 
         namespace detail
         {
             /// A read string implementation with comparison functionality.
             struct r_string
             {
-                r_string(){};
-                r_string(char* s, char* e):
-                  s_(s), e_(e){};
+                r_string() {};
+                r_string(char *s, char *e) : s_(s), e_(e) {};
                 ~r_string()
                 {
                     if (owned_)
                         delete[] s_;
                 }
 
-                r_string(const r_string& r)
+                r_string(const r_string &r)
                 {
                     *this = r;
                 }
 
-                r_string(r_string&& r)
+                r_string(r_string &&r)
                 {
                     *this = r;
                 }
 
-                r_string& operator=(r_string&& r)
+                r_string &operator=(r_string &&r)
                 {
                     s_ = r.s_;
                     e_ = r.e_;
@@ -8720,7 +8754,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     return *this;
                 }
 
-                r_string& operator=(const r_string& r)
+                r_string &operator=(const r_string &r)
                 {
                     s_ = r.s_;
                     e_ = r.e_;
@@ -8733,38 +8767,37 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     return std::string(s_, e_);
                 }
 
-
-                const char* begin() const { return s_; }
-                const char* end() const { return e_; }
+                const char *begin() const { return s_; }
+                const char *end() const { return e_; }
                 size_t size() const { return end() - begin(); }
 
-                using iterator = const char*;
-                using const_iterator = const char*;
+                using iterator = const char *;
+                using const_iterator = const char *;
 
-                char* s_;         ///< Start.
-                mutable char* e_; ///< End.
+                char *s_;         ///< Start.
+                mutable char *e_; ///< End.
                 uint8_t owned_{0};
-                friend std::ostream& operator<<(std::ostream& os, const r_string& s)
+                friend std::ostream &operator<<(std::ostream &os, const r_string &s)
                 {
                     os << static_cast<std::string>(s);
                     return os;
                 }
 
             private:
-                void force(char* s, uint32_t length)
+                void force(char *s, uint32_t length)
                 {
                     s_ = s;
                     e_ = s_ + length;
                     owned_ = 1;
                 }
-                friend rvalue crow::json::load(const char* data, size_t size);
+                friend rvalue crow::json::load(const char *data, size_t size);
 
-                friend bool operator==(const r_string& l, const r_string& r);
-                friend bool operator==(const std::string& l, const r_string& r);
-                friend bool operator==(const r_string& l, const std::string& r);
+                friend bool operator==(const r_string &l, const r_string &r);
+                friend bool operator==(const std::string &l, const r_string &r);
+                friend bool operator==(const r_string &l, const std::string &r);
 
-                template<typename T, typename U>
-                inline static bool equals(const T& l, const U& r)
+                template <typename T, typename U>
+                inline static bool equals(const T &l, const U &r)
                 {
                     if (l.size() != r.size())
                         return false;
@@ -8779,62 +8812,62 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             };
 
-            inline bool operator<(const r_string& l, const r_string& r)
+            inline bool operator<(const r_string &l, const r_string &r)
             {
                 return std::lexicographical_compare(l.begin(), l.end(), r.begin(), r.end());
             }
 
-            inline bool operator<(const r_string& l, const std::string& r)
+            inline bool operator<(const r_string &l, const std::string &r)
             {
                 return std::lexicographical_compare(l.begin(), l.end(), r.begin(), r.end());
             }
 
-            inline bool operator<(const std::string& l, const r_string& r)
+            inline bool operator<(const std::string &l, const r_string &r)
             {
                 return std::lexicographical_compare(l.begin(), l.end(), r.begin(), r.end());
             }
 
-            inline bool operator>(const r_string& l, const r_string& r)
+            inline bool operator>(const r_string &l, const r_string &r)
             {
                 return std::lexicographical_compare(l.begin(), l.end(), r.begin(), r.end());
             }
 
-            inline bool operator>(const r_string& l, const std::string& r)
+            inline bool operator>(const r_string &l, const std::string &r)
             {
                 return std::lexicographical_compare(l.begin(), l.end(), r.begin(), r.end());
             }
 
-            inline bool operator>(const std::string& l, const r_string& r)
+            inline bool operator>(const std::string &l, const r_string &r)
             {
                 return std::lexicographical_compare(l.begin(), l.end(), r.begin(), r.end());
             }
 
-            inline bool operator==(const r_string& l, const r_string& r)
+            inline bool operator==(const r_string &l, const r_string &r)
             {
                 return r_string::equals(l, r);
             }
 
-            inline bool operator==(const r_string& l, const std::string& r)
+            inline bool operator==(const r_string &l, const std::string &r)
             {
                 return r_string::equals(l, r);
             }
 
-            inline bool operator==(const std::string& l, const r_string& r)
+            inline bool operator==(const std::string &l, const r_string &r)
             {
                 return r_string::equals(l, r);
             }
 
-            inline bool operator!=(const r_string& l, const r_string& r)
+            inline bool operator!=(const r_string &l, const r_string &r)
             {
                 return !(l == r);
             }
 
-            inline bool operator!=(const r_string& l, const std::string& r)
+            inline bool operator!=(const r_string &l, const std::string &r)
             {
                 return !(l == r);
             }
 
-            inline bool operator!=(const std::string& l, const r_string& r)
+            inline bool operator!=(const std::string &l, const r_string &r)
             {
                 return !(l == r);
             }
@@ -8851,32 +8884,28 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             static const int error_bit = 4;
 
         public:
-            rvalue() noexcept:
-              option_{error_bit}
+            rvalue() noexcept : option_{error_bit}
             {
             }
-            rvalue(type t) noexcept:
-              lsize_{}, lremain_{}, t_{t}
+            rvalue(type t) noexcept : lsize_{}, lremain_{}, t_{t}
             {
             }
-            rvalue(type t, char* s, char* e) noexcept:
-              start_{s}, end_{e}, t_{t}
+            rvalue(type t, char *s, char *e) noexcept : start_{s}, end_{e}, t_{t}
             {
                 determine_num_type();
             }
 
-            rvalue(const rvalue& r):
-              start_(r.start_), end_(r.end_), key_(r.key_), t_(r.t_), nt_(r.nt_), option_(r.option_)
+            rvalue(const rvalue &r) : start_(r.start_), end_(r.end_), key_(r.key_), t_(r.t_), nt_(r.nt_), option_(r.option_)
             {
                 copy_l(r);
             }
 
-            rvalue(rvalue&& r) noexcept
+            rvalue(rvalue &&r) noexcept
             {
                 *this = std::move(r);
             }
 
-            rvalue& operator=(const rvalue& r)
+            rvalue &operator=(const rvalue &r)
             {
                 start_ = r.start_;
                 end_ = r.end_;
@@ -8887,7 +8916,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 copy_l(r);
                 return *this;
             }
-            rvalue& operator=(rvalue&& r) noexcept
+            rvalue &operator=(rvalue &&r) noexcept
             {
                 start_ = r.start_;
                 end_ = r.end_;
@@ -8930,16 +8959,16 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #endif
                 switch (t())
                 {
-                    case type::String:
-                        return std::string(s());
-                    case type::Null:
-                        return std::string("null");
-                    case type::True:
-                        return std::string("true");
-                    case type::False:
-                        return std::string("false");
-                    default:
-                        return std::string(start_, end_ - start_);
+                case type::String:
+                    return std::string(s());
+                case type::Null:
+                    return std::string("null");
+                case type::True:
+                    return std::string("true");
+                case type::False:
+                    return std::string("false");
+                default:
+                    return std::string(start_, end_ - start_);
                 }
             }
 
@@ -8973,12 +9002,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #ifndef CROW_JSON_NO_ERROR_CHECK
                 switch (t())
                 {
-                    case type::Number:
-                    case type::String:
-                        return utility::lexical_cast<int64_t>(start_, end_ - start_);
-                    default:
-                        const std::string msg = "expected number, got: " + std::string(get_type_str(t()));
-                        throw std::runtime_error(msg);
+                case type::Number:
+                case type::String:
+                    return utility::lexical_cast<int64_t>(start_, end_ - start_);
+                default:
+                    const std::string msg = "expected number, got: " + std::string(get_type_str(t()));
+                    throw std::runtime_error(msg);
                 }
 #endif
                 return utility::lexical_cast<int64_t>(start_, end_ - start_);
@@ -8990,11 +9019,11 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #ifndef CROW_JSON_NO_ERROR_CHECK
                 switch (t())
                 {
-                    case type::Number:
-                    case type::String:
-                        return utility::lexical_cast<uint64_t>(start_, end_ - start_);
-                    default:
-                        throw std::runtime_error(std::string("expected number, got: ") + get_type_str(t()));
+                case type::Number:
+                case type::String:
+                    return utility::lexical_cast<uint64_t>(start_, end_ - start_);
+                default:
+                    throw std::runtime_error(std::string("expected number, got: ") + get_type_str(t()));
                 }
 #endif
                 return utility::lexical_cast<uint64_t>(start_, end_ - start_);
@@ -9052,54 +9081,71 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             {
                 if (*(start_ - 1))
                 {
-                    char* head = start_;
-                    char* tail = start_;
+                    char *head = start_;
+                    char *tail = start_;
                     while (head != end_)
                     {
                         if (*head == '\\')
                         {
                             switch (*++head)
                             {
-                                case '"': *tail++ = '"'; break;
-                                case '\\': *tail++ = '\\'; break;
-                                case '/': *tail++ = '/'; break;
-                                case 'b': *tail++ = '\b'; break;
-                                case 'f': *tail++ = '\f'; break;
-                                case 'n': *tail++ = '\n'; break;
-                                case 'r': *tail++ = '\r'; break;
-                                case 't': *tail++ = '\t'; break;
-                                case 'u':
-                                {
-                                    auto from_hex = [](char c) {
-                                        if (c >= 'a')
-                                            return c - 'a' + 10;
-                                        if (c >= 'A')
-                                            return c - 'A' + 10;
-                                        return c - '0';
-                                    };
-                                    unsigned int code =
-                                      (from_hex(head[1]) << 12) +
-                                      (from_hex(head[2]) << 8) +
-                                      (from_hex(head[3]) << 4) +
-                                      from_hex(head[4]);
-                                    if (code >= 0x800)
-                                    {
-                                        *tail++ = 0xE0 | (code >> 12);
-                                        *tail++ = 0x80 | ((code >> 6) & 0x3F);
-                                        *tail++ = 0x80 | (code & 0x3F);
-                                    }
-                                    else if (code >= 0x80)
-                                    {
-                                        *tail++ = 0xC0 | (code >> 6);
-                                        *tail++ = 0x80 | (code & 0x3F);
-                                    }
-                                    else
-                                    {
-                                        *tail++ = code;
-                                    }
-                                    head += 4;
-                                }
+                            case '"':
+                                *tail++ = '"';
                                 break;
+                            case '\\':
+                                *tail++ = '\\';
+                                break;
+                            case '/':
+                                *tail++ = '/';
+                                break;
+                            case 'b':
+                                *tail++ = '\b';
+                                break;
+                            case 'f':
+                                *tail++ = '\f';
+                                break;
+                            case 'n':
+                                *tail++ = '\n';
+                                break;
+                            case 'r':
+                                *tail++ = '\r';
+                                break;
+                            case 't':
+                                *tail++ = '\t';
+                                break;
+                            case 'u':
+                            {
+                                auto from_hex = [](char c)
+                                {
+                                    if (c >= 'a')
+                                        return c - 'a' + 10;
+                                    if (c >= 'A')
+                                        return c - 'A' + 10;
+                                    return c - '0';
+                                };
+                                unsigned int code =
+                                    (from_hex(head[1]) << 12) +
+                                    (from_hex(head[2]) << 8) +
+                                    (from_hex(head[3]) << 4) +
+                                    from_hex(head[4]);
+                                if (code >= 0x800)
+                                {
+                                    *tail++ = 0xE0 | (code >> 12);
+                                    *tail++ = 0x80 | ((code >> 6) & 0x3F);
+                                    *tail++ = 0x80 | (code & 0x3F);
+                                }
+                                else if (code >= 0x80)
+                                {
+                                    *tail++ = 0xC0 | (code >> 6);
+                                    *tail++ = 0x80 | (code & 0x3F);
+                                }
+                                else
+                                {
+                                    *tail++ = code;
+                                }
+                                head += 4;
+                            }
+                            break;
                             }
                         }
                         else
@@ -9113,24 +9159,24 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
             /// Check if the json object has the passed string as a key.
-            bool has(const char* str) const
+            bool has(const char *str) const
             {
                 return has(std::string(str));
             }
 
-            bool has(const std::string& str) const
+            bool has(const std::string &str) const
             {
                 struct Pred
                 {
-                    bool operator()(const rvalue& l, const rvalue& r) const
+                    bool operator()(const rvalue &l, const rvalue &r) const
                     {
                         return l.key_ < r.key_;
                     };
-                    bool operator()(const rvalue& l, const std::string& r) const
+                    bool operator()(const rvalue &l, const std::string &r) const
                     {
                         return l.key_ < r;
                     };
-                    bool operator()(const std::string& l, const rvalue& r) const
+                    bool operator()(const std::string &l, const rvalue &r) const
                     {
                         return l < r.key_;
                     };
@@ -9144,12 +9190,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return it != end() && it->key_ == str;
             }
 
-            int count(const std::string& str) const
+            int count(const std::string &str) const
             {
                 return has(str) ? 1 : 0;
             }
 
-            rvalue* begin() const
+            rvalue *begin() const
             {
 #ifndef CROW_JSON_NO_ERROR_CHECK
                 if (t() != type::Object && t() != type::List)
@@ -9157,7 +9203,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #endif
                 return l_.get();
             }
-            rvalue* end() const
+            rvalue *end() const
             {
 #ifndef CROW_JSON_NO_ERROR_CHECK
                 if (t() != type::Object && t() != type::List)
@@ -9166,7 +9212,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return l_.get() + lsize_;
             }
 
-            const detail::r_string& key() const
+            const detail::r_string &key() const
             {
                 return key_;
             }
@@ -9182,7 +9228,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return lsize_;
             }
 
-            const rvalue& operator[](int index) const
+            const rvalue &operator[](int index) const
             {
 #ifndef CROW_JSON_NO_ERROR_CHECK
                 if (t() != type::List)
@@ -9193,7 +9239,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return l_[index];
             }
 
-            const rvalue& operator[](size_t index) const
+            const rvalue &operator[](size_t index) const
             {
 #ifndef CROW_JSON_NO_ERROR_CHECK
                 if (t() != type::List)
@@ -9204,12 +9250,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return l_[index];
             }
 
-            const rvalue& operator[](const char* str) const
+            const rvalue &operator[](const char *str) const
             {
                 return this->operator[](std::string(str));
             }
 
-            const rvalue& operator[](const std::string& str) const
+            const rvalue &operator[](const std::string &str) const
             {
 #ifndef CROW_JSON_NO_ERROR_CHECK
                 if (t() != type::Object)
@@ -9217,15 +9263,15 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #endif
                 struct Pred
                 {
-                    bool operator()(const rvalue& l, const rvalue& r) const
+                    bool operator()(const rvalue &l, const rvalue &r) const
                     {
                         return l.key_ < r.key_;
                     };
-                    bool operator()(const rvalue& l, const std::string& r) const
+                    bool operator()(const rvalue &l, const std::string &r) const
                     {
                         return l.key_ < r;
                     };
-                    bool operator()(const std::string& l, const rvalue& r) const
+                    bool operator()(const std::string &l, const rvalue &r) const
                     {
                         return l < r.key_;
                     };
@@ -9280,7 +9326,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             {
                 option_ |= cached_bit;
             }
-            void copy_l(const rvalue& r)
+            void copy_l(const rvalue &r)
             {
                 if (r.t() != type::Object && r.t() != type::List)
                     return;
@@ -9290,7 +9336,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 std::copy(r.begin(), r.end(), begin());
             }
 
-            void emplace_back(rvalue&& v)
+            void emplace_back(rvalue &&v)
             {
                 if (!lremain_)
                 {
@@ -9299,9 +9345,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         new_size = lsize_ + 60000;
                     if (new_size < 4)
                         new_size = 4;
-                    rvalue* p = new rvalue[new_size];
-                    rvalue* p2 = p;
-                    for (auto& x : *this)
+                    rvalue *p = new rvalue[new_size];
+                    rvalue *p2 = p;
+                    for (auto &x : *this)
                         *p2++ = std::move(x);
                     l_.reset(p);
                     lremain_ = new_size - lsize_;
@@ -9331,8 +9377,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     nt_ = num_type::Unsigned_integer;
             }
 
-            mutable char* start_;
-            mutable char* end_;
+            mutable char *start_;
+            mutable char *end_;
             detail::r_string key_;
             std::unique_ptr<rvalue[]> l_;
             uint32_t lsize_;
@@ -9341,59 +9387,78 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             num_type nt_{num_type::Null};
             mutable uint8_t option_{0};
 
-            friend rvalue load_nocopy_internal(char* data, size_t size);
-            friend rvalue load(const char* data, size_t size);
-            friend std::ostream& operator<<(std::ostream& os, const rvalue& r)
+            friend rvalue load_nocopy_internal(char *data, size_t size);
+            friend rvalue load(const char *data, size_t size);
+            friend std::ostream &operator<<(std::ostream &os, const rvalue &r)
             {
                 switch (r.t_)
                 {
 
-                    case type::Null: os << "null"; break;
-                    case type::False: os << "false"; break;
-                    case type::True: os << "true"; break;
-                    case type::Number:
-                    {
-                        switch (r.nt())
-                        {
-                            case num_type::Floating_point: os << r.d(); break;
-                            case num_type::Double_precision_floating_point: os << r.d(); break;
-                            case num_type::Signed_integer: os << r.i(); break;
-                            case num_type::Unsigned_integer: os << r.u(); break;
-                            case num_type::Null: throw std::runtime_error("Number with num_type Null");
-                        }
-                    }
+                case type::Null:
+                    os << "null";
                     break;
-                    case type::String: os << '"' << r.s() << '"'; break;
-                    case type::List:
-                    {
-                        os << '[';
-                        bool first = true;
-                        for (auto& x : r)
-                        {
-                            if (!first)
-                                os << ',';
-                            first = false;
-                            os << x;
-                        }
-                        os << ']';
-                    }
+                case type::False:
+                    os << "false";
                     break;
-                    case type::Object:
-                    {
-                        os << '{';
-                        bool first = true;
-                        for (auto& x : r)
-                        {
-                            if (!first)
-                                os << ',';
-                            os << '"' << escape(x.key_) << "\":";
-                            first = false;
-                            os << x;
-                        }
-                        os << '}';
-                    }
+                case type::True:
+                    os << "true";
                     break;
-                    case type::Function: os << "custom function"; break;
+                case type::Number:
+                {
+                    switch (r.nt())
+                    {
+                    case num_type::Floating_point:
+                        os << r.d();
+                        break;
+                    case num_type::Double_precision_floating_point:
+                        os << r.d();
+                        break;
+                    case num_type::Signed_integer:
+                        os << r.i();
+                        break;
+                    case num_type::Unsigned_integer:
+                        os << r.u();
+                        break;
+                    case num_type::Null:
+                        throw std::runtime_error("Number with num_type Null");
+                    }
+                }
+                break;
+                case type::String:
+                    os << '"' << r.s() << '"';
+                    break;
+                case type::List:
+                {
+                    os << '[';
+                    bool first = true;
+                    for (auto &x : r)
+                    {
+                        if (!first)
+                            os << ',';
+                        first = false;
+                        os << x;
+                    }
+                    os << ']';
+                }
+                break;
+                case type::Object:
+                {
+                    os << '{';
+                    bool first = true;
+                    for (auto &x : r)
+                    {
+                        if (!first)
+                            os << ',';
+                        os << '"' << escape(x.key_) << "\":";
+                        first = false;
+                        os << x;
+                    }
+                    os << '}';
+                }
+                break;
+                case type::Function:
+                    os << "custom function";
+                    break;
                 }
                 return os;
             }
@@ -9402,57 +9467,55 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
         }
 
-        inline bool operator==(const rvalue& l, const std::string& r)
+        inline bool operator==(const rvalue &l, const std::string &r)
         {
             return l.s() == r;
         }
 
-        inline bool operator==(const std::string& l, const rvalue& r)
+        inline bool operator==(const std::string &l, const rvalue &r)
         {
             return l == r.s();
         }
 
-        inline bool operator!=(const rvalue& l, const std::string& r)
+        inline bool operator!=(const rvalue &l, const std::string &r)
         {
             return l.s() != r;
         }
 
-        inline bool operator!=(const std::string& l, const rvalue& r)
+        inline bool operator!=(const std::string &l, const rvalue &r)
         {
             return l != r.s();
         }
 
-        inline bool operator==(const rvalue& l, double r)
+        inline bool operator==(const rvalue &l, double r)
         {
             return l.d() == r;
         }
 
-        inline bool operator==(double l, const rvalue& r)
+        inline bool operator==(double l, const rvalue &r)
         {
             return l == r.d();
         }
 
-        inline bool operator!=(const rvalue& l, double r)
+        inline bool operator!=(const rvalue &l, double r)
         {
             return l.d() != r;
         }
 
-        inline bool operator!=(double l, const rvalue& r)
+        inline bool operator!=(double l, const rvalue &r)
         {
             return l != r.d();
         }
 
-
-        inline rvalue load_nocopy_internal(char* data, size_t size)
+        inline rvalue load_nocopy_internal(char *data, size_t size)
         {
             // Defend against excessive recursion
             static constexpr unsigned max_depth = 10000;
 
-            //static const char* escaped = "\"\\/\b\f\n\r\t";
+            // static const char* escaped = "\"\\/\b\f\n\r\t";
             struct Parser
             {
-                Parser(char* data_, size_t /*size*/):
-                  data(data_)
+                Parser(char *data_, size_t /*size*/) : data(data_)
                 {
                 }
 
@@ -9474,7 +9537,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 {
                     if (CROW_UNLIKELY(!consume('"')))
                         return {};
-                    char* start = data;
+                    char *start = data;
                     uint8_t has_escaping = 0;
                     while (1)
                     {
@@ -9495,33 +9558,34 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                             data++;
                             switch (*data)
                             {
-                                case 'u':
+                            case 'u':
+                            {
+                                auto check = [](char c)
                                 {
-                                    auto check = [](char c) {
-                                        return ('0' <= c && c <= '9') ||
-                                               ('a' <= c && c <= 'f') ||
-                                               ('A' <= c && c <= 'F');
-                                    };
-                                    if (!(check(*(data + 1)) &&
-                                          check(*(data + 2)) &&
-                                          check(*(data + 3)) &&
-                                          check(*(data + 4))))
-                                        return {};
-                                }
-                                    data += 5;
-                                    break;
-                                case '"':
-                                case '\\':
-                                case '/':
-                                case 'b':
-                                case 'f':
-                                case 'n':
-                                case 'r':
-                                case 't':
-                                    data++;
-                                    break;
-                                default:
+                                    return ('0' <= c && c <= '9') ||
+                                           ('a' <= c && c <= 'f') ||
+                                           ('A' <= c && c <= 'F');
+                                };
+                                if (!(check(*(data + 1)) &&
+                                      check(*(data + 2)) &&
+                                      check(*(data + 3)) &&
+                                      check(*(data + 4))))
                                     return {};
+                            }
+                                data += 5;
+                                break;
+                            case '"':
+                            case '\\':
+                            case '/':
+                            case 'b':
+                            case 'f':
+                            case 'n':
+                            case 'r':
+                            case 't':
+                                data++;
+                                break;
+                            default:
+                                return {};
                             }
                         }
                         else
@@ -9572,7 +9636,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
                 rvalue decode_number()
                 {
-                    char* start = data;
+                    char *start = data;
 
                     enum NumberParsingState
                     {
@@ -9589,106 +9653,106 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     {
                         switch (*data)
                         {
-                            case '0':
-                                state = static_cast<NumberParsingState>("\2\2\7\3\4\6\6"[state]);
-                                /*if (state == NumberParsingState::Minus || state == NumberParsingState::AfterMinus)
-                                {
-                                    state = NumberParsingState::ZeroFirst;
-                                }
-                                else if (state == NumberParsingState::Digits ||
-                                    state == NumberParsingState::DigitsAfterE ||
-                                    state == NumberParsingState::DigitsAfterPoints)
-                                {
-                                    // ok; pass
-                                }
-                                else if (state == NumberParsingState::E)
-                                {
-                                    state = NumberParsingState::DigitsAfterE;
-                                }
-                                else
-                                    return {};*/
-                                break;
-                            case '1':
-                            case '2':
-                            case '3':
-                            case '4':
-                            case '5':
-                            case '6':
-                            case '7':
-                            case '8':
-                            case '9':
-                                state = static_cast<NumberParsingState>("\3\3\7\3\4\6\6"[state]);
-                                while (*(data + 1) >= '0' && *(data + 1) <= '9')
-                                    data++;
-                                /*if (state == NumberParsingState::Minus || state == NumberParsingState::AfterMinus)
-                                {
-                                    state = NumberParsingState::Digits;
-                                }
-                                else if (state == NumberParsingState::Digits ||
-                                    state == NumberParsingState::DigitsAfterE ||
-                                    state == NumberParsingState::DigitsAfterPoints)
-                                {
-                                    // ok; pass
-                                }
-                                else if (state == NumberParsingState::E)
-                                {
-                                    state = NumberParsingState::DigitsAfterE;
-                                }
-                                else
-                                    return {};*/
-                                break;
-                            case '.':
-                                state = static_cast<NumberParsingState>("\7\7\4\4\7\7\7"[state]);
-                                /*
-                                if (state == NumberParsingState::Digits || state == NumberParsingState::ZeroFirst)
-                                {
-                                    state = NumberParsingState::DigitsAfterPoints;
-                                }
-                                else
-                                    return {};
-                                */
-                                break;
-                            case '-':
-                                state = static_cast<NumberParsingState>("\1\7\7\7\7\6\7"[state]);
-                                /*if (state == NumberParsingState::Minus)
-                                {
-                                    state = NumberParsingState::AfterMinus;
-                                }
-                                else if (state == NumberParsingState::E)
-                                {
-                                    state = NumberParsingState::DigitsAfterE;
-                                }
-                                else
-                                    return {};*/
-                                break;
-                            case '+':
-                                state = static_cast<NumberParsingState>("\7\7\7\7\7\6\7"[state]);
-                                /*if (state == NumberParsingState::E)
-                                {
-                                    state = NumberParsingState::DigitsAfterE;
-                                }
-                                else
-                                    return {};*/
-                                break;
-                            case 'e':
-                            case 'E':
-                                state = static_cast<NumberParsingState>("\7\7\7\5\5\7\7"[state]);
-                                /*if (state == NumberParsingState::Digits ||
-                                    state == NumberParsingState::DigitsAfterPoints)
-                                {
-                                    state = NumberParsingState::E;
-                                }
-                                else
-                                    return {};*/
-                                break;
-                            default:
-                                if (CROW_LIKELY(state == NumberParsingState::ZeroFirst ||
-                                                state == NumberParsingState::Digits ||
-                                                state == NumberParsingState::DigitsAfterPoints ||
-                                                state == NumberParsingState::DigitsAfterE))
-                                    return {type::Number, start, data};
-                                else
-                                    return {};
+                        case '0':
+                            state = static_cast<NumberParsingState>("\2\2\7\3\4\6\6"[state]);
+                            /*if (state == NumberParsingState::Minus || state == NumberParsingState::AfterMinus)
+                            {
+                                state = NumberParsingState::ZeroFirst;
+                            }
+                            else if (state == NumberParsingState::Digits ||
+                                state == NumberParsingState::DigitsAfterE ||
+                                state == NumberParsingState::DigitsAfterPoints)
+                            {
+                                // ok; pass
+                            }
+                            else if (state == NumberParsingState::E)
+                            {
+                                state = NumberParsingState::DigitsAfterE;
+                            }
+                            else
+                                return {};*/
+                            break;
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                            state = static_cast<NumberParsingState>("\3\3\7\3\4\6\6"[state]);
+                            while (*(data + 1) >= '0' && *(data + 1) <= '9')
+                                data++;
+                            /*if (state == NumberParsingState::Minus || state == NumberParsingState::AfterMinus)
+                            {
+                                state = NumberParsingState::Digits;
+                            }
+                            else if (state == NumberParsingState::Digits ||
+                                state == NumberParsingState::DigitsAfterE ||
+                                state == NumberParsingState::DigitsAfterPoints)
+                            {
+                                // ok; pass
+                            }
+                            else if (state == NumberParsingState::E)
+                            {
+                                state = NumberParsingState::DigitsAfterE;
+                            }
+                            else
+                                return {};*/
+                            break;
+                        case '.':
+                            state = static_cast<NumberParsingState>("\7\7\4\4\7\7\7"[state]);
+                            /*
+                            if (state == NumberParsingState::Digits || state == NumberParsingState::ZeroFirst)
+                            {
+                                state = NumberParsingState::DigitsAfterPoints;
+                            }
+                            else
+                                return {};
+                            */
+                            break;
+                        case '-':
+                            state = static_cast<NumberParsingState>("\1\7\7\7\7\6\7"[state]);
+                            /*if (state == NumberParsingState::Minus)
+                            {
+                                state = NumberParsingState::AfterMinus;
+                            }
+                            else if (state == NumberParsingState::E)
+                            {
+                                state = NumberParsingState::DigitsAfterE;
+                            }
+                            else
+                                return {};*/
+                            break;
+                        case '+':
+                            state = static_cast<NumberParsingState>("\7\7\7\7\7\6\7"[state]);
+                            /*if (state == NumberParsingState::E)
+                            {
+                                state = NumberParsingState::DigitsAfterE;
+                            }
+                            else
+                                return {};*/
+                            break;
+                        case 'e':
+                        case 'E':
+                            state = static_cast<NumberParsingState>("\7\7\7\5\5\7\7"[state]);
+                            /*if (state == NumberParsingState::Digits ||
+                                state == NumberParsingState::DigitsAfterPoints)
+                            {
+                                state = NumberParsingState::E;
+                            }
+                            else
+                                return {};*/
+                            break;
+                        default:
+                            if (CROW_LIKELY(state == NumberParsingState::ZeroFirst ||
+                                            state == NumberParsingState::Digits ||
+                                            state == NumberParsingState::DigitsAfterPoints ||
+                                            state == NumberParsingState::DigitsAfterE))
+                                return {type::Number, start, data};
+                            else
+                                return {};
                         }
                         data++;
                     }
@@ -9696,57 +9760,56 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     return {};
                 }
 
-
                 rvalue decode_value(unsigned depth)
                 {
                     switch (*data)
                     {
-                        case '[':
-                            return decode_list(depth + 1);
-                        case '{':
-                            return decode_object(depth + 1);
-                        case '"':
-                            return decode_string();
-                        case 't':
-                            if ( //e-data >= 4 &&
-                              data[1] == 'r' &&
-                              data[2] == 'u' &&
-                              data[3] == 'e')
-                            {
-                                data += 4;
-                                return {type::True};
-                            }
-                            else
-                                return {};
-                        case 'f':
-                            if ( //e-data >= 5 &&
-                              data[1] == 'a' &&
-                              data[2] == 'l' &&
-                              data[3] == 's' &&
-                              data[4] == 'e')
-                            {
-                                data += 5;
-                                return {type::False};
-                            }
-                            else
-                                return {};
-                        case 'n':
-                            if ( //e-data >= 4 &&
-                              data[1] == 'u' &&
-                              data[2] == 'l' &&
-                              data[3] == 'l')
-                            {
-                                data += 4;
-                                return {type::Null};
-                            }
-                            else
-                                return {};
-                        //case '1': case '2': case '3':
-                        //case '4': case '5': case '6':
-                        //case '7': case '8': case '9':
-                        //case '0': case '-':
-                        default:
-                            return decode_number();
+                    case '[':
+                        return decode_list(depth + 1);
+                    case '{':
+                        return decode_object(depth + 1);
+                    case '"':
+                        return decode_string();
+                    case 't':
+                        if ( // e-data >= 4 &&
+                            data[1] == 'r' &&
+                            data[2] == 'u' &&
+                            data[3] == 'e')
+                        {
+                            data += 4;
+                            return {type::True};
+                        }
+                        else
+                            return {};
+                    case 'f':
+                        if ( // e-data >= 5 &&
+                            data[1] == 'a' &&
+                            data[2] == 'l' &&
+                            data[3] == 's' &&
+                            data[4] == 'e')
+                        {
+                            data += 5;
+                            return {type::False};
+                        }
+                        else
+                            return {};
+                    case 'n':
+                        if ( // e-data >= 4 &&
+                            data[1] == 'u' &&
+                            data[2] == 'l' &&
+                            data[3] == 'l')
+                        {
+                            data += 4;
+                            return {type::Null};
+                        }
+                        else
+                            return {};
+                    // case '1': case '2': case '3':
+                    // case '4': case '5': case '6':
+                    // case '7': case '8': case '9':
+                    // case '0': case '-':
+                    default:
+                        return decode_number();
                     }
                     return {};
                 }
@@ -9824,13 +9887,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     return ret;
                 }
 
-                char* data;
+                char *data;
             };
             return Parser(data, size).parse();
         }
-        inline rvalue load(const char* data, size_t size)
+        inline rvalue load(const char *data, size_t size)
         {
-            char* s = new char[size + 1];
+            char *s = new char[size + 1];
             memcpy(s, data, size);
             s[size] = 0;
             auto ret = load_nocopy_internal(s, size);
@@ -9841,12 +9904,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return ret;
         }
 
-        inline rvalue load(const char* data)
+        inline rvalue load(const char *data)
         {
             return load(data, strlen(data));
         }
 
-        inline rvalue load(const std::string& str)
+        inline rvalue load(const std::string &str)
         {
             return load(str.data(), str.size());
         }
@@ -9866,9 +9929,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         public:
             using object =
 #ifdef CROW_JSON_USE_MAP
-              std::map<std::string, wvalue>;
+                std::map<std::string, wvalue>;
 #else
-              std::unordered_map<std::string, wvalue>;
+                std::unordered_map<std::string, wvalue>;
 #endif
 
             using list = std::vector<wvalue>;
@@ -9888,73 +9951,48 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 uint64_t ui;
 
             public:
-                constexpr number() noexcept:
-                  ui() {} /* default constructor initializes unsigned integer. */
-                constexpr number(std::uint64_t value) noexcept:
-                  ui(value) {}
-                constexpr number(std::int64_t value) noexcept:
-                  si(value) {}
-                explicit constexpr number(double value) noexcept:
-                  d(value) {}
-                explicit constexpr number(float value) noexcept:
-                  d(value) {}
-            } num;                                      ///< Value if type is a number.
-            std::string s;                              ///< Value if type is a string.
-            std::unique_ptr<list> l;                    ///< Value if type is a list.
-            std::unique_ptr<object> o;                  ///< Value if type is a JSON object.
-            std::function<std::string(std::string&)> f; ///< Value if type is a function (C++ lambda)
+                constexpr number() noexcept : ui() {} /* default constructor initializes unsigned integer. */
+                constexpr number(std::uint64_t value) noexcept : ui(value) {}
+                constexpr number(std::int64_t value) noexcept : si(value) {}
+                explicit constexpr number(double value) noexcept : d(value) {}
+                explicit constexpr number(float value) noexcept : d(value) {}
+            } num;                                       ///< Value if type is a number.
+            std::string s;                               ///< Value if type is a string.
+            std::unique_ptr<list> l;                     ///< Value if type is a list.
+            std::unique_ptr<object> o;                   ///< Value if type is a JSON object.
+            std::function<std::string(std::string &)> f; ///< Value if type is a function (C++ lambda)
 
         public:
-            wvalue():
-              returnable("application/json") {}
+            wvalue() : returnable("application/json") {}
 
-            wvalue(std::nullptr_t):
-              returnable("application/json"), t_(type::Null) {}
+            wvalue(std::nullptr_t) : returnable("application/json"), t_(type::Null) {}
 
-            wvalue(bool value):
-              returnable("application/json"), t_(value ? type::True : type::False) {}
+            wvalue(bool value) : returnable("application/json"), t_(value ? type::True : type::False) {}
 
-            wvalue(std::uint8_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
-            wvalue(std::uint16_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
-            wvalue(std::uint32_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
-            wvalue(std::uint64_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
+            wvalue(std::uint8_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
+            wvalue(std::uint16_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
+            wvalue(std::uint32_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
+            wvalue(std::uint64_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Unsigned_integer), num(static_cast<std::uint64_t>(value)) {}
 
-            wvalue(std::int8_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
-            wvalue(std::int16_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
-            wvalue(std::int32_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
-            wvalue(std::int64_t value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
+            wvalue(std::int8_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
+            wvalue(std::int16_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
+            wvalue(std::int32_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
+            wvalue(std::int64_t value) : returnable("application/json"), t_(type::Number), nt(num_type::Signed_integer), num(static_cast<std::int64_t>(value)) {}
 
-            wvalue(float value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Floating_point), num(static_cast<double>(value)) {}
-            wvalue(double value):
-              returnable("application/json"), t_(type::Number), nt(num_type::Double_precision_floating_point), num(static_cast<double>(value)) {}
+            wvalue(float value) : returnable("application/json"), t_(type::Number), nt(num_type::Floating_point), num(static_cast<double>(value)) {}
+            wvalue(double value) : returnable("application/json"), t_(type::Number), nt(num_type::Double_precision_floating_point), num(static_cast<double>(value)) {}
 
-            wvalue(char const* value):
-              returnable("application/json"), t_(type::String), s(value) {}
+            wvalue(char const *value) : returnable("application/json"), t_(type::String), s(value) {}
 
-            wvalue(std::string const& value):
-              returnable("application/json"), t_(type::String), s(value) {}
-            wvalue(std::string&& value):
-              returnable("application/json"), t_(type::String), s(std::move(value)) {}
+            wvalue(std::string const &value) : returnable("application/json"), t_(type::String), s(value) {}
+            wvalue(std::string &&value) : returnable("application/json"), t_(type::String), s(std::move(value)) {}
 
-            wvalue(std::initializer_list<std::pair<std::string const, wvalue>> initializer_list):
-              returnable("application/json"), t_(type::Object), o(new object(initializer_list)) {}
+            wvalue(std::initializer_list<std::pair<std::string const, wvalue>> initializer_list) : returnable("application/json"), t_(type::Object), o(new object(initializer_list)) {}
 
-            wvalue(object const& value):
-              returnable("application/json"), t_(type::Object), o(new object(value)) {}
-            wvalue(object&& value):
-              returnable("application/json"), t_(type::Object), o(new object(std::move(value))) {}
+            wvalue(object const &value) : returnable("application/json"), t_(type::Object), o(new object(value)) {}
+            wvalue(object &&value) : returnable("application/json"), t_(type::Object), o(new object(std::move(value))) {}
 
-            wvalue(const list& r):
-              returnable("application/json")
+            wvalue(const list &r) : returnable("application/json")
             {
                 t_ = type::List;
                 l = std::unique_ptr<list>(new list{});
@@ -9962,8 +10000,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 for (auto it = r.begin(); it != r.end(); ++it)
                     l->emplace_back(*it);
             }
-            wvalue(list& r):
-              returnable("application/json")
+            wvalue(list &r) : returnable("application/json")
             {
                 t_ = type::List;
                 l = std::unique_ptr<list>(new list{});
@@ -9973,87 +10010,84 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
             /// Create a write value from a read value (useful for editing JSON strings).
-            wvalue(const rvalue& r):
-              returnable("application/json")
+            wvalue(const rvalue &r) : returnable("application/json")
             {
                 t_ = r.t();
                 switch (r.t())
                 {
-                    case type::Null:
-                    case type::False:
-                    case type::True:
-                    case type::Function:
-                        return;
-                    case type::Number:
-                        nt = r.nt();
-                        if (nt == num_type::Floating_point || nt == num_type::Double_precision_floating_point)
-                            num.d = r.d();
-                        else if (nt == num_type::Signed_integer)
-                            num.si = r.i();
-                        else
-                            num.ui = r.u();
-                        return;
-                    case type::String:
-                        s = r.s();
-                        return;
-                    case type::List:
-                        l = std::unique_ptr<list>(new list{});
-                        l->reserve(r.size());
-                        for (auto it = r.begin(); it != r.end(); ++it)
-                            l->emplace_back(*it);
-                        return;
-                    case type::Object:
-                        o = std::unique_ptr<object>(new object{});
-                        for (auto it = r.begin(); it != r.end(); ++it)
-                            o->emplace(it->key(), *it);
-                        return;
+                case type::Null:
+                case type::False:
+                case type::True:
+                case type::Function:
+                    return;
+                case type::Number:
+                    nt = r.nt();
+                    if (nt == num_type::Floating_point || nt == num_type::Double_precision_floating_point)
+                        num.d = r.d();
+                    else if (nt == num_type::Signed_integer)
+                        num.si = r.i();
+                    else
+                        num.ui = r.u();
+                    return;
+                case type::String:
+                    s = r.s();
+                    return;
+                case type::List:
+                    l = std::unique_ptr<list>(new list{});
+                    l->reserve(r.size());
+                    for (auto it = r.begin(); it != r.end(); ++it)
+                        l->emplace_back(*it);
+                    return;
+                case type::Object:
+                    o = std::unique_ptr<object>(new object{});
+                    for (auto it = r.begin(); it != r.end(); ++it)
+                        o->emplace(it->key(), *it);
+                    return;
                 }
             }
 
-            wvalue(const wvalue& r):
-              returnable("application/json")
+            wvalue(const wvalue &r) : returnable("application/json")
             {
                 t_ = r.t();
                 switch (r.t())
                 {
-                    case type::Null:
-                    case type::False:
-                    case type::True:
-                        return;
-                    case type::Number:
-                        nt = r.nt;
-                        if (nt == num_type::Floating_point || nt == num_type::Double_precision_floating_point)
-                            num.d = r.num.d;
-                        else if (nt == num_type::Signed_integer)
-                            num.si = r.num.si;
-                        else
-                            num.ui = r.num.ui;
-                        return;
-                    case type::String:
-                        s = r.s;
-                        return;
-                    case type::List:
-                        l = std::unique_ptr<list>(new list{});
-                        l->reserve(r.size());
-                        for (auto it = r.l->begin(); it != r.l->end(); ++it)
-                            l->emplace_back(*it);
-                        return;
-                    case type::Object:
-                        o = std::unique_ptr<object>(new object{});
-                        o->insert(r.o->begin(), r.o->end());
-                        return;
-                    case type::Function:
-                        f = r.f;
+                case type::Null:
+                case type::False:
+                case type::True:
+                    return;
+                case type::Number:
+                    nt = r.nt;
+                    if (nt == num_type::Floating_point || nt == num_type::Double_precision_floating_point)
+                        num.d = r.num.d;
+                    else if (nt == num_type::Signed_integer)
+                        num.si = r.num.si;
+                    else
+                        num.ui = r.num.ui;
+                    return;
+                case type::String:
+                    s = r.s;
+                    return;
+                case type::List:
+                    l = std::unique_ptr<list>(new list{});
+                    l->reserve(r.size());
+                    for (auto it = r.l->begin(); it != r.l->end(); ++it)
+                        l->emplace_back(*it);
+                    return;
+                case type::Object:
+                    o = std::unique_ptr<object>(new object{});
+                    o->insert(r.o->begin(), r.o->end());
+                    return;
+                case type::Function:
+                    f = r.f;
                 }
             }
 
-            wvalue(wvalue&& r):
-              returnable("application/json")
+            wvalue(wvalue &&r) : returnable("application/json")
             {
                 *this = std::move(r);
             }
 
-            wvalue& operator=(wvalue&& r)
+            wvalue &operator=(wvalue &&r)
             {
                 t_ = r.t_;
                 nt = r.nt;
@@ -10077,12 +10111,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 o.reset();
             }
 
-            wvalue& operator=(std::nullptr_t)
+            wvalue &operator=(std::nullptr_t)
             {
                 reset();
                 return *this;
             }
-            wvalue& operator=(bool value)
+            wvalue &operator=(bool value)
             {
                 reset();
                 if (value)
@@ -10092,7 +10126,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(float value)
+            wvalue &operator=(float value)
             {
                 reset();
                 t_ = type::Number;
@@ -10101,7 +10135,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(double value)
+            wvalue &operator=(double value)
             {
                 reset();
                 t_ = type::Number;
@@ -10110,7 +10144,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(unsigned short value)
+            wvalue &operator=(unsigned short value)
             {
                 reset();
                 t_ = type::Number;
@@ -10119,7 +10153,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(short value)
+            wvalue &operator=(short value)
             {
                 reset();
                 t_ = type::Number;
@@ -10128,7 +10162,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(long long value)
+            wvalue &operator=(long long value)
             {
                 reset();
                 t_ = type::Number;
@@ -10137,7 +10171,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(long value)
+            wvalue &operator=(long value)
             {
                 reset();
                 t_ = type::Number;
@@ -10146,7 +10180,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(int value)
+            wvalue &operator=(int value)
             {
                 reset();
                 t_ = type::Number;
@@ -10155,7 +10189,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(unsigned long long value)
+            wvalue &operator=(unsigned long long value)
             {
                 reset();
                 t_ = type::Number;
@@ -10164,7 +10198,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(unsigned long value)
+            wvalue &operator=(unsigned long value)
             {
                 reset();
                 t_ = type::Number;
@@ -10173,7 +10207,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(unsigned int value)
+            wvalue &operator=(unsigned int value)
             {
                 reset();
                 t_ = type::Number;
@@ -10182,7 +10216,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(const char* str)
+            wvalue &operator=(const char *str)
             {
                 reset();
                 t_ = type::String;
@@ -10190,7 +10224,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(const std::string& str)
+            wvalue &operator=(const std::string &str)
             {
                 reset();
                 t_ = type::String;
@@ -10198,7 +10232,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(list&& v)
+            wvalue &operator=(list &&v)
             {
                 if (t_ != type::List)
                     reset();
@@ -10208,15 +10242,15 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 l->clear();
                 l->resize(v.size());
                 size_t idx = 0;
-                for (auto& x : v)
+                for (auto &x : v)
                 {
                     (*l)[idx++] = std::move(x);
                 }
                 return *this;
             }
 
-            template<typename T>
-            wvalue& operator=(const std::vector<T>& v)
+            template <typename T>
+            wvalue &operator=(const std::vector<T> &v)
             {
                 if (t_ != type::List)
                     reset();
@@ -10226,14 +10260,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 l->clear();
                 l->resize(v.size());
                 size_t idx = 0;
-                for (auto& x : v)
+                for (auto &x : v)
                 {
                     (*l)[idx++] = x;
                 }
                 return *this;
             }
 
-            wvalue& operator=(std::initializer_list<std::pair<std::string const, wvalue>> initializer_list)
+            wvalue &operator=(std::initializer_list<std::pair<std::string const, wvalue>> initializer_list)
             {
                 if (t_ != type::Object)
                 {
@@ -10252,7 +10286,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(object const& value)
+            wvalue &operator=(object const &value)
             {
                 if (t_ != type::Object)
                 {
@@ -10271,7 +10305,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(object&& value)
+            wvalue &operator=(object &&value)
             {
                 if (t_ != type::Object)
                 {
@@ -10286,7 +10320,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator=(std::function<std::string(std::string&)>&& func)
+            wvalue &operator=(std::function<std::string(std::string &)> &&func)
             {
                 reset();
                 t_ = type::Function;
@@ -10294,7 +10328,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return *this;
             }
 
-            wvalue& operator[](unsigned index)
+            wvalue &operator[](unsigned index)
             {
                 if (t_ != type::List)
                     reset();
@@ -10306,12 +10340,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return (*l)[index];
             }
 
-            const wvalue& operator[](unsigned index) const
+            const wvalue &operator[](unsigned index) const
             {
-                return const_cast<wvalue*>(this)->operator[](index);
+                return const_cast<wvalue *>(this)->operator[](index);
             }
 
-            int count(const std::string& str) const
+            int count(const std::string &str) const
             {
                 if (t_ != type::Object)
                     return 0;
@@ -10320,7 +10354,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return o->count(str);
             }
 
-            wvalue& operator[](const std::string& str)
+            wvalue &operator[](const std::string &str)
             {
                 if (t_ != type::Object)
                     reset();
@@ -10330,9 +10364,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return (*o)[str];
             }
 
-            const wvalue& operator[](const std::string& str) const
+            const wvalue &operator[](const std::string &str) const
             {
-                return const_cast<wvalue*>(this)->operator[](str);
+                return const_cast<wvalue *>(this)->operator[](str);
             }
 
             std::vector<std::string> keys() const
@@ -10340,14 +10374,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 if (t_ != type::Object)
                     return {};
                 std::vector<std::string> result;
-                for (auto& kv : *o)
+                for (auto &kv : *o)
                 {
                     result.push_back(kv.first);
                 }
                 return result;
             }
 
-            std::string execute(std::string txt = "") const //Not using reference because it cannot be used with a default rvalue
+            std::string execute(std::string txt = "") const // Not using reference because it cannot be used with a default rvalue
             {
                 if (t_ != type::Function)
                     return "";
@@ -10367,234 +10401,247 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             {
                 switch (t_)
                 {
-                    case type::Null: return 4;
-                    case type::False: return 5;
-                    case type::True: return 4;
-                    case type::Number: return 30;
-                    case type::String: return 2 + s.size() + s.size() / 2;
-                    case type::List:
+                case type::Null:
+                    return 4;
+                case type::False:
+                    return 5;
+                case type::True:
+                    return 4;
+                case type::Number:
+                    return 30;
+                case type::String:
+                    return 2 + s.size() + s.size() / 2;
+                case type::List:
+                {
+                    size_t sum{};
+                    if (l)
                     {
-                        size_t sum{};
-                        if (l)
+                        for (auto &x : *l)
                         {
-                            for (auto& x : *l)
-                            {
-                                sum += 1;
-                                sum += x.estimate_length();
-                            }
+                            sum += 1;
+                            sum += x.estimate_length();
                         }
-                        return sum + 2;
                     }
-                    case type::Object:
+                    return sum + 2;
+                }
+                case type::Object:
+                {
+                    size_t sum{};
+                    if (o)
                     {
-                        size_t sum{};
-                        if (o)
+                        for (auto &kv : *o)
                         {
-                            for (auto& kv : *o)
-                            {
-                                sum += 2;
-                                sum += 2 + kv.first.size() + kv.first.size() / 2;
-                                sum += kv.second.estimate_length();
-                            }
+                            sum += 2;
+                            sum += 2 + kv.first.size() + kv.first.size() / 2;
+                            sum += kv.second.estimate_length();
                         }
-                        return sum + 2;
                     }
-                    case type::Function:
-                        return 0;
+                    return sum + 2;
+                }
+                case type::Function:
+                    return 0;
                 }
                 return 1;
             }
 
         private:
-            inline void dump_string(const std::string& str, std::string& out) const
+            inline void dump_string(const std::string &str, std::string &out) const
             {
                 out.push_back('"');
                 escape(str, out);
                 out.push_back('"');
             }
 
-            inline void dump_indentation_part(std::string& out, const int indent, const char separator, const int indent_level) const
+            inline void dump_indentation_part(std::string &out, const int indent, const char separator, const int indent_level) const
             {
                 out.push_back('\n');
                 out.append(indent_level * indent, separator);
             }
 
-
-            inline void dump_internal(const wvalue& v, std::string& out, const int indent, const char separator, const int indent_level = 0) const
+            inline void dump_internal(const wvalue &v, std::string &out, const int indent, const char separator, const int indent_level = 0) const
             {
                 switch (v.t_)
                 {
-                    case type::Null: out += "null"; break;
-                    case type::False: out += "false"; break;
-                    case type::True: out += "true"; break;
-                    case type::Number:
+                case type::Null:
+                    out += "null";
+                    break;
+                case type::False:
+                    out += "false";
+                    break;
+                case type::True:
+                    out += "true";
+                    break;
+                case type::Number:
+                {
+                    if (v.nt == num_type::Floating_point || v.nt == num_type::Double_precision_floating_point)
                     {
-                        if (v.nt == num_type::Floating_point || v.nt == num_type::Double_precision_floating_point)
+                        if (isnan(v.num.d) || isinf(v.num.d))
                         {
-                            if (isnan(v.num.d) || isinf(v.num.d))
-                            {
-                                out += "null";
-                                CROW_LOG_WARNING << "Invalid JSON value detected (" << v.num.d << "), value set to null";
-                                break;
-                            }
-                            enum
-                            {
-                                start,
-                                decp, // Decimal point
-                                zero
-                            } f_state;
-                            char outbuf[128];
-                            if (v.nt == num_type::Double_precision_floating_point)
-                            {
-#ifdef _MSC_VER
-                                sprintf_s(outbuf, sizeof(outbuf), "%.*g", DECIMAL_DIG, v.num.d);
-#else
-                                snprintf(outbuf, sizeof(outbuf), "%.*g", DECIMAL_DIG, v.num.d);
-#endif
-                            }
-                            else
-                            {
-#ifdef _MSC_VER
-                                sprintf_s(outbuf, sizeof(outbuf), "%f", v.num.d);
-#else
-                                snprintf(outbuf, sizeof(outbuf), "%f", v.num.d);
-#endif
-                            }
-                            char* p = &outbuf[0];
-                            char* pos_first_trailing_0 = nullptr;
-                            f_state = start;
-                            while (*p != '\0')
-                            {
-                                //std::cout << *p << std::endl;
-                                char ch = *p;
-                                switch (f_state)
-                                {
-                                    case start: // Loop and lookahead until a decimal point is found
-                                        if (ch == '.')
-                                        {
-                                            char fch = *(p + 1);
-                                            // if the first character is 0, leave it be (this is so that "1.00000" becomes "1.0" and not "1.")
-                                            if (fch != '\0' && fch == '0') p++;
-                                            f_state = decp;
-                                        }
-                                        p++;
-                                        break;
-                                    case decp: // Loop until a 0 is found, if found, record its position
-                                        if (ch == '0')
-                                        {
-                                            f_state = zero;
-                                            pos_first_trailing_0 = p;
-                                        }
-                                        p++;
-                                        break;
-                                    case zero: // if a non 0 is found (e.g. 1.00004) remove the earlier recorded 0 position and look for more trailing 0s
-                                        if (ch != '0')
-                                        {
-                                            pos_first_trailing_0 = nullptr;
-                                            f_state = decp;
-                                        }
-                                        p++;
-                                        break;
-                                }
-                            }
-                            if (pos_first_trailing_0 != nullptr) // if any trailing 0s are found, terminate the string where they begin
-                                *pos_first_trailing_0 = '\0';
-                            out += outbuf;
+                            out += "null";
+                            CROW_LOG_WARNING << "Invalid JSON value detected (" << v.num.d << "), value set to null";
+                            break;
                         }
-                        else if (v.nt == num_type::Signed_integer)
+                        enum
                         {
-                            out += std::to_string(v.num.si);
+                            start,
+                            decp, // Decimal point
+                            zero
+                        } f_state;
+                        char outbuf[128];
+                        if (v.nt == num_type::Double_precision_floating_point)
+                        {
+#ifdef _MSC_VER
+                            sprintf_s(outbuf, sizeof(outbuf), "%.*g", DECIMAL_DIG, v.num.d);
+#else
+                            snprintf(outbuf, sizeof(outbuf), "%.*g", DECIMAL_DIG, v.num.d);
+#endif
                         }
                         else
                         {
-                            out += std::to_string(v.num.ui);
+#ifdef _MSC_VER
+                            sprintf_s(outbuf, sizeof(outbuf), "%f", v.num.d);
+#else
+                            snprintf(outbuf, sizeof(outbuf), "%f", v.num.d);
+#endif
                         }
-                    }
-                    break;
-                    case type::String: dump_string(v.s, out); break;
-                    case type::List:
-                    {
-                        out.push_back('[');
-
-                        if (indent >= 0)
+                        char *p = &outbuf[0];
+                        char *pos_first_trailing_0 = nullptr;
+                        f_state = start;
+                        while (*p != '\0')
                         {
-                            dump_indentation_part(out, indent, separator, indent_level + 1);
-                        }
-
-                        if (v.l)
-                        {
-                            bool first = true;
-                            for (auto& x : *v.l)
+                            // std::cout << *p << std::endl;
+                            char ch = *p;
+                            switch (f_state)
                             {
-                                if (!first)
+                            case start: // Loop and lookahead until a decimal point is found
+                                if (ch == '.')
                                 {
-                                    out.push_back(',');
-
-                                    if (indent >= 0)
-                                    {
-                                        dump_indentation_part(out, indent, separator, indent_level + 1);
-                                    }
+                                    char fch = *(p + 1);
+                                    // if the first character is 0, leave it be (this is so that "1.00000" becomes "1.0" and not "1.")
+                                    if (fch != '\0' && fch == '0')
+                                        p++;
+                                    f_state = decp;
                                 }
-                                first = false;
-                                dump_internal(x, out, indent, separator, indent_level + 1);
+                                p++;
+                                break;
+                            case decp: // Loop until a 0 is found, if found, record its position
+                                if (ch == '0')
+                                {
+                                    f_state = zero;
+                                    pos_first_trailing_0 = p;
+                                }
+                                p++;
+                                break;
+                            case zero: // if a non 0 is found (e.g. 1.00004) remove the earlier recorded 0 position and look for more trailing 0s
+                                if (ch != '0')
+                                {
+                                    pos_first_trailing_0 = nullptr;
+                                    f_state = decp;
+                                }
+                                p++;
+                                break;
                             }
                         }
-
-                        if (indent >= 0)
-                        {
-                            dump_indentation_part(out, indent, separator, indent_level);
-                        }
-
-                        out.push_back(']');
+                        if (pos_first_trailing_0 != nullptr) // if any trailing 0s are found, terminate the string where they begin
+                            *pos_first_trailing_0 = '\0';
+                        out += outbuf;
                     }
-                    break;
-                    case type::Object:
+                    else if (v.nt == num_type::Signed_integer)
                     {
-                        out.push_back('{');
+                        out += std::to_string(v.num.si);
+                    }
+                    else
+                    {
+                        out += std::to_string(v.num.ui);
+                    }
+                }
+                break;
+                case type::String:
+                    dump_string(v.s, out);
+                    break;
+                case type::List:
+                {
+                    out.push_back('[');
 
-                        if (indent >= 0)
-                        {
-                            dump_indentation_part(out, indent, separator, indent_level + 1);
-                        }
+                    if (indent >= 0)
+                    {
+                        dump_indentation_part(out, indent, separator, indent_level + 1);
+                    }
 
-                        if (v.o)
+                    if (v.l)
+                    {
+                        bool first = true;
+                        for (auto &x : *v.l)
                         {
-                            bool first = true;
-                            for (auto& kv : *v.o)
+                            if (!first)
                             {
-                                if (!first)
-                                {
-                                    out.push_back(',');
-                                    if (indent >= 0)
-                                    {
-                                        dump_indentation_part(out, indent, separator, indent_level + 1);
-                                    }
-                                }
-                                first = false;
-                                dump_string(kv.first, out);
-                                out.push_back(':');
+                                out.push_back(',');
 
                                 if (indent >= 0)
                                 {
-                                    out.push_back(' ');
+                                    dump_indentation_part(out, indent, separator, indent_level + 1);
                                 }
-
-                                dump_internal(kv.second, out, indent, separator, indent_level + 1);
                             }
+                            first = false;
+                            dump_internal(x, out, indent, separator, indent_level + 1);
                         }
-
-                        if (indent >= 0)
-                        {
-                            dump_indentation_part(out, indent, separator, indent_level);
-                        }
-
-                        out.push_back('}');
                     }
-                    break;
 
-                    case type::Function:
-                        out += "custom function";
-                        break;
+                    if (indent >= 0)
+                    {
+                        dump_indentation_part(out, indent, separator, indent_level);
+                    }
+
+                    out.push_back(']');
+                }
+                break;
+                case type::Object:
+                {
+                    out.push_back('{');
+
+                    if (indent >= 0)
+                    {
+                        dump_indentation_part(out, indent, separator, indent_level + 1);
+                    }
+
+                    if (v.o)
+                    {
+                        bool first = true;
+                        for (auto &kv : *v.o)
+                        {
+                            if (!first)
+                            {
+                                out.push_back(',');
+                                if (indent >= 0)
+                                {
+                                    dump_indentation_part(out, indent, separator, indent_level + 1);
+                                }
+                            }
+                            first = false;
+                            dump_string(kv.first, out);
+                            out.push_back(':');
+
+                            if (indent >= 0)
+                            {
+                                out.push_back(' ');
+                            }
+
+                            dump_internal(kv.second, out, indent, separator, indent_level + 1);
+                        }
+                    }
+
+                    if (indent >= 0)
+                    {
+                        dump_indentation_part(out, indent, separator, indent_level);
+                    }
+
+                    out.push_back('}');
+                }
+                break;
+
+                case type::Function:
+                    out += "custom function";
+                    break;
                 }
             }
 
@@ -10636,27 +10683,28 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
             bool get(bool fallback)
             {
-                if (ref.t() == type::True) return true;
-                if (ref.t() == type::False) return false;
+                if (ref.t() == type::True)
+                    return true;
+                if (ref.t() == type::False)
+                    return false;
                 return fallback;
             }
 
-            std::string get(const std::string& fallback)
+            std::string get(const std::string &fallback)
             {
-                if (ref.t() != type::String) return fallback;
+                if (ref.t() != type::String)
+                    return fallback;
                 return ref.s;
             }
 
-            const wvalue& ref;
+            const wvalue &ref;
         };
 
-        //std::vector<asio::const_buffer> dump_ref(wvalue& v)
+        // std::vector<asio::const_buffer> dump_ref(wvalue& v)
         //{
-        //}
+        // }
     } // namespace json
 } // namespace crow
-
-
 
 #include <unordered_map>
 #include <unordered_set>
@@ -10680,21 +10728,21 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 namespace
 {
     // convert all integer values to int64_t
-    template<typename T>
+    template <typename T>
     using wrap_integral_t = typename std::conditional<
-      std::is_integral<T>::value && !std::is_same<bool, T>::value
-        // except for uint64_t because that could lead to overflow on conversion
-        && !std::is_same<uint64_t, T>::value,
-      int64_t, T>::type;
+        std::is_integral<T>::value && !std::is_same<bool, T>::value
+            // except for uint64_t because that could lead to overflow on conversion
+            && !std::is_same<uint64_t, T>::value,
+        int64_t, T>::type;
 
     // convert char[]/char* to std::string
-    template<typename T>
+    template <typename T>
     using wrap_char_t = typename std::conditional<
-      std::is_same<typename std::decay<T>::type, char*>::value,
-      std::string, T>::type;
+        std::is_same<typename std::decay<T>::type, char *>::value,
+        std::string, T>::type;
 
     // Upgrade to correct type for multi_variant use
-    template<typename T>
+    template <typename T>
     using wrap_mv_t = wrap_char_t<wrap_integral_t<T>>;
 } // namespace
 
@@ -10717,7 +10765,7 @@ namespace crow
                 // clang-format on
             }
 
-            static multi_value from_json(const json::rvalue&);
+            static multi_value from_json(const json::rvalue &);
 
             std::string string() const
             {
@@ -10731,14 +10779,15 @@ namespace crow
                 // clang-format on
             }
 
-            template<typename T, typename RT = wrap_mv_t<T>>
-            RT get(const T& fallback)
+            template <typename T, typename RT = wrap_mv_t<T>>
+            RT get(const T &fallback)
             {
-                if (const RT* val = std::get_if<RT>(&v_)) return *val;
+                if (const RT *val = std::get_if<RT>(&v_))
+                    return *val;
                 return fallback;
             }
 
-            template<typename T, typename RT = wrap_mv_t<T>>
+            template <typename T, typename RT = wrap_mv_t<T>>
             void set(T val)
             {
                 v_ = RT(std::move(val));
@@ -10747,24 +10796,28 @@ namespace crow
             typename multi_value_types::rebind<std::variant> v_;
         };
 
-        inline multi_value multi_value::from_json(const json::rvalue& rv)
+        inline multi_value multi_value::from_json(const json::rvalue &rv)
         {
             using namespace json;
             switch (rv.t())
             {
-                case type::Number:
-                {
-                    if (rv.nt() == num_type::Floating_point || rv.nt() == num_type::Double_precision_floating_point)
-                        return multi_value{rv.d()};
-                    else if (rv.nt() == num_type::Unsigned_integer)
-                        return multi_value{int64_t(rv.u())};
-                    else
-                        return multi_value{rv.i()};
-                }
-                case type::False: return multi_value{false};
-                case type::True: return multi_value{true};
-                case type::String: return multi_value{std::string(rv)};
-                default: return multi_value{false};
+            case type::Number:
+            {
+                if (rv.nt() == num_type::Floating_point || rv.nt() == num_type::Double_precision_floating_point)
+                    return multi_value{rv.d()};
+                else if (rv.nt() == num_type::Unsigned_integer)
+                    return multi_value{int64_t(rv.u())};
+                else
+                    return multi_value{rv.i()};
+            }
+            case type::False:
+                return multi_value{false};
+            case type::True:
+                return multi_value{true};
+            case type::String:
+                return multi_value{std::string(rv)};
+            default:
+                return multi_value{false};
             }
         }
 
@@ -10778,12 +10831,13 @@ namespace crow
             void add(std::string key, uint64_t time)
             {
                 auto it = times_.find(key);
-                if (it != times_.end()) remove(key);
+                if (it != times_.end())
+                    remove(key);
                 times_[key] = time;
                 queue_.insert({time, std::move(key)});
             }
 
-            void remove(const std::string& key)
+            void remove(const std::string &key)
             {
                 auto it = times_.find(key);
                 if (it != times_.end())
@@ -10796,7 +10850,8 @@ namespace crow
             /// Get expiration time of soonest-to-expire entry
             uint64_t peek_first() const
             {
-                if (queue_.empty()) return std::numeric_limits<uint64_t>::max();
+                if (queue_.empty())
+                    return std::numeric_limits<uint64_t>::max();
                 return queue_.begin()->first;
             }
 
@@ -10829,7 +10884,7 @@ namespace crow
             std::unordered_map<std::string, multi_value> entries;
             std::unordered_set<std::string> dirty; // values that were changed after last load
 
-            void* store_data;
+            void *store_data;
             bool requested_refresh;
 
             // number of references held - used for correctly destroying the cache.
@@ -10840,7 +10895,7 @@ namespace crow
     } // namespace session
 
     // SessionMiddleware allows storing securely and easily small snippets of user information
-    template<typename Store>
+    template <typename Store>
     struct SessionMiddleware
     {
         using lock = std::scoped_lock<std::mutex>;
@@ -10849,7 +10904,7 @@ namespace crow
         struct context
         {
             // Get a mutex for locking this session
-            std::recursive_mutex& mutex()
+            std::recursive_mutex &mutex()
             {
                 check_node();
                 return node->mutex;
@@ -10859,26 +10914,28 @@ namespace crow
             bool exists() { return bool(node); }
 
             // Get a value by key or fallback if it doesn't exist or is of another type
-            template<typename F>
-            auto get(const std::string& key, const F& fallback = F())
-              // This trick lets the multi_value deduce the return type from the fallback
-              // which allows both:
-              //   context.get<std::string>("key")
-              //   context.get("key", "") -> char[] is transformed into string by multivalue
-              // to return a string
-              -> decltype(std::declval<session::multi_value>().get<F>(std::declval<F>()))
+            template <typename F>
+            auto get(const std::string &key, const F &fallback = F())
+                // This trick lets the multi_value deduce the return type from the fallback
+                // which allows both:
+                //   context.get<std::string>("key")
+                //   context.get("key", "") -> char[] is transformed into string by multivalue
+                // to return a string
+                -> decltype(std::declval<session::multi_value>().get<F>(std::declval<F>()))
             {
-                if (!node) return fallback;
+                if (!node)
+                    return fallback;
                 rc_lock l(node->mutex);
 
                 auto it = node->entries.find(key);
-                if (it != node->entries.end()) return it->second.get<F>(fallback);
+                if (it != node->entries.end())
+                    return it->second.get<F>(fallback);
                 return fallback;
             }
 
             // Set a value by key
-            template<typename T>
-            void set(const std::string& key, T value)
+            template <typename T>
+            void set(const std::string &key, T value)
             {
                 check_node();
                 rc_lock l(node->mutex);
@@ -10887,15 +10944,16 @@ namespace crow
                 node->entries[key].set(std::move(value));
             }
 
-            bool contains(const std::string& key)
+            bool contains(const std::string &key)
             {
-                if (!node) return false;
+                if (!node)
+                    return false;
                 return node->entries.find(key) != node->entries.end();
             }
 
             // Atomically mutate a value with a function
-            template<typename Func>
-            void apply(const std::string& key, const Func& f)
+            template <typename Func>
+            void apply(const std::string &key, const Func &f)
             {
                 using traits = utility::function_traits<Func>;
                 using arg = typename std::decay<typename traits::template arg<0>>::type;
@@ -10907,33 +10965,37 @@ namespace crow
             }
 
             // Remove a value from the session
-            void remove(const std::string& key)
+            void remove(const std::string &key)
             {
-                if (!node) return;
+                if (!node)
+                    return;
                 rc_lock l(node->mutex);
                 node->dirty.insert(key);
                 node->entries.erase(key);
             }
 
             // Format value by key as a string
-            std::string string(const std::string& key)
+            std::string string(const std::string &key)
             {
-                if (!node) return "";
+                if (!node)
+                    return "";
                 rc_lock l(node->mutex);
 
                 auto it = node->entries.find(key);
-                if (it != node->entries.end()) return it->second.string();
+                if (it != node->entries.end())
+                    return it->second.string();
                 return "";
             }
 
             // Get a list of keys present in session
             std::vector<std::string> keys()
             {
-                if (!node) return {};
+                if (!node)
+                    return {};
                 rc_lock l(node->mutex);
 
                 std::vector<std::string> out;
-                for (const auto& p : node->entries)
+                for (const auto &p : node->entries)
                     out.push_back(p.first);
                 return out;
             }
@@ -10942,7 +11004,8 @@ namespace crow
             // and notifying the store
             void refresh_expiration()
             {
-                if (!node) return;
+                if (!node)
+                    return;
                 node->requested_refresh = true;
             }
 
@@ -10951,38 +11014,40 @@ namespace crow
 
             void check_node()
             {
-                if (!node) node = std::make_shared<session::CachedSession>();
+                if (!node)
+                    node = std::make_shared<session::CachedSession>();
             }
 
             std::shared_ptr<session::CachedSession> node;
         };
 
-        template<typename... Ts>
+        template <typename... Ts>
         SessionMiddleware(
-          CookieParser::Cookie cookie,
-          int id_length,
-          Ts... ts):
-          id_length_(id_length),
-          cookie_(cookie),
-          store_(std::forward<Ts>(ts)...), mutex_(new std::mutex{})
-        {}
+            CookieParser::Cookie cookie,
+            int id_length,
+            Ts... ts) : id_length_(id_length),
+                        cookie_(cookie),
+                        store_(std::forward<Ts>(ts)...), mutex_(new std::mutex{})
+        {
+        }
 
-        template<typename... Ts>
-        SessionMiddleware(Ts... ts):
-          SessionMiddleware(
-            CookieParser::Cookie("session").path("/").max_age(/*month*/ 30 * 24 * 60 * 60),
-            /*id_length */ 20, // around 10^34 possible combinations, but small enough to fit into SSO
-            std::forward<Ts>(ts)...)
-        {}
+        template <typename... Ts>
+        SessionMiddleware(Ts... ts) : SessionMiddleware(
+                                          CookieParser::Cookie("session").path("/").max_age(/*month*/ 30 * 24 * 60 * 60),
+                                          /*id_length */ 20, // around 10^34 possible combinations, but small enough to fit into SSO
+                                          std::forward<Ts>(ts)...)
+        {
+        }
 
-        template<typename AllContext>
-        void before_handle(request& /*req*/, response& /*res*/, context& ctx, AllContext& all_ctx)
+        template <typename AllContext>
+        void before_handle(request & /*req*/, response & /*res*/, context &ctx, AllContext &all_ctx)
         {
             lock l(*mutex_);
 
-            auto& cookies = all_ctx.template get<CookieParser>();
+            auto &cookies = all_ctx.template get<CookieParser>();
             auto session_id = load_id(cookies);
-            if (session_id == "") return;
+            if (session_id == "")
+                return;
 
             // search entry in cache
             auto it = cache_.find(session_id);
@@ -10994,7 +11059,8 @@ namespace crow
             }
 
             // check this is a valid entry before loading
-            if (!store_.contains(session_id)) return;
+            if (!store_.contains(session_id))
+                return;
 
             auto node = std::make_shared<session::CachedSession>();
             node->session_id = session_id;
@@ -11014,11 +11080,12 @@ namespace crow
             cache_[session_id] = node;
         }
 
-        template<typename AllContext>
-        void after_handle(request& /*req*/, response& /*res*/, context& ctx, AllContext& all_ctx)
+        template <typename AllContext>
+        void after_handle(request & /*req*/, response & /*res*/, context &ctx, AllContext &all_ctx)
         {
             lock l(*mutex_);
-            if (!ctx.node || --ctx.node->referrers > 0) return;
+            if (!ctx.node || --ctx.node->referrers > 0)
+                return;
             ctx.node->requested_refresh |= ctx.node->session_id == "";
 
             // generate new id
@@ -11038,7 +11105,7 @@ namespace crow
 
             if (ctx.node->requested_refresh)
             {
-                auto& cookies = all_ctx.template get<CookieParser>();
+                auto &cookies = all_ctx.template get<CookieParser>();
                 store_id(cookies, ctx.node->session_id);
             }
 
@@ -11064,12 +11131,12 @@ namespace crow
             return id;
         }
 
-        std::string load_id(const CookieParser::context& cookies)
+        std::string load_id(const CookieParser::context &cookies)
         {
             return cookies.get_cookie(cookie_.name());
         }
 
-        void store_id(CookieParser::context& cookies, const std::string& session_id)
+        void store_id(CookieParser::context &cookies, const std::string &session_id)
         {
             cookie_.value(session_id);
             cookies.set_cookie(cookie_);
@@ -11093,20 +11160,20 @@ namespace crow
     {
         // Load a value into the session cache.
         // A load is always followed by a save, no loads happen consecutively
-        void load(session::CachedSession& cn)
+        void load(session::CachedSession &cn)
         {
             // load & stores happen sequentially, so moving is safe
             cn.entries = std::move(entries[cn.session_id]);
         }
 
         // Persist session data
-        void save(session::CachedSession& cn)
+        void save(session::CachedSession &cn)
         {
             entries[cn.session_id] = std::move(cn.entries);
             // cn.dirty is a list of changed keys since the last load
         }
 
-        bool contains(const std::string& key)
+        bool contains(const std::string &key)
         {
             return entries.count(key) > 0;
         }
@@ -11118,8 +11185,7 @@ namespace crow
     // Files are deleted after expiration. Expiration refreshes are automatically picked up.
     struct FileStore
     {
-        FileStore(const std::string& folder, uint64_t expiration_seconds = /*month*/ 30 * 24 * 60 * 60):
-          path_(folder), expiration_seconds_(expiration_seconds)
+        FileStore(const std::string &folder, uint64_t expiration_seconds = /*month*/ 30 * 24 * 60 * 60) : path_(folder), expiration_seconds_(expiration_seconds)
         {
             std::ifstream ifs(get_filename(".expirations", false));
 
@@ -11142,7 +11208,7 @@ namespace crow
         ~FileStore()
         {
             std::ofstream ofs(get_filename(".expirations", false), std::ios::trunc);
-            for (const auto& p : expirations_)
+            for (const auto &p : expirations_)
                 ofs << p.second << " " << p.first << "\n";
         }
 
@@ -11159,7 +11225,7 @@ namespace crow
             }
         }
 
-        void load(session::CachedSession& cn)
+        void load(session::CachedSession &cn)
         {
             handle_expired();
 
@@ -11168,35 +11234,36 @@ namespace crow
             std::stringstream buffer;
             buffer << file.rdbuf() << std::endl;
 
-            for (const auto& p : json::load(buffer.str()))
+            for (const auto &p : json::load(buffer.str()))
                 cn.entries[p.key()] = session::multi_value::from_json(p);
         }
 
-        void save(session::CachedSession& cn)
+        void save(session::CachedSession &cn)
         {
             if (cn.requested_refresh)
                 expirations_.add(cn.session_id, chrono_time() + expiration_seconds_);
-            if (cn.dirty.empty()) return;
+            if (cn.dirty.empty())
+                return;
 
             std::ofstream file(get_filename(cn.session_id));
             json::wvalue jw;
-            for (const auto& p : cn.entries)
+            for (const auto &p : cn.entries)
                 jw[p.first] = p.second.json();
             file << jw.dump() << std::flush;
         }
 
-        std::string get_filename(const std::string& key, bool suffix = true)
+        std::string get_filename(const std::string &key, bool suffix = true)
         {
             return utility::join_path(path_, key + (suffix ? ".json" : ""));
         }
 
-        bool contains(const std::string& key)
+        bool contains(const std::string &key)
         {
             std::ifstream file(get_filename(key));
             return file.good();
         }
 
-        void evict(const std::string& key)
+        void evict(const std::string &key)
         {
             std::remove(get_filename(key).c_str());
         }
@@ -11204,8 +11271,8 @@ namespace crow
         uint64_t chrono_time() const
         {
             return std::chrono::duration_cast<std::chrono::seconds>(
-                     std::chrono::steady_clock::now().time_since_epoch())
-              .count();
+                       std::chrono::steady_clock::now().time_since_epoch())
+                .count();
         }
 
         std::string path_;
@@ -11253,7 +11320,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
     {
         using context = json::wvalue;
 
-        template_t load(const std::string& filename);
+        template_t load(const std::string &filename);
 
         /**
          * \class invalid_template_exception
@@ -11263,10 +11330,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         class invalid_template_exception : public std::exception
         {
         public:
-            invalid_template_exception(const std::string& msg_):
-              msg("crow::mustache error: " + msg_)
-            {}
-            virtual const char* what() const throw() override
+            invalid_template_exception(const std::string &msg_) : msg("crow::mustache error: " + msg_)
+            {
+            }
+            virtual const char *what() const throw() override
             {
                 return msg.c_str();
             }
@@ -11284,11 +11351,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
          */
         struct rendered_template : returnable
         {
-            rendered_template():
-              returnable("text/html") {}
+            rendered_template() : returnable("text/html") {}
 
-            rendered_template(std::string& body):
-              returnable("text/html"), body_(std::move(body)) {}
+            rendered_template(std::string &body) : returnable("text/html"), body_(std::move(body)) {}
 
             std::string body_;
 
@@ -11333,28 +11398,28 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             int pos;
             ActionType t;
 
-            Action(char tag_char_, ActionType t_, size_t start_, size_t end_, size_t pos_ = 0):
-              has_end_match(false), tag_char(tag_char_), start(static_cast<int>(start_)), end(static_cast<int>(end_)), pos(static_cast<int>(pos_)), t(t_)
+            Action(char tag_char_, ActionType t_, size_t start_, size_t end_, size_t pos_ = 0) : has_end_match(false), tag_char(tag_char_), start(static_cast<int>(start_)), end(static_cast<int>(end_)), pos(static_cast<int>(pos_)), t(t_)
             {
             }
 
-            bool missing_end_pair() const {
+            bool missing_end_pair() const
+            {
                 switch (t)
                 {
-                    case ActionType::Ignore:
-                    case ActionType::Tag:
-                    case ActionType::UnescapeTag:
-                    case ActionType::CloseBlock:
-                    case ActionType::Partial:
-                        return false;
+                case ActionType::Ignore:
+                case ActionType::Tag:
+                case ActionType::UnescapeTag:
+                case ActionType::CloseBlock:
+                case ActionType::Partial:
+                    return false;
 
-                    // requires a match
-                    case ActionType::OpenBlock:
-                    case ActionType::ElseBlock:
-                        return !has_end_match;
+                // requires a match
+                case ActionType::OpenBlock:
+                case ActionType::ElseBlock:
+                    return !has_end_match;
 
-                    default:
-                        throw std::logic_error("invalid type");
+                default:
+                    throw std::logic_error("invalid type");
                 }
             }
         };
@@ -11368,19 +11433,18 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         class template_t
         {
         public:
-            template_t(std::string body):
-              body_(std::move(body))
+            template_t(std::string body) : body_(std::move(body))
             {
                 // {{ {{# {{/ {{^ {{! {{> {{=
                 parse();
             }
 
         private:
-            std::string tag_name(const Action& action) const
+            std::string tag_name(const Action &action) const
             {
                 return body_.substr(action.start, action.end - action.start);
             }
-            auto find_context(const std::string& name, const std::vector<const context*>& stack, bool shouldUseOnlyFirstStackValue = false) const -> std::pair<bool, const context&>
+            auto find_context(const std::string &name, const std::vector<const context *> &stack, bool shouldUseOnlyFirstStackValue = false) const -> std::pair<bool, const context &>
             {
                 if (name == ".")
                 {
@@ -11418,7 +11482,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
                     for (auto it = stack.rbegin(); it != stack.rend(); ++it)
                     {
-                        const context* view = *it;
+                        const context *view = *it;
                         bool found = true;
                         for (auto jt = names.begin(); jt != names.end(); ++jt)
                         {
@@ -11445,32 +11509,50 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return {false, empty_str};
             }
 
-            void escape(const std::string& in, std::string& out) const
+            void escape(const std::string &in, std::string &out) const
             {
                 out.reserve(out.size() + in.size());
                 for (auto it = in.begin(); it != in.end(); ++it)
                 {
                     switch (*it)
                     {
-                        case '&': out += "&amp;"; break;
-                        case '<': out += "&lt;"; break;
-                        case '>': out += "&gt;"; break;
-                        case '"': out += "&quot;"; break;
-                        case '\'': out += "&#39;"; break;
-                        case '/': out += "&#x2F;"; break;
-                        case '`': out += "&#x60;"; break;
-                        case '=': out += "&#x3D;"; break;
-                        default: out += *it; break;
+                    case '&':
+                        out += "&amp;";
+                        break;
+                    case '<':
+                        out += "&lt;";
+                        break;
+                    case '>':
+                        out += "&gt;";
+                        break;
+                    case '"':
+                        out += "&quot;";
+                        break;
+                    case '\'':
+                        out += "&#39;";
+                        break;
+                    case '/':
+                        out += "&#x2F;";
+                        break;
+                    case '`':
+                        out += "&#x60;";
+                        break;
+                    case '=':
+                        out += "&#x3D;";
+                        break;
+                    default:
+                        out += *it;
+                        break;
                     }
                 }
             }
 
-            bool isTagInsideObjectBlock(const int& current, const std::vector<const context*>& stack) const
+            bool isTagInsideObjectBlock(const int &current, const std::vector<const context *> &stack) const
             {
                 int openedBlock = 0;
                 for (int i = current; i > 0; --i)
                 {
-                    auto& action = actions_[i - 1];
+                    auto &action = actions_[i - 1];
 
                     if (action.t == ActionType::OpenBlock)
                     {
@@ -11489,7 +11571,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 return false;
             }
 
-            void render_internal(int actionBegin, int actionEnd, std::vector<const context*>& stack, std::string& out, int indent) const
+            void render_internal(int actionBegin, int actionEnd, std::vector<const context *> &stack, std::string &out, int indent) const
             {
                 int current = actionBegin;
 
@@ -11498,144 +11580,144 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
                 while (current < actionEnd)
                 {
-                    auto& fragment = fragments_[current];
-                    auto& action = actions_[current];
+                    auto &fragment = fragments_[current];
+                    auto &action = actions_[current];
                     render_fragment(fragment, indent, out);
                     switch (action.t)
                     {
-                        case ActionType::Ignore:
-                            // do nothing
+                    case ActionType::Ignore:
+                        // do nothing
+                        break;
+                    case ActionType::Partial:
+                    {
+                        std::string partial_name = tag_name(action);
+                        auto partial_templ = load(partial_name);
+                        int partial_indent = action.pos;
+                        partial_templ.render_internal(0, partial_templ.fragments_.size() - 1, stack, out, partial_indent ? indent + partial_indent : 0);
+                    }
+                    break;
+                    case ActionType::UnescapeTag:
+                    case ActionType::Tag:
+                    {
+                        bool shouldUseOnlyFirstStackValue = false;
+                        if (isTagInsideObjectBlock(current, stack))
+                        {
+                            shouldUseOnlyFirstStackValue = true;
+                        }
+                        auto optional_ctx = find_context(tag_name(action), stack, shouldUseOnlyFirstStackValue);
+                        auto &ctx = optional_ctx.second;
+                        switch (ctx.t())
+                        {
+                        case json::type::False:
+                        case json::type::True:
+                        case json::type::Number:
+                            out += ctx.dump();
                             break;
-                        case ActionType::Partial:
+                        case json::type::String:
+                            if (action.t == ActionType::Tag)
+                                escape(ctx.s, out);
+                            else
+                                out += ctx.s;
+                            break;
+                        case json::type::Function:
                         {
-                            std::string partial_name = tag_name(action);
-                            auto partial_templ = load(partial_name);
-                            int partial_indent = action.pos;
-                            partial_templ.render_internal(0, partial_templ.fragments_.size() - 1, stack, out, partial_indent ? indent + partial_indent : 0);
-                        }
-                        break;
-                        case ActionType::UnescapeTag:
-                        case ActionType::Tag:
-                        {
-                            bool shouldUseOnlyFirstStackValue = false;
-                            if (isTagInsideObjectBlock(current, stack))
+                            std::string execute_result = ctx.execute();
+                            while (execute_result.find("{{") != std::string::npos)
                             {
-                                shouldUseOnlyFirstStackValue = true;
-                            }
-                            auto optional_ctx = find_context(tag_name(action), stack, shouldUseOnlyFirstStackValue);
-                            auto& ctx = optional_ctx.second;
-                            switch (ctx.t())
-                            {
-                                case json::type::False:
-                                case json::type::True:
-                                case json::type::Number:
-                                    out += ctx.dump();
-                                    break;
-                                case json::type::String:
-                                    if (action.t == ActionType::Tag)
-                                        escape(ctx.s, out);
-                                    else
-                                        out += ctx.s;
-                                    break;
-                                case json::type::Function:
-                                {
-                                    std::string execute_result = ctx.execute();
-                                    while (execute_result.find("{{") != std::string::npos)
-                                    {
-                                        template_t result_plug(execute_result);
-                                        execute_result = result_plug.render_string(*(stack[0]));
-                                    }
-
-                                    if (action.t == ActionType::Tag)
-                                        escape(execute_result, out);
-                                    else
-                                        out += execute_result;
-                                }
-                                break;
-                                default:
-                                    throw std::runtime_error("not implemented tag type" + utility::lexical_cast<std::string>(static_cast<int>(ctx.t())));
-                            }
-                        }
-                        break;
-                        case ActionType::ElseBlock:
-                        {
-                            static context nullContext;
-                            auto optional_ctx = find_context(tag_name(action), stack);
-                            if (!optional_ctx.first)
-                            {
-                                stack.emplace_back(&nullContext);
-                                break;
+                                template_t result_plug(execute_result);
+                                execute_result = result_plug.render_string(*(stack[0]));
                             }
 
-                            auto& ctx = optional_ctx.second;
-                            switch (ctx.t())
-                            {
-                                case json::type::List:
-                                    if (ctx.l && !ctx.l->empty())
-                                        current = action.pos;
-                                    else
-                                        stack.emplace_back(&nullContext);
-                                    break;
-                                case json::type::False:
-                                case json::type::Null:
-                                    stack.emplace_back(&nullContext);
-                                    break;
-                                default:
-                                    current = action.pos;
-                                    break;
-                            }
+                            if (action.t == ActionType::Tag)
+                                escape(execute_result, out);
+                            else
+                                out += execute_result;
+                        }
+                        break;
+                        default:
+                            throw std::runtime_error("not implemented tag type" + utility::lexical_cast<std::string>(static_cast<int>(ctx.t())));
+                        }
+                    }
+                    break;
+                    case ActionType::ElseBlock:
+                    {
+                        static context nullContext;
+                        auto optional_ctx = find_context(tag_name(action), stack);
+                        if (!optional_ctx.first)
+                        {
+                            stack.emplace_back(&nullContext);
                             break;
                         }
-                        case ActionType::OpenBlock:
+
+                        auto &ctx = optional_ctx.second;
+                        switch (ctx.t())
                         {
-                            auto optional_ctx = find_context(tag_name(action), stack);
-                            if (!optional_ctx.first)
-                            {
+                        case json::type::List:
+                            if (ctx.l && !ctx.l->empty())
                                 current = action.pos;
-                                break;
-                            }
-
-                            auto& ctx = optional_ctx.second;
-                            switch (ctx.t())
-                            {
-                                case json::type::List:
-                                    if (ctx.l)
-                                        for (auto it = ctx.l->begin(); it != ctx.l->end(); ++it)
-                                        {
-                                            stack.push_back(&*it);
-                                            render_internal(current + 1, action.pos, stack, out, indent);
-                                            stack.pop_back();
-                                        }
-                                    current = action.pos;
-                                    break;
-                                case json::type::Number:
-                                case json::type::String:
-                                case json::type::Object:
-                                case json::type::True:
-                                    stack.push_back(&ctx);
-                                    break;
-                                case json::type::False:
-                                case json::type::Null:
-                                    current = action.pos;
-                                    break;
-                                default:
-                                    throw std::runtime_error("{{#: not implemented context type: " + utility::lexical_cast<std::string>(static_cast<int>(ctx.t())));
-                                    break;
-                            }
+                            else
+                                stack.emplace_back(&nullContext);
                             break;
-                        }
-                        case ActionType::CloseBlock:
-                            stack.pop_back();
+                        case json::type::False:
+                        case json::type::Null:
+                            stack.emplace_back(&nullContext);
                             break;
                         default:
-                            throw std::runtime_error("not implemented " + utility::lexical_cast<std::string>(static_cast<int>(action.t)));
+                            current = action.pos;
+                            break;
+                        }
+                        break;
+                    }
+                    case ActionType::OpenBlock:
+                    {
+                        auto optional_ctx = find_context(tag_name(action), stack);
+                        if (!optional_ctx.first)
+                        {
+                            current = action.pos;
+                            break;
+                        }
+
+                        auto &ctx = optional_ctx.second;
+                        switch (ctx.t())
+                        {
+                        case json::type::List:
+                            if (ctx.l)
+                                for (auto it = ctx.l->begin(); it != ctx.l->end(); ++it)
+                                {
+                                    stack.push_back(&*it);
+                                    render_internal(current + 1, action.pos, stack, out, indent);
+                                    stack.pop_back();
+                                }
+                            current = action.pos;
+                            break;
+                        case json::type::Number:
+                        case json::type::String:
+                        case json::type::Object:
+                        case json::type::True:
+                            stack.push_back(&ctx);
+                            break;
+                        case json::type::False:
+                        case json::type::Null:
+                            current = action.pos;
+                            break;
+                        default:
+                            throw std::runtime_error("{{#: not implemented context type: " + utility::lexical_cast<std::string>(static_cast<int>(ctx.t())));
+                            break;
+                        }
+                        break;
+                    }
+                    case ActionType::CloseBlock:
+                        stack.pop_back();
+                        break;
+                    default:
+                        throw std::runtime_error("not implemented " + utility::lexical_cast<std::string>(static_cast<int>(action.t)));
                     }
                     current++;
                 }
-                auto& fragment = fragments_[actionEnd];
+                auto &fragment = fragments_[actionEnd];
                 render_fragment(fragment, indent, out);
             }
-            void render_fragment(const std::pair<int, int> fragment, int indent, std::string& out) const
+            void render_fragment(const std::pair<int, int> fragment, int indent, std::string &out) const
             {
                 if (indent)
                 {
@@ -11655,7 +11737,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             rendered_template render() const
             {
                 context empty_ctx;
-                std::vector<const context*> stack;
+                std::vector<const context *> stack;
                 stack.emplace_back(&empty_ctx);
 
                 std::string ret;
@@ -11664,9 +11746,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
             /// Apply the values from the context provided and output a returnable template from this mustache template
-            rendered_template render(const context& ctx) const
+            rendered_template render(const context &ctx) const
             {
-                std::vector<const context*> stack;
+                std::vector<const context *> stack;
                 stack.emplace_back(&ctx);
 
                 std::string ret;
@@ -11675,7 +11757,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
             /// Apply the values from the context provided and output a returnable template from this mustache template
-            rendered_template render(const context&& ctx) const
+            rendered_template render(const context &&ctx) const
             {
                 return render(ctx);
             }
@@ -11684,7 +11766,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             std::string render_string() const
             {
                 context empty_ctx;
-                std::vector<const context*> stack;
+                std::vector<const context *> stack;
                 stack.emplace_back(&empty_ctx);
 
                 std::string ret;
@@ -11693,9 +11775,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
 
             /// Apply the values from the context provided and output a returnable template from this mustache template
-            std::string render_string(const context& ctx) const
+            std::string render_string(const context &ctx) const
             {
-                std::vector<const context*> stack;
+                std::vector<const context *> stack;
                 stack.emplace_back(&ctx);
 
                 std::string ret;
@@ -11738,138 +11820,131 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     char tag_char = body_[idx];
                     switch (tag_char)
                     {
-                        case '#':
+                    case '#':
+                        idx++;
+                        while (body_[idx] == ' ')
                             idx++;
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx - 1] == ' ')
-                                endIdx--;
-                            blockPositions.emplace_back(static_cast<int>(actions_.size()));
-                            actions_.emplace_back(tag_char, ActionType::OpenBlock, idx, endIdx);
-                            break;
-                        case '/':
-                            idx++;
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx - 1] == ' ')
-                                endIdx--;
-                            {
-                                if (blockPositions.empty())
-                                {
-                                    throw invalid_template_exception(
-                                             std::string("unexpected closing tag: ")
-                                             + body_.substr(idx, endIdx - idx)
-                                             );
-                                }
-                                auto& matched = actions_[blockPositions.back()];
-                                if (body_.compare(idx, endIdx - idx,
-                                                  body_, matched.start, matched.end - matched.start) != 0)
-                                {
-                                     throw invalid_template_exception(
-                                             std::string("not matched {{")
-                                             + matched.tag_char
-                                             + "{{/ pair: "
-                                             + body_.substr(matched.start, matched.end - matched.start) + ", "
-                                             + body_.substr(idx, endIdx - idx)
-                                             );
-                                }
-                                matched.pos = static_cast<int>(actions_.size());
-                                matched.has_end_match = true;
-                            }
-                            actions_.emplace_back(tag_char, ActionType::CloseBlock, idx, endIdx, blockPositions.back());
-                            blockPositions.pop_back();
-                            break;
-                        case '^':
-                            idx++;
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx - 1] == ' ')
-                                endIdx--;
-                            blockPositions.emplace_back(static_cast<int>(actions_.size()));
-                            actions_.emplace_back(tag_char, ActionType::ElseBlock, idx, endIdx);
-                            break;
-                        case '!':
-                            // do nothing action
-                            actions_.emplace_back(tag_char, ActionType::Ignore, idx + 1, endIdx);
-                            break;
-                        case '>': // partial
-                            idx++;
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx - 1] == ' ')
-                                endIdx--;
-                            actions_.emplace_back(tag_char, ActionType::Partial, idx, endIdx);
-                            break;
-                        case '{':
-                            if (tag_open != "{{" || tag_close != "}}")
-                                throw invalid_template_exception("cannot use triple mustache when delimiter changed");
-
-                            idx++;
-                            if (body_[endIdx + 2] != '}')
-                            {
-                                throw invalid_template_exception("{{{: }}} not matched");
-                            }
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx - 1] == ' ')
-                                endIdx--;
-                            actions_.emplace_back(tag_char, ActionType::UnescapeTag, idx, endIdx);
-                            current++;
-                            break;
-                        case '&':
-                            idx++;
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx - 1] == ' ')
-                                endIdx--;
-                            actions_.emplace_back(tag_char, ActionType::UnescapeTag, idx, endIdx);
-                            break;
-                        case '=':
-                            // tag itself is no-op
-                            idx++;
-                            actions_.emplace_back(tag_char, ActionType::Ignore, idx, endIdx);
+                        while (body_[endIdx - 1] == ' ')
                             endIdx--;
-                            if (body_[endIdx] != '=')
-                                throw invalid_template_exception("{{=: not matching = tag: " + body_.substr(idx, endIdx - idx));
+                        blockPositions.emplace_back(static_cast<int>(actions_.size()));
+                        actions_.emplace_back(tag_char, ActionType::OpenBlock, idx, endIdx);
+                        break;
+                    case '/':
+                        idx++;
+                        while (body_[idx] == ' ')
+                            idx++;
+                        while (body_[endIdx - 1] == ' ')
                             endIdx--;
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx] == ' ')
-                                endIdx--;
-                            endIdx++;
+                        {
+                            if (blockPositions.empty())
                             {
-                                bool succeeded = false;
-                                for (size_t i = idx; i < endIdx; i++)
-                                {
-                                    if (body_[i] == ' ')
-                                    {
-                                        tag_open = body_.substr(idx, i - idx);
-                                        while (body_[i] == ' ')
-                                            i++;
-                                        tag_close = body_.substr(i, endIdx - i);
-                                        if (tag_open.empty())
-                                            throw invalid_template_exception("{{=: empty open tag");
-                                        if (tag_close.empty())
-                                            throw invalid_template_exception("{{=: empty close tag");
-
-                                        if (tag_close.find(" ") != tag_close.npos)
-                                            throw invalid_template_exception("{{=: invalid open/close tag: " + tag_open + " " + tag_close);
-                                        succeeded = true;
-                                        break;
-                                    }
-                                }
-                                if (!succeeded)
-                                    throw invalid_template_exception("{{=: cannot find space between new open/close tags");
+                                throw invalid_template_exception(
+                                    std::string("unexpected closing tag: ") + body_.substr(idx, endIdx - idx));
                             }
-                            break;
-                        default:
-                            // normal tag case;
-                            while (body_[idx] == ' ')
-                                idx++;
-                            while (body_[endIdx - 1] == ' ')
-                                endIdx--;
-                            actions_.emplace_back(tag_char, ActionType::Tag, idx, endIdx);
-                            break;
+                            auto &matched = actions_[blockPositions.back()];
+                            if (body_.compare(idx, endIdx - idx,
+                                              body_, matched.start, matched.end - matched.start) != 0)
+                            {
+                                throw invalid_template_exception(
+                                    std::string("not matched {{") + matched.tag_char + "{{/ pair: " + body_.substr(matched.start, matched.end - matched.start) + ", " + body_.substr(idx, endIdx - idx));
+                            }
+                            matched.pos = static_cast<int>(actions_.size());
+                            matched.has_end_match = true;
+                        }
+                        actions_.emplace_back(tag_char, ActionType::CloseBlock, idx, endIdx, blockPositions.back());
+                        blockPositions.pop_back();
+                        break;
+                    case '^':
+                        idx++;
+                        while (body_[idx] == ' ')
+                            idx++;
+                        while (body_[endIdx - 1] == ' ')
+                            endIdx--;
+                        blockPositions.emplace_back(static_cast<int>(actions_.size()));
+                        actions_.emplace_back(tag_char, ActionType::ElseBlock, idx, endIdx);
+                        break;
+                    case '!':
+                        // do nothing action
+                        actions_.emplace_back(tag_char, ActionType::Ignore, idx + 1, endIdx);
+                        break;
+                    case '>': // partial
+                        idx++;
+                        while (body_[idx] == ' ')
+                            idx++;
+                        while (body_[endIdx - 1] == ' ')
+                            endIdx--;
+                        actions_.emplace_back(tag_char, ActionType::Partial, idx, endIdx);
+                        break;
+                    case '{':
+                        if (tag_open != "{{" || tag_close != "}}")
+                            throw invalid_template_exception("cannot use triple mustache when delimiter changed");
+
+                        idx++;
+                        if (body_[endIdx + 2] != '}')
+                        {
+                            throw invalid_template_exception("{{{: }}} not matched");
+                        }
+                        while (body_[idx] == ' ')
+                            idx++;
+                        while (body_[endIdx - 1] == ' ')
+                            endIdx--;
+                        actions_.emplace_back(tag_char, ActionType::UnescapeTag, idx, endIdx);
+                        current++;
+                        break;
+                    case '&':
+                        idx++;
+                        while (body_[idx] == ' ')
+                            idx++;
+                        while (body_[endIdx - 1] == ' ')
+                            endIdx--;
+                        actions_.emplace_back(tag_char, ActionType::UnescapeTag, idx, endIdx);
+                        break;
+                    case '=':
+                        // tag itself is no-op
+                        idx++;
+                        actions_.emplace_back(tag_char, ActionType::Ignore, idx, endIdx);
+                        endIdx--;
+                        if (body_[endIdx] != '=')
+                            throw invalid_template_exception("{{=: not matching = tag: " + body_.substr(idx, endIdx - idx));
+                        endIdx--;
+                        while (body_[idx] == ' ')
+                            idx++;
+                        while (body_[endIdx] == ' ')
+                            endIdx--;
+                        endIdx++;
+                        {
+                            bool succeeded = false;
+                            for (size_t i = idx; i < endIdx; i++)
+                            {
+                                if (body_[i] == ' ')
+                                {
+                                    tag_open = body_.substr(idx, i - idx);
+                                    while (body_[i] == ' ')
+                                        i++;
+                                    tag_close = body_.substr(i, endIdx - i);
+                                    if (tag_open.empty())
+                                        throw invalid_template_exception("{{=: empty open tag");
+                                    if (tag_close.empty())
+                                        throw invalid_template_exception("{{=: empty close tag");
+
+                                    if (tag_close.find(" ") != tag_close.npos)
+                                        throw invalid_template_exception("{{=: invalid open/close tag: " + tag_open + " " + tag_close);
+                                    succeeded = true;
+                                    break;
+                                }
+                            }
+                            if (!succeeded)
+                                throw invalid_template_exception("{{=: cannot find space between new open/close tags");
+                        }
+                        break;
+                    default:
+                        // normal tag case;
+                        while (body_[idx] == ' ')
+                            idx++;
+                        while (body_[endIdx - 1] == ' ')
+                            endIdx--;
+                        actions_.emplace_back(tag_char, ActionType::Tag, idx, endIdx);
+                        break;
                     }
                 }
 
@@ -11879,11 +11954,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     if (actions_[i].missing_end_pair())
                     {
                         throw invalid_template_exception(
-                                std::string("open tag has no matching end tag {{")
-                                + actions_[i].tag_char
-                                + " {{/ pair: "
-                                + body_.substr(actions_[i].start, actions_[i].end - actions_[i].start)
-                                );
+                            std::string("open tag has no matching end tag {{") + actions_[i].tag_char + " {{/ pair: " + body_.substr(actions_[i].start, actions_[i].end - actions_[i].start));
                     }
                 }
 
@@ -11892,8 +11963,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 {
                     if (actions_[i].t == ActionType::Tag || actions_[i].t == ActionType::UnescapeTag)
                         continue;
-                    auto& fragment_before = fragments_[i];
-                    auto& fragment_after = fragments_[i + 1];
+                    auto &fragment_before = fragments_[i];
+                    auto &fragment_after = fragments_[i + 1];
                     bool is_last_action = i == static_cast<int>(actions_.size()) - 2;
                     bool all_space_before = true;
                     int j, k;
@@ -11922,10 +11993,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         continue;
                     if (!all_space_after &&
                         !(
-                          body_[k] == '\n' ||
-                          (body_[k] == '\r' &&
-                           k + 1 < static_cast<int>(body_.size()) &&
-                           body_[k + 1] == '\n')))
+                            body_[k] == '\n' ||
+                            (body_[k] == '\r' &&
+                             k + 1 < static_cast<int>(body_.size()) &&
+                             body_[k + 1] == '\n')))
                         continue;
                     if (actions_[i].t == ActionType::Partial)
                     {
@@ -11950,21 +12021,21 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         /// \brief The function that compiles a source into a mustache
         /// template.
-        inline template_t compile(const std::string& body)
+        inline template_t compile(const std::string &body)
         {
             return template_t(body);
         }
 
         namespace detail
         {
-            inline std::string& get_template_base_directory_ref()
+            inline std::string &get_template_base_directory_ref()
             {
                 static std::string template_base_directory = "templates";
                 return template_base_directory;
             }
 
             /// A base directory not related to any blueprint
-            inline std::string& get_global_template_base_directory_ref()
+            inline std::string &get_global_template_base_directory_ref()
             {
                 static std::string template_base_directory = "templates";
                 return template_base_directory;
@@ -11974,7 +12045,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         /// \brief The default way that \ref load, \ref load_unsafe,
         /// \ref load_text and \ref load_text_unsafe use to read the
         /// contents of a file.
-        inline std::string default_loader(const std::string& filename)
+        inline std::string default_loader(const std::string &filename)
         {
             std::string path = detail::get_template_base_directory_ref();
             std::ifstream inf(utility::join_path(path, filename));
@@ -11988,7 +12059,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         namespace detail
         {
-            inline std::function<std::string(std::string)>& get_loader_ref()
+            inline std::function<std::string(std::string)> &get_loader_ref()
             {
                 static std::function<std::string(std::string)> loader = default_loader;
                 return loader;
@@ -11997,9 +12068,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         /// \brief Defines the templates directory path at **route
         /// level**. By default is `templates/`.
-        inline void set_base(const std::string& path)
+        inline void set_base(const std::string &path)
         {
-            auto& base = detail::get_template_base_directory_ref();
+            auto &base = detail::get_template_base_directory_ref();
             base = path;
             if (base.back() != '\\' &&
                 base.back() != '/')
@@ -12010,9 +12081,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         /// \brief Defines the templates directory path at **global
         /// level**. By default is `templates/`.
-        inline void set_global_base(const std::string& path)
+        inline void set_global_base(const std::string &path)
         {
-            auto& base = detail::get_global_template_base_directory_ref();
+            auto &base = detail::get_global_template_base_directory_ref();
             base = path;
             if (base.back() != '\\' &&
                 base.back() != '/')
@@ -12037,7 +12108,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         ///
         /// Except for the **sanitize process** this function does the
         /// almost the same thing that \ref load_text_unsafe.
-        inline std::string load_text(const std::string& filename)
+        inline std::string load_text(const std::string &filename)
         {
             std::string filename_sanitized(filename);
             utility::sanitize_filename(filename_sanitized);
@@ -12064,14 +12135,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         /// \warning Usually \ref load_text is more recommended to use
         /// instead because it may prevent some [XSS Attacks](https://en.wikipedia.org/wiki/Cross-site_scripting).
         /// **Never blindly trust your users!**
-        inline std::string load_text_unsafe(const std::string& filename)
+        inline std::string load_text_unsafe(const std::string &filename)
         {
             return detail::get_loader_ref()(filename);
         }
 
         /// \brief Open, read and renders a file using a mustache
         /// compiler. It also sanitize the input before compilation.
-        inline template_t load(const std::string& filename)
+        inline template_t load(const std::string &filename)
         {
             std::string filename_sanitized(filename);
             utility::sanitize_filename(filename_sanitized);
@@ -12085,13 +12156,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         /// \warning Usually \ref load is more recommended to use
         /// instead because it may prevent some [XSS Attacks](https://en.wikipedia.org/wiki/Cross-site_scripting).
         /// **Never blindly trust your users!**
-        inline template_t load_unsafe(const std::string& filename)
+        inline template_t load_unsafe(const std::string &filename)
         {
             return compile(detail::get_loader_ref()(filename));
         }
     } // namespace mustache
 } // namespace crow
-
 
 #include <cstdint>
 #include <utility>
@@ -12101,7 +12171,6 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 #include <vector>
 #include <algorithm>
 #include <type_traits>
-
 
 namespace crow // NOTE: Already documented in "crow/app.h"
 {
@@ -12113,11 +12182,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         /// Typesafe wrapper for storing lists of middleware as their indices in the App
         struct middleware_indices
         {
-            template<typename App>
+            template <typename App>
             void push()
-            {}
+            {
+            }
 
-            template<typename App, typename MW, typename... Middlewares>
+            template <typename App, typename MW, typename... Middlewares>
             void push()
             {
                 using MwContainer = typename App::mw_container_t;
@@ -12128,17 +12198,17 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 push<App, Middlewares...>();
             }
 
-            void merge_front(const detail::middleware_indices& other)
+            void merge_front(const detail::middleware_indices &other)
             {
                 indices_.insert(indices_.begin(), other.indices_.cbegin(), other.indices_.cend());
             }
 
-            void merge_back(const detail::middleware_indices& other)
+            void merge_back(const detail::middleware_indices &other)
             {
                 indices_.insert(indices_.end(), other.indices_.cbegin(), other.indices_.cend());
             }
 
-            void pop_back(const detail::middleware_indices& other)
+            void pop_back(const detail::middleware_indices &other)
             {
                 indices_.resize(indices_.size() - other.indices_.size());
             }
@@ -12155,7 +12225,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 indices_.erase(std::unique(indices_.begin(), indices_.end()), indices_.end());
             }
 
-            const std::vector<int>& indices()
+            const std::vector<int> &indices()
             {
                 return indices_;
             }
@@ -12173,12 +12243,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
     class BaseRule
     {
     public:
-        BaseRule(std::string rule):
-          rule_(std::move(rule))
-        {}
+        BaseRule(std::string rule) : rule_(std::move(rule))
+        {
+        }
 
         virtual ~BaseRule()
-        {}
+        {
+        }
 
         virtual void validate() = 0;
 
@@ -12199,14 +12270,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return {};
         }
 
-        virtual void handle(request&, response&, const routing_params&) = 0;
-        virtual void handle_upgrade(const request&, response& res, SocketAdaptor&&)
+        virtual void handle(request &, response &, const routing_params &) = 0;
+        virtual void handle_upgrade(const request &, response &res, SocketAdaptor &&)
         {
             res = response(404);
             res.end();
         }
 #ifdef CROW_ENABLE_SSL
-        virtual void handle_upgrade(const request&, response& res, SSLAdaptor&&)
+        virtual void handle_upgrade(const request &, response &res, SSLAdaptor &&)
         {
             res = response(404);
             res.end();
@@ -12218,7 +12289,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return methods_;
         }
 
-        template<typename F>
+        template <typename F>
         void foreach_method(F f)
         {
             for (uint32_t method = 0, method_bit = 1; method < static_cast<uint32_t>(HTTPMethod::InternalMethodCount); method++, method_bit <<= 1)
@@ -12230,7 +12301,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         std::string custom_templates_base;
 
-        const std::string& rule() { return rule_; }
+        const std::string &rule() { return rule_; }
 
     protected:
         uint32_t methods_{1 << static_cast<int>(HTTPMethod::Get)};
@@ -12245,36 +12316,36 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         friend class Router;
         friend class Blueprint;
-        template<typename T>
+        template <typename T>
         friend struct RuleParameterTraits;
     };
-
 
     namespace detail
     {
         namespace routing_handler_call_helper
         {
-            template<typename T, int Pos>
+            template <typename T, int Pos>
             struct call_pair
             {
                 using type = T;
                 static const int pos = Pos;
             };
 
-            template<typename H1>
+            template <typename H1>
             struct call_params
             {
-                H1& handler;
-                const routing_params& params;
-                request& req;
-                response& res;
+                H1 &handler;
+                const routing_params &params;
+                request &req;
+                response &res;
             };
 
-            template<typename F, int NInt, int NUint, int NDouble, int NString, typename S1, typename S2>
+            template <typename F, int NInt, int NUint, int NDouble, int NString, typename S1, typename S2>
             struct call
-            {};
+            {
+            };
 
-            template<typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
+            template <typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
             struct call<F, NInt, NUint, NDouble, NString, black_magic::S<int64_t, Args1...>, black_magic::S<Args2...>>
             {
                 void operator()(F cparams)
@@ -12284,7 +12355,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             };
 
-            template<typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
+            template <typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
             struct call<F, NInt, NUint, NDouble, NString, black_magic::S<uint64_t, Args1...>, black_magic::S<Args2...>>
             {
                 void operator()(F cparams)
@@ -12294,7 +12365,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             };
 
-            template<typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
+            template <typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
             struct call<F, NInt, NUint, NDouble, NString, black_magic::S<double, Args1...>, black_magic::S<Args2...>>
             {
                 void operator()(F cparams)
@@ -12304,7 +12375,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             };
 
-            template<typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
+            template <typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1, typename... Args2>
             struct call<F, NInt, NUint, NDouble, NString, black_magic::S<std::string, Args1...>, black_magic::S<Args2...>>
             {
                 void operator()(F cparams)
@@ -12314,39 +12385,38 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             };
 
-            template<typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1>
+            template <typename F, int NInt, int NUint, int NDouble, int NString, typename... Args1>
             struct call<F, NInt, NUint, NDouble, NString, black_magic::S<>, black_magic::S<Args1...>>
             {
                 void operator()(F cparams)
                 {
                     cparams.handler(
-                      cparams.req,
-                      cparams.res,
-                      cparams.params.template get<typename Args1::type>(Args1::pos)...);
+                        cparams.req,
+                        cparams.res,
+                        cparams.params.template get<typename Args1::type>(Args1::pos)...);
                 }
             };
 
-            template<typename Func, typename... ArgsWrapped>
+            template <typename Func, typename... ArgsWrapped>
             struct Wrapped
             {
-                template<typename... Args>
-                void set_(Func f, typename std::enable_if<!std::is_same<typename std::tuple_element<0, std::tuple<Args..., void>>::type, const request&>::value, int>::type = 0)
+                template <typename... Args>
+                void set_(Func f, typename std::enable_if<!std::is_same<typename std::tuple_element<0, std::tuple<Args..., void>>::type, const request &>::value, int>::type = 0)
                 {
-                    handler_ = ([f = std::move(f)](const request&, response& res, Args... args) {
+                    handler_ = ([f = std::move(f)](const request &, response &res, Args... args)
+                                {
                         res = response(f(args...));
-                        res.end();
-                    });
+                        res.end(); });
                 }
 
-                template<typename Req, typename... Args>
+                template <typename Req, typename... Args>
                 struct req_handler_wrapper
                 {
-                    req_handler_wrapper(Func fun):
-                      f(std::move(fun))
+                    req_handler_wrapper(Func fun) : f(std::move(fun))
                     {
                     }
 
-                    void operator()(const request& req, response& res, Args... args)
+                    void operator()(const request &req, response &res, Args... args)
                     {
                         res = response(f(req, args...));
                         res.end();
@@ -12355,11 +12425,11 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     Func f;
                 };
 
-                template<typename... Args>
+                template <typename... Args>
                 void set_(Func f, typename std::enable_if<
-                                    std::is_same<typename std::tuple_element<0, std::tuple<Args..., void>>::type, const request&>::value &&
-                                      !std::is_same<typename std::tuple_element<1, std::tuple<Args..., void, void>>::type, response&>::value,
-                                    int>::type = 0)
+                                      std::is_same<typename std::tuple_element<0, std::tuple<Args..., void>>::type, const request &>::value &&
+                                          !std::is_same<typename std::tuple_element<1, std::tuple<Args..., void, void>>::type, response &>::value,
+                                      int>::type = 0)
                 {
                     handler_ = req_handler_wrapper<Args...>(std::move(f));
                     /*handler_ = (
@@ -12370,54 +12440,53 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         });*/
                 }
 
-                template<typename... Args>
+                template <typename... Args>
                 void set_(Func f, typename std::enable_if<
-                                    std::is_same<typename std::tuple_element<0, std::tuple<Args..., void>>::type, const request&>::value &&
-                                      std::is_same<typename std::tuple_element<1, std::tuple<Args..., void, void>>::type, response&>::value,
-                                    int>::type = 0)
+                                      std::is_same<typename std::tuple_element<0, std::tuple<Args..., void>>::type, const request &>::value &&
+                                          std::is_same<typename std::tuple_element<1, std::tuple<Args..., void, void>>::type, response &>::value,
+                                      int>::type = 0)
                 {
                     handler_ = std::move(f);
                 }
 
-                template<typename... Args>
+                template <typename... Args>
                 struct handler_type_helper
                 {
-                    using type = std::function<void(const crow::request&, crow::response&, Args...)>;
+                    using type = std::function<void(const crow::request &, crow::response &, Args...)>;
                     using args_type = black_magic::S<typename black_magic::promote_t<Args>...>;
                 };
 
-                template<typename... Args>
-                struct handler_type_helper<const request&, Args...>
+                template <typename... Args>
+                struct handler_type_helper<const request &, Args...>
                 {
-                    using type = std::function<void(const crow::request&, crow::response&, Args...)>;
+                    using type = std::function<void(const crow::request &, crow::response &, Args...)>;
                     using args_type = black_magic::S<typename black_magic::promote_t<Args>...>;
                 };
 
-                template<typename... Args>
-                struct handler_type_helper<const request&, response&, Args...>
+                template <typename... Args>
+                struct handler_type_helper<const request &, response &, Args...>
                 {
-                    using type = std::function<void(const crow::request&, crow::response&, Args...)>;
+                    using type = std::function<void(const crow::request &, crow::response &, Args...)>;
                     using args_type = black_magic::S<typename black_magic::promote_t<Args>...>;
                 };
 
                 typename handler_type_helper<ArgsWrapped...>::type handler_;
 
-                void operator()(request& req, response& res, const routing_params& params)
+                void operator()(request &req, response &res, const routing_params &params)
                 {
                     detail::routing_handler_call_helper::call<
-                      detail::routing_handler_call_helper::call_params<
-                        decltype(handler_)>,
-                      0, 0, 0, 0,
-                      typename handler_type_helper<ArgsWrapped...>::args_type,
-                      black_magic::S<>>()(
-                      detail::routing_handler_call_helper::call_params<
-                        decltype(handler_)>{handler_, params, req, res});
+                        detail::routing_handler_call_helper::call_params<
+                            decltype(handler_)>,
+                        0, 0, 0, 0,
+                        typename handler_type_helper<ArgsWrapped...>::args_type,
+                        black_magic::S<>>()(
+                        detail::routing_handler_call_helper::call_params<
+                            decltype(handler_)>{handler_, params, req, res});
                 }
             };
 
         } // namespace routing_handler_call_helper
-    }     // namespace detail
-
+    } // namespace detail
 
     class CatchallRule
     {
@@ -12425,59 +12494,58 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         /// @cond SKIP
         CatchallRule() {}
 
-        template<typename Func>
+        template <typename Func>
         typename std::enable_if<black_magic::CallHelper<Func, black_magic::S<>>::value, void>::type
-          operator()(Func&& f)
+        operator()(Func &&f)
         {
             static_assert(!std::is_same<void, decltype(f())>::value,
                           "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
 
-            handler_ = ([f = std::move(f)](const request&, response& res) {
+            handler_ = ([f = std::move(f)](const request &, response &res)
+                        {
                 res = response(f());
-                res.end();
-            });
+                res.end(); });
         }
 
-        template<typename Func>
+        template <typename Func>
         typename std::enable_if<
-          !black_magic::CallHelper<Func, black_magic::S<>>::value &&
-            black_magic::CallHelper<Func, black_magic::S<crow::request>>::value,
-          void>::type
-          operator()(Func&& f)
+            !black_magic::CallHelper<Func, black_magic::S<>>::value &&
+                black_magic::CallHelper<Func, black_magic::S<crow::request>>::value,
+            void>::type
+        operator()(Func &&f)
         {
             static_assert(!std::is_same<void, decltype(f(std::declval<crow::request>()))>::value,
                           "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
 
-            handler_ = ([f = std::move(f)](const request& req, response& res) {
+            handler_ = ([f = std::move(f)](const request &req, response &res)
+                        {
                 res = response(f(req));
-                res.end();
-            });
+                res.end(); });
         }
 
-        template<typename Func>
+        template <typename Func>
         typename std::enable_if<
-          !black_magic::CallHelper<Func, black_magic::S<>>::value &&
-            !black_magic::CallHelper<Func, black_magic::S<crow::request>>::value &&
-            black_magic::CallHelper<Func, black_magic::S<crow::response&>>::value,
-          void>::type
-          operator()(Func&& f)
+            !black_magic::CallHelper<Func, black_magic::S<>>::value &&
+                !black_magic::CallHelper<Func, black_magic::S<crow::request>>::value &&
+                black_magic::CallHelper<Func, black_magic::S<crow::response &>>::value,
+            void>::type
+        operator()(Func &&f)
         {
-            static_assert(std::is_same<void, decltype(f(std::declval<crow::response&>()))>::value,
+            static_assert(std::is_same<void, decltype(f(std::declval<crow::response &>()))>::value,
                           "Handler function with response argument should have void return type");
-            handler_ = ([f = std::move(f)](const request&, response& res) {
-                f(res);
-            });
+            handler_ = ([f = std::move(f)](const request &, response &res)
+                        { f(res); });
         }
 
-        template<typename Func>
+        template <typename Func>
         typename std::enable_if<
-          !black_magic::CallHelper<Func, black_magic::S<>>::value &&
-            !black_magic::CallHelper<Func, black_magic::S<crow::request>>::value &&
-            !black_magic::CallHelper<Func, black_magic::S<crow::response&>>::value,
-          void>::type
-          operator()(Func&& f)
+            !black_magic::CallHelper<Func, black_magic::S<>>::value &&
+                !black_magic::CallHelper<Func, black_magic::S<crow::request>>::value &&
+                !black_magic::CallHelper<Func, black_magic::S<crow::response &>>::value,
+            void>::type
+        operator()(Func &&f)
         {
-            static_assert(std::is_same<void, decltype(f(std::declval<crow::request>(), std::declval<crow::response&>()))>::value,
+            static_assert(std::is_same<void, decltype(f(std::declval<crow::request>(), std::declval<crow::response &>()))>::value,
                           "Handler function with response argument should have void return type");
 
             handler_ = std::move(f);
@@ -12492,109 +12560,109 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         friend class Router;
 
     private:
-        std::function<void(const crow::request&, crow::response&)> handler_;
+        std::function<void(const crow::request &, crow::response &)> handler_;
     };
-
 
     /// A rule dealing with websockets.
 
     ///
     /// Provides the interface for the user to put in the necessary handlers for a websocket to work.
-    template<typename App>
+    template <typename App>
     class WebSocketRule : public BaseRule
     {
         using self_t = WebSocketRule;
 
     public:
-        WebSocketRule(std::string rule, App* app):
-          BaseRule(std::move(rule)),
-          app_(app),
-          max_payload_(UINT64_MAX)
-        {}
+        WebSocketRule(std::string rule, App *app) : BaseRule(std::move(rule)),
+                                                    app_(app),
+                                                    max_payload_(UINT64_MAX)
+        {
+        }
 
         void validate() override
-        {}
+        {
+        }
 
-        void handle(request&, response& res, const routing_params&) override
+        void handle(request &, response &res, const routing_params &) override
         {
             res = response(404);
             res.end();
         }
 
-        void handle_upgrade(const request& req, response&, SocketAdaptor&& adaptor) override
+        void handle_upgrade(const request &req, response &, SocketAdaptor &&adaptor) override
         {
             max_payload_ = max_payload_override_ ? max_payload_ : app_->websocket_max_payload();
             new crow::websocket::Connection<SocketAdaptor, App>(req, std::move(adaptor), app_, max_payload_, subprotocols_, open_handler_, message_handler_, close_handler_, error_handler_, accept_handler_, mirror_protocols_);
         }
 #ifdef CROW_ENABLE_SSL
-        void handle_upgrade(const request& req, response&, SSLAdaptor&& adaptor) override
+        void handle_upgrade(const request &req, response &, SSLAdaptor &&adaptor) override
         {
             new crow::websocket::Connection<SSLAdaptor, App>(req, std::move(adaptor), app_, max_payload_, subprotocols_, open_handler_, message_handler_, close_handler_, error_handler_, accept_handler_, mirror_protocols_);
         }
 #endif
 
         /// Override the global payload limit for this single WebSocket rule
-        self_t& max_payload(uint64_t max_payload)
+        self_t &max_payload(uint64_t max_payload)
         {
             max_payload_ = max_payload;
             max_payload_override_ = true;
             return *this;
         }
 
-        self_t& subprotocols(const std::vector<std::string>& subprotocols)
+        self_t &subprotocols(const std::vector<std::string> &subprotocols)
         {
             subprotocols_ = subprotocols;
             return *this;
         }
 
-        template<typename Func>
-        self_t& onopen(Func f)
+        template <typename Func>
+        self_t &onopen(Func f)
         {
             open_handler_ = f;
             return *this;
         }
 
-        template<typename Func>
-        self_t& onmessage(Func f)
+        template <typename Func>
+        self_t &onmessage(Func f)
         {
             message_handler_ = f;
             return *this;
         }
 
-        template<typename Func>
-        self_t& onclose(Func f)
+        template <typename Func>
+        self_t &onclose(Func f)
         {
             close_handler_ = f;
             return *this;
         }
 
-        template<typename Func>
-        self_t& onerror(Func f)
+        template <typename Func>
+        self_t &onerror(Func f)
         {
             error_handler_ = f;
             return *this;
         }
 
-        template<typename Func>
-        self_t& onaccept(Func f)
+        template <typename Func>
+        self_t &onaccept(Func f)
         {
             accept_handler_ = f;
             return *this;
         }
 
-        self_t& mirrorprotocols(bool mirror_protocols = true)
+        self_t &mirrorprotocols(bool mirror_protocols = true)
         {
             mirror_protocols_ = mirror_protocols;
             return *this;
         }
 
     protected:
-        App* app_;
-        std::function<void(crow::websocket::connection&)> open_handler_;
-        std::function<void(crow::websocket::connection&, const std::string&, bool)> message_handler_;
-        std::function<void(crow::websocket::connection&, const std::string&, uint16_t)> close_handler_;
-        std::function<void(crow::websocket::connection&, const std::string&)> error_handler_;
-        std::function<bool(const crow::request&, void**)> accept_handler_;
+        App *app_;
+        std::function<void(crow::websocket::connection &)> open_handler_;
+        std::function<void(crow::websocket::connection &, const std::string &, bool)> message_handler_;
+        std::function<void(crow::websocket::connection &, const std::string &, uint16_t)> close_handler_;
+        std::function<void(crow::websocket::connection &, const std::string &)> error_handler_;
+        std::function<bool(const crow::request &, void **)> accept_handler_;
         bool mirror_protocols_ = false;
         uint64_t max_payload_;
         bool max_payload_override_ = false;
@@ -12605,45 +12673,45 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
     ///
     /// `rule.name("name").methods(HTTPMethod::POST)`
-    template<typename T>
+    template <typename T>
     struct RuleParameterTraits
     {
         using self_t = T;
 
-        template<typename App>
-        WebSocketRule<App>& websocket(App* app)
+        template <typename App>
+        WebSocketRule<App> &websocket(App *app)
         {
-            auto p = new WebSocketRule<App>(static_cast<self_t*>(this)->rule_, app);
-            static_cast<self_t*>(this)->rule_to_upgrade_.reset(p);
+            auto p = new WebSocketRule<App>(static_cast<self_t *>(this)->rule_, app);
+            static_cast<self_t *>(this)->rule_to_upgrade_.reset(p);
             return *p;
         }
 
-        self_t& name(std::string name) noexcept
+        self_t &name(std::string name) noexcept
         {
-            static_cast<self_t*>(this)->name_ = std::move(name);
-            return static_cast<self_t&>(*this);
+            static_cast<self_t *>(this)->name_ = std::move(name);
+            return static_cast<self_t &>(*this);
         }
 
-        self_t& methods(HTTPMethod method)
+        self_t &methods(HTTPMethod method)
         {
-            static_cast<self_t*>(this)->methods_ = 1 << static_cast<int>(method);
-            return static_cast<self_t&>(*this);
+            static_cast<self_t *>(this)->methods_ = 1 << static_cast<int>(method);
+            return static_cast<self_t &>(*this);
         }
 
-        template<typename... MethodArgs>
-        self_t& methods(HTTPMethod method, MethodArgs... args_method)
+        template <typename... MethodArgs>
+        self_t &methods(HTTPMethod method, MethodArgs... args_method)
         {
             methods(args_method...);
-            static_cast<self_t*>(this)->methods_ |= 1 << static_cast<int>(method);
-            return static_cast<self_t&>(*this);
+            static_cast<self_t *>(this)->methods_ |= 1 << static_cast<int>(method);
+            return static_cast<self_t &>(*this);
         }
 
         /// Enable local middleware for this handler
-        template<typename App, typename... Middlewares>
-        self_t& middlewares()
+        template <typename App, typename... Middlewares>
+        self_t &middlewares()
         {
-            static_cast<self_t*>(this)->mw_indices_.template push<App, Middlewares...>();
-            return static_cast<self_t&>(*this);
+            static_cast<self_t *>(this)->mw_indices_.template push<App, Middlewares...>();
+            return static_cast<self_t &>(*this);
         }
     };
 
@@ -12651,9 +12719,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
     class DynamicRule : public BaseRule, public RuleParameterTraits<DynamicRule>
     {
     public:
-        DynamicRule(std::string rule):
-          BaseRule(std::move(rule))
-        {}
+        DynamicRule(std::string rule) : BaseRule(std::move(rule))
+        {
+        }
 
         void validate() override
         {
@@ -12663,7 +12731,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
         }
 
-        void handle(request& req, response& res, const routing_params& params) override
+        void handle(request &req, response &res, const routing_params &params) override
         {
             if (!custom_templates_base.empty())
                 mustache::set_base(custom_templates_base);
@@ -12672,7 +12740,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             erased_handler_(req, res, params);
         }
 
-        template<typename Func>
+        template <typename Func>
         void operator()(Func f)
         {
 #ifdef CROW_MSVC_WORKAROUND
@@ -12687,12 +12755,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         // enable_if Arg1 == request && Arg2 != resposne
         // enable_if Arg1 != request
 #ifdef CROW_MSVC_WORKAROUND
-        template<typename Func, size_t... Indices>
+        template <typename Func, size_t... Indices>
 #else
-        template<typename Func, unsigned... Indices>
+        template <typename Func, unsigned... Indices>
 #endif
-        std::function<void(request&, response&, const routing_params&)>
-          wrap(Func f, black_magic::seq<Indices...>)
+        std::function<void(request &, response &, const routing_params &)>
+        wrap(Func f, black_magic::seq<Indices...>)
         {
 #ifdef CROW_MSVC_WORKAROUND
             using function_t = utility::function_traits<decltype(&Func::operator())>;
@@ -12700,39 +12768,39 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             using function_t = utility::function_traits<Func>;
 #endif
             if (!black_magic::is_parameter_tag_compatible(
-                  black_magic::get_parameter_tag_runtime(rule_.c_str()),
-                  black_magic::compute_parameter_tag_from_args_list<
-                    typename function_t::template arg<Indices>...>::value))
+                    black_magic::get_parameter_tag_runtime(rule_.c_str()),
+                    black_magic::compute_parameter_tag_from_args_list<
+                        typename function_t::template arg<Indices>...>::value))
             {
                 throw std::runtime_error("route_dynamic: Handler type is mismatched with URL parameters: " + rule_);
             }
             auto ret = detail::routing_handler_call_helper::Wrapped<Func, typename function_t::template arg<Indices>...>();
             ret.template set_<
-              typename function_t::template arg<Indices>...>(std::move(f));
+                typename function_t::template arg<Indices>...>(std::move(f));
             return ret;
         }
 
-        template<typename Func>
-        void operator()(std::string name, Func&& f)
+        template <typename Func>
+        void operator()(std::string name, Func &&f)
         {
             name_ = std::move(name);
             (*this).template operator()<Func>(std::forward(f));
         }
 
     private:
-        std::function<void(request&, response&, const routing_params&)> erased_handler_;
+        std::function<void(request &, response &, const routing_params &)> erased_handler_;
     };
 
     /// Default rule created when CROW_ROUTE is called.
-    template<typename... Args>
+    template <typename... Args>
     class TaggedRule : public BaseRule, public RuleParameterTraits<TaggedRule<Args...>>
     {
     public:
         using self_t = TaggedRule<Args...>;
 
-        TaggedRule(std::string rule):
-          BaseRule(std::move(rule))
-        {}
+        TaggedRule(std::string rule) : BaseRule(std::move(rule))
+        {
+        }
 
         void validate() override
         {
@@ -12745,22 +12813,21 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
         }
 
-        template<typename Func>
-        void operator()(Func&& f)
+        template <typename Func>
+        void operator()(Func &&f)
         {
-            handler_ = ([f = std::move(f)](request& req, response& res, Args... args) {
-                detail::wrapped_handler_call(req, res, f, std::forward<Args>(args)...);
-            });
+            handler_ = ([f = std::move(f)](request &req, response &res, Args... args)
+                        { detail::wrapped_handler_call(req, res, f, std::forward<Args>(args)...); });
         }
 
-        template<typename Func>
-        void operator()(std::string name, Func&& f)
+        template <typename Func>
+        void operator()(std::string name, Func &&f)
         {
             name_ = std::move(name);
             (*this).template operator()<Func>(std::forward(f));
         }
 
-        void handle(request& req, response& res, const routing_params& params) override
+        void handle(request &req, response &res, const routing_params &params) override
         {
             if (!custom_templates_base.empty())
                 mustache::set_base(custom_templates_base);
@@ -12768,19 +12835,18 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 mustache::set_base(mustache::detail::get_global_template_base_directory_ref());
 
             detail::routing_handler_call_helper::call<
-              detail::routing_handler_call_helper::call_params<decltype(handler_)>,
-              0, 0, 0, 0,
-              black_magic::S<Args...>,
-              black_magic::S<>>()(
-              detail::routing_handler_call_helper::call_params<decltype(handler_)>{handler_, params, req, res});
+                detail::routing_handler_call_helper::call_params<decltype(handler_)>,
+                0, 0, 0, 0,
+                black_magic::S<Args...>,
+                black_magic::S<>>()(
+                detail::routing_handler_call_helper::call_params<decltype(handler_)>{handler_, params, req, res});
         }
 
     private:
-        std::function<void(crow::request&, crow::response&, Args...)> handler_;
+        std::function<void(crow::request &, crow::response &, Args...)> handler_;
     };
 
     const int RULE_SPECIAL_REDIRECT_SLASH = 1;
-
 
     /// A search tree.
     class Trie
@@ -12801,21 +12867,20 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                        blueprint_index == INVALID_BP_ID &&
                        children.size() < 2 &&
                        param == ParamType::MAX &&
-                       std::all_of(std::begin(children), std::end(children), [](const Node& x) {
-                           return x.param == ParamType::MAX;
-                       });
+                       std::all_of(std::begin(children), std::end(children), [](const Node &x)
+                                   { return x.param == ParamType::MAX; });
             }
 
-            Node& add_child_node()
+            Node &add_child_node()
             {
                 children.emplace_back();
                 return children.back();
             }
         };
 
-
         Trie()
-        {}
+        {
+        }
 
         /// Check whether or not the trie is empty.
         bool is_empty()
@@ -12825,22 +12890,21 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         void optimize()
         {
-            for (auto& child : head_.children)
+            for (auto &child : head_.children)
             {
                 optimizeNode(child);
             }
         }
 
-
     private:
-        void optimizeNode(Node& node)
+        void optimizeNode(Node &node)
         {
             if (node.children.empty())
                 return;
             if (node.IsSimpleNode())
             {
                 auto children_temp = std::move(node.children);
-                auto& child_temp = children_temp[0];
+                auto &child_temp = children_temp[0];
                 node.key += child_temp.key;
                 node.rule_index = child_temp.rule_index;
                 node.blueprint_index = child_temp.blueprint_index;
@@ -12849,49 +12913,49 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
             else
             {
-                for (auto& child : node.children)
+                for (auto &child : node.children)
                 {
                     optimizeNode(child);
                 }
             }
         }
 
-        void debug_node_print(const Node& node, int level)
+        void debug_node_print(const Node &node, int level)
         {
             if (node.param != ParamType::MAX)
             {
                 switch (node.param)
                 {
-                    case ParamType::INT:
-                        CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
-                                       << "<int>";
-                        break;
-                    case ParamType::UINT:
-                        CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
-                                       << "<uint>";
-                        break;
-                    case ParamType::DOUBLE:
-                        CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
-                                       << "<double>";
-                        break;
-                    case ParamType::STRING:
-                        CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
-                                       << "<string>";
-                        break;
-                    case ParamType::PATH:
-                        CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
-                                       << "<path>";
-                        break;
-                    default:
-                        CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
-                                       << "<ERROR>";
-                        break;
+                case ParamType::INT:
+                    CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
+                                   << "<int>";
+                    break;
+                case ParamType::UINT:
+                    CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
+                                   << "<uint>";
+                    break;
+                case ParamType::DOUBLE:
+                    CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
+                                   << "<double>";
+                    break;
+                case ParamType::STRING:
+                    CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
+                                   << "<string>";
+                    break;
+                case ParamType::PATH:
+                    CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
+                                   << "<path>";
+                    break;
+                default:
+                    CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ "
+                                   << "<ERROR>";
+                    break;
                 }
             }
             else
                 CROW_LOG_DEBUG << std::string(3 * level, ' ') << "└➝ " << node.key;
 
-            for (const auto& child : node.children)
+            for (const auto &child : node.children)
             {
                 debug_node_print(child, level + 1);
             }
@@ -12901,7 +12965,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         void debug_print()
         {
             CROW_LOG_DEBUG << "└➙ ROOT";
-            for (const auto& child : head_.children)
+            for (const auto &child : head_.children)
                 debug_node_print(child, 1);
         }
 
@@ -12912,23 +12976,24 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             optimize();
         }
 
-        //Rule_index, Blueprint_index, routing_params
-        routing_handle_result find(const std::string& req_url, const Node& node, unsigned pos = 0, routing_params* params = nullptr, std::vector<uint16_t>* blueprints = nullptr) const
+        // Rule_index, Blueprint_index, routing_params
+        routing_handle_result find(const std::string &req_url, const Node &node, unsigned pos = 0, routing_params *params = nullptr, std::vector<uint16_t> *blueprints = nullptr) const
         {
-            //start params as an empty struct
+            // start params as an empty struct
             routing_params empty;
             if (params == nullptr)
                 params = &empty;
-            //same for blueprint vector
+            // same for blueprint vector
             std::vector<uint16_t> MT;
             if (blueprints == nullptr)
                 blueprints = &MT;
 
-            uint16_t found{};               //The rule index to be found
-            std::vector<uint16_t> found_BP; //The Blueprint indices to be found
-            routing_params match_params;    //supposedly the final matched parameters
+            uint16_t found{};               // The rule index to be found
+            std::vector<uint16_t> found_BP; // The Blueprint indices to be found
+            routing_params match_params;    // supposedly the final matched parameters
 
-            auto update_found = [&found, &found_BP, &match_params](routing_handle_result& ret) {
+            auto update_found = [&found, &found_BP, &match_params](routing_handle_result &ret)
+            {
                 found_BP = std::move(ret.blueprint_indices);
                 if (ret.rule_index && (!found || found > ret.rule_index))
                 {
@@ -12937,7 +13002,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             };
 
-            //if the function was called on a node at the end of the string (the last recursion), return the nodes rule index, and whatever params were passed to the function
+            // if the function was called on a node at the end of the string (the last recursion), return the nodes rule index, and whatever params were passed to the function
             if (pos == req_url.size())
             {
                 found_BP = std::move(*blueprints);
@@ -12946,7 +13011,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
             bool found_fragment = false;
 
-            for (const auto& child : node.children)
+            for (const auto &child : node.children)
             {
                 if (child.param != ParamType::MAX)
                 {
@@ -12955,18 +13020,20 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         char c = req_url[pos];
                         if ((c >= '0' && c <= '9') || c == '+' || c == '-')
                         {
-                            char* eptr;
+                            char *eptr;
                             errno = 0;
                             long long int value = strtoll(req_url.data() + pos, &eptr, 10);
                             if (errno != ERANGE && eptr != req_url.data() + pos)
                             {
                                 found_fragment = true;
                                 params->int_params.push_back(value);
-                                if (child.blueprint_index != INVALID_BP_ID) blueprints->push_back(child.blueprint_index);
+                                if (child.blueprint_index != INVALID_BP_ID)
+                                    blueprints->push_back(child.blueprint_index);
                                 auto ret = find(req_url, child, eptr - req_url.data(), params, blueprints);
                                 update_found(ret);
                                 params->int_params.pop_back();
-                                if (!blueprints->empty()) blueprints->pop_back();
+                                if (!blueprints->empty())
+                                    blueprints->pop_back();
                             }
                         }
                     }
@@ -12976,18 +13043,20 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         char c = req_url[pos];
                         if ((c >= '0' && c <= '9') || c == '+')
                         {
-                            char* eptr;
+                            char *eptr;
                             errno = 0;
                             unsigned long long int value = strtoull(req_url.data() + pos, &eptr, 10);
                             if (errno != ERANGE && eptr != req_url.data() + pos)
                             {
                                 found_fragment = true;
                                 params->uint_params.push_back(value);
-                                if (child.blueprint_index != INVALID_BP_ID) blueprints->push_back(child.blueprint_index);
+                                if (child.blueprint_index != INVALID_BP_ID)
+                                    blueprints->push_back(child.blueprint_index);
                                 auto ret = find(req_url, child, eptr - req_url.data(), params, blueprints);
                                 update_found(ret);
                                 params->uint_params.pop_back();
-                                if (!blueprints->empty()) blueprints->pop_back();
+                                if (!blueprints->empty())
+                                    blueprints->pop_back();
                             }
                         }
                     }
@@ -12997,18 +13066,20 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         char c = req_url[pos];
                         if ((c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.')
                         {
-                            char* eptr;
+                            char *eptr;
                             errno = 0;
                             double value = strtod(req_url.data() + pos, &eptr);
                             if (errno != ERANGE && eptr != req_url.data() + pos)
                             {
                                 found_fragment = true;
                                 params->double_params.push_back(value);
-                                if (child.blueprint_index != INVALID_BP_ID) blueprints->push_back(child.blueprint_index);
+                                if (child.blueprint_index != INVALID_BP_ID)
+                                    blueprints->push_back(child.blueprint_index);
                                 auto ret = find(req_url, child, eptr - req_url.data(), params, blueprints);
                                 update_found(ret);
                                 params->double_params.pop_back();
-                                if (!blueprints->empty()) blueprints->pop_back();
+                                if (!blueprints->empty())
+                                    blueprints->pop_back();
                             }
                         }
                     }
@@ -13026,11 +13097,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         {
                             found_fragment = true;
                             params->string_params.push_back(req_url.substr(pos, epos - pos));
-                            if (child.blueprint_index != INVALID_BP_ID) blueprints->push_back(child.blueprint_index);
+                            if (child.blueprint_index != INVALID_BP_ID)
+                                blueprints->push_back(child.blueprint_index);
                             auto ret = find(req_url, child, epos, params, blueprints);
                             update_found(ret);
                             params->string_params.pop_back();
-                            if (!blueprints->empty()) blueprints->pop_back();
+                            if (!blueprints->empty())
+                                blueprints->pop_back();
                         }
                     }
 
@@ -13042,25 +13115,29 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         {
                             found_fragment = true;
                             params->string_params.push_back(req_url.substr(pos, epos - pos));
-                            if (child.blueprint_index != INVALID_BP_ID) blueprints->push_back(child.blueprint_index);
+                            if (child.blueprint_index != INVALID_BP_ID)
+                                blueprints->push_back(child.blueprint_index);
                             auto ret = find(req_url, child, epos, params, blueprints);
                             update_found(ret);
                             params->string_params.pop_back();
-                            if (!blueprints->empty()) blueprints->pop_back();
+                            if (!blueprints->empty())
+                                blueprints->pop_back();
                         }
                     }
                 }
 
                 else
                 {
-                    const std::string& fragment = child.key;
+                    const std::string &fragment = child.key;
                     if (req_url.compare(pos, fragment.size(), fragment) == 0)
                     {
                         found_fragment = true;
-                        if (child.blueprint_index != INVALID_BP_ID) blueprints->push_back(child.blueprint_index);
+                        if (child.blueprint_index != INVALID_BP_ID)
+                            blueprints->push_back(child.blueprint_index);
                         auto ret = find(req_url, child, pos + fragment.size(), params, blueprints);
                         update_found(ret);
-                        if (!blueprints->empty()) blueprints->pop_back();
+                        if (!blueprints->empty())
+                            blueprints->pop_back();
                     }
                 }
             }
@@ -13068,16 +13145,16 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             if (!found_fragment)
                 found_BP = std::move(*blueprints);
 
-            return routing_handle_result{found, found_BP, match_params}; //Called after all the recursions have been done
+            return routing_handle_result{found, found_BP, match_params}; // Called after all the recursions have been done
         }
 
-        routing_handle_result find(const std::string& req_url) const
+        routing_handle_result find(const std::string &req_url) const
         {
             return find(req_url, head_);
         }
 
-        //This functions assumes any blueprint info passed is valid
-        void add(const std::string& url, uint16_t rule_index, unsigned bp_prefix_length = 0, uint16_t blueprint_index = INVALID_BP_ID)
+        // This functions assumes any blueprint info passed is valid
+        void add(const std::string &url, uint16_t rule_index, unsigned bp_prefix_length = 0, uint16_t blueprint_index = INVALID_BP_ID)
         {
             auto idx = &head_;
 
@@ -13093,22 +13170,22 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                         ParamType type;
                         std::string name;
                     } paramTraits[] =
-                      {
-                        {ParamType::INT, "<int>"},
-                        {ParamType::UINT, "<uint>"},
-                        {ParamType::DOUBLE, "<float>"},
-                        {ParamType::DOUBLE, "<double>"},
-                        {ParamType::STRING, "<str>"},
-                        {ParamType::STRING, "<string>"},
-                        {ParamType::PATH, "<path>"},
-                      };
+                        {
+                            {ParamType::INT, "<int>"},
+                            {ParamType::UINT, "<uint>"},
+                            {ParamType::DOUBLE, "<float>"},
+                            {ParamType::DOUBLE, "<double>"},
+                            {ParamType::STRING, "<str>"},
+                            {ParamType::STRING, "<string>"},
+                            {ParamType::PATH, "<path>"},
+                        };
 
-                    for (const auto& x : paramTraits)
+                    for (const auto &x : paramTraits)
                     {
                         if (url.compare(i, x.name.size(), x.name) == 0)
                         {
                             bool found = false;
-                            for (auto& child : idx->children)
+                            for (auto &child : idx->children)
                             {
                                 if (child.param == x.type)
                                 {
@@ -13133,9 +13210,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
                 else
                 {
-                    //This part assumes the tree is unoptimized (every node has a max 1 character key)
+                    // This part assumes the tree is unoptimized (every node has a max 1 character key)
                     bool piece_found = false;
-                    for (auto& child : idx->children)
+                    for (auto &child : idx->children)
                     {
                         if (child.key[0] == c)
                         {
@@ -13148,7 +13225,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     {
                         auto new_node_idx = &idx->add_child_node();
                         new_node_idx->key = c;
-                        //The assumption here is that you'd only need to add a blueprint index if the tree didn't have the BP prefix.
+                        // The assumption here is that you'd only need to add a blueprint index if the tree didn't have the BP prefix.
                         if (has_blueprint && i == bp_prefix_length)
                             new_node_idx->blueprint_index = blueprint_index;
                         idx = new_node_idx;
@@ -13156,7 +13233,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
             }
 
-            //check if the last node already has a value (exact url already in Trie)
+            // check if the last node already has a value (exact url already in Trie)
             if (idx->rule_index)
                 throw std::runtime_error("handler already exists for " + url);
             idx->rule_index = rule_index;
@@ -13174,16 +13251,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
     class Blueprint
     {
     public:
-        Blueprint(const std::string& prefix):
-          prefix_(prefix),
-          static_dir_(prefix),
-          templates_dir_(prefix){};
+        Blueprint(const std::string &prefix) : prefix_(prefix),
+                                               static_dir_(prefix),
+                                               templates_dir_(prefix) {};
 
-        Blueprint(const std::string& prefix, const std::string& static_dir):
-          prefix_(prefix), static_dir_(static_dir){};
+        Blueprint(const std::string &prefix, const std::string &static_dir) : prefix_(prefix), static_dir_(static_dir) {};
 
-        Blueprint(const std::string& prefix, const std::string& static_dir, const std::string& templates_dir):
-          prefix_(prefix), static_dir_(static_dir), templates_dir_(templates_dir){};
+        Blueprint(const std::string &prefix, const std::string &static_dir, const std::string &templates_dir) : prefix_(prefix), static_dir_(static_dir), templates_dir_(templates_dir) {};
 
         /*
         Blueprint(Blueprint& other)
@@ -13198,14 +13272,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             all_rules_ = other.all_rules_;
         }
 */
-        Blueprint(Blueprint&& value)
+        Blueprint(Blueprint &&value)
         {
             *this = std::move(value);
         }
 
-        Blueprint& operator=(const Blueprint& value) = delete;
+        Blueprint &operator=(const Blueprint &value) = delete;
 
-        Blueprint& operator=(Blueprint&& value) noexcept
+        Blueprint &operator=(Blueprint &&value) noexcept
         {
             prefix_ = std::move(value.prefix_);
             static_dir_ = std::move(value.static_dir_);
@@ -13217,12 +13291,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return *this;
         }
 
-        bool operator==(const Blueprint& value)
+        bool operator==(const Blueprint &value)
         {
             return value.prefix() == prefix_;
         }
 
-        bool operator!=(const Blueprint& value)
+        bool operator!=(const Blueprint &value)
         {
             return value.prefix() != prefix_;
         }
@@ -13247,7 +13321,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return added_;
         }
 
-        DynamicRule& new_rule_dynamic(const std::string& rule)
+        DynamicRule &new_rule_dynamic(const std::string &rule)
         {
             std::string new_rule = '/' + prefix_ + rule;
             auto ruleObject = new DynamicRule(std::move(new_rule));
@@ -13257,8 +13331,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return *ruleObject;
         }
 
-        template<uint64_t N>
-        typename black_magic::arguments<N>::type::template rebind<TaggedRule>& new_rule_tagged(const std::string& rule)
+        template <uint64_t N>
+        typename black_magic::arguments<N>::type::template rebind<TaggedRule> &new_rule_tagged(const std::string &rule)
         {
             std::string new_rule = '/' + prefix_ + rule;
             using RuleT = typename black_magic::arguments<N>::type::template rebind<TaggedRule>;
@@ -13270,7 +13344,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return *ruleObject;
         }
 
-        void register_blueprint(Blueprint& blueprint)
+        void register_blueprint(Blueprint &blueprint)
         {
             if (blueprints_.empty() || std::find(blueprints_.begin(), blueprints_.end(), &blueprint) == blueprints_.end())
             {
@@ -13281,33 +13355,32 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 throw std::runtime_error("blueprint \"" + blueprint.prefix_ + "\" already exists in blueprint \"" + prefix_ + '\"');
         }
 
-
-        CatchallRule& catchall_rule()
+        CatchallRule &catchall_rule()
         {
             return catchall_rule_;
         }
 
-        template<typename App, typename... Middlewares>
+        template <typename App, typename... Middlewares>
         void middlewares()
         {
             mw_indices_.push<App, Middlewares...>();
         }
 
     private:
-        void apply_blueprint(Blueprint& blueprint)
+        void apply_blueprint(Blueprint &blueprint)
         {
 
             blueprint.prefix_ = prefix_ + '/' + blueprint.prefix_;
             blueprint.static_dir_ = static_dir_ + '/' + blueprint.static_dir_;
             blueprint.templates_dir_ = templates_dir_ + '/' + blueprint.templates_dir_;
-            for (auto& rule : blueprint.all_rules_)
+            for (auto &rule : blueprint.all_rules_)
             {
                 std::string new_rule = '/' + prefix_ + rule->rule_;
                 rule->rule_ = new_rule;
             }
-            for (Blueprint* bp_child : blueprint.blueprints_)
+            for (Blueprint *bp_child : blueprint.blueprints_)
             {
-                Blueprint& bp_ref = *bp_child;
+                Blueprint &bp_ref = *bp_child;
                 apply_blueprint(bp_ref);
             }
         }
@@ -13317,7 +13390,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         std::string templates_dir_;
         std::vector<std::unique_ptr<BaseRule>> all_rules_;
         CatchallRule catchall_rule_;
-        std::vector<Blueprint*> blueprints_;
+        std::vector<Blueprint *> blueprints_;
         detail::middleware_indices mw_indices_;
         bool added_{false};
 
@@ -13331,9 +13404,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         bool using_ssl;
 
         Router() : using_ssl(false)
-        {}
+        {
+        }
 
-        DynamicRule& new_rule_dynamic(const std::string& rule)
+        DynamicRule &new_rule_dynamic(const std::string &rule)
         {
             auto ruleObject = new DynamicRule(rule);
             all_rules_.emplace_back(ruleObject);
@@ -13341,8 +13415,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return *ruleObject;
         }
 
-        template<uint64_t N>
-        typename black_magic::arguments<N>::type::template rebind<TaggedRule>& new_rule_tagged(const std::string& rule)
+        template <uint64_t N>
+        typename black_magic::arguments<N>::type::template rebind<TaggedRule> &new_rule_tagged(const std::string &rule)
         {
             using RuleT = typename black_magic::arguments<N>::type::template rebind<TaggedRule>;
 
@@ -13352,17 +13426,17 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return *ruleObject;
         }
 
-        CatchallRule& catchall_rule()
+        CatchallRule &catchall_rule()
         {
             return catchall_rule_;
         }
 
-        void internal_add_rule_object(const std::string& rule, BaseRule* ruleObject)
+        void internal_add_rule_object(const std::string &rule, BaseRule *ruleObject)
         {
             internal_add_rule_object(rule, ruleObject, INVALID_BP_ID, blueprints_);
         }
 
-        void internal_add_rule_object(const std::string& rule, BaseRule* ruleObject, const uint16_t& BP_index, std::vector<Blueprint*>& blueprints)
+        void internal_add_rule_object(const std::string &rule, BaseRule *ruleObject, const uint16_t &BP_index, std::vector<Blueprint *> &blueprints)
         {
             bool has_trailing_slash = false;
             std::string rule_without_trailing_slash;
@@ -13375,7 +13449,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
             ruleObject->mw_indices_.pack();
 
-            ruleObject->foreach_method([&](int method) {
+            ruleObject->foreach_method([&](int method)
+                                       {
                 per_methods_[method].rules.emplace_back(ruleObject);
                 per_methods_[method].trie.add(rule, per_methods_[method].rules.size() - 1, BP_index != INVALID_BP_ID ? blueprints[BP_index]->prefix().length() : 0, BP_index);
 
@@ -13384,13 +13459,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 if (has_trailing_slash)
                 {
                     per_methods_[method].trie.add(rule_without_trailing_slash, RULE_SPECIAL_REDIRECT_SLASH, BP_index != INVALID_BP_ID ? blueprints[BP_index]->prefix().length() : 0, BP_index);
-                }
-            });
+                } });
 
             ruleObject->set_added();
         }
 
-        void register_blueprint(Blueprint& blueprint)
+        void register_blueprint(Blueprint &blueprint)
         {
             if (std::find(blueprints_.begin(), blueprints_.end(), &blueprint) == blueprints_.end())
             {
@@ -13400,42 +13474,43 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 throw std::runtime_error("blueprint \"" + blueprint.prefix_ + "\" already exists in router");
         }
 
-        void get_recursive_child_methods(Blueprint* blueprint, std::vector<HTTPMethod>& methods)
+        void get_recursive_child_methods(Blueprint *blueprint, std::vector<HTTPMethod> &methods)
         {
-            //we only need to deal with children if the blueprint has absolutely no methods (meaning its index won't be added to the trie)
+            // we only need to deal with children if the blueprint has absolutely no methods (meaning its index won't be added to the trie)
             if (blueprint->static_dir_.empty() && blueprint->all_rules_.empty())
             {
-                for (Blueprint* bp : blueprint->blueprints_)
+                for (Blueprint *bp : blueprint->blueprints_)
                 {
                     get_recursive_child_methods(bp, methods);
                 }
             }
             else if (!blueprint->static_dir_.empty())
                 methods.emplace_back(HTTPMethod::Get);
-            for (auto& rule : blueprint->all_rules_)
+            for (auto &rule : blueprint->all_rules_)
             {
-                rule->foreach_method([&methods](unsigned method) {
+                rule->foreach_method([&methods](unsigned method)
+                                     {
                     HTTPMethod method_final = static_cast<HTTPMethod>(method);
                     if (std::find(methods.begin(), methods.end(), method_final) == methods.end())
-                        methods.emplace_back(method_final);
-                });
+                        methods.emplace_back(method_final); });
             }
         }
 
         void validate_bp()
         {
-            //Take all the routes from the registered blueprints and add them to `all_rules_` to be processed.
+            // Take all the routes from the registered blueprints and add them to `all_rules_` to be processed.
             detail::middleware_indices blueprint_mw;
             validate_bp(blueprints_, blueprint_mw);
         }
 
-        void validate_bp(std::vector<Blueprint*> blueprints, detail::middleware_indices& current_mw)
+        void validate_bp(std::vector<Blueprint *> blueprints, detail::middleware_indices &current_mw)
         {
             for (unsigned i = 0; i < blueprints.size(); i++)
             {
-                Blueprint* blueprint = blueprints[i];
+                Blueprint *blueprint = blueprints[i];
 
-                if (blueprint->is_added()) continue;
+                if (blueprint->is_added())
+                    continue;
 
                 if (blueprint->static_dir_ == "" && blueprint->all_rules_.empty())
                 {
@@ -13449,7 +13524,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 }
 
                 current_mw.merge_back(blueprint->mw_indices_);
-                for (auto& rule : blueprint->all_rules_)
+                for (auto &rule : blueprint->all_rules_)
                 {
                     if (rule && !rule->is_added())
                     {
@@ -13469,7 +13544,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         void validate()
         {
-            for (auto& rule : all_rules_)
+            for (auto &rule : all_rules_)
             {
                 if (rule && !rule->is_added())
                 {
@@ -13480,26 +13555,26 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     internal_add_rule_object(rule->rule(), rule.get());
                 }
             }
-            for (auto& per_method : per_methods_)
+            for (auto &per_method : per_methods_)
             {
                 per_method.trie.validate();
             }
         }
 
         // TODO maybe add actual_method
-        template<typename Adaptor>
-        void handle_upgrade(const request& req, response& res, Adaptor&& adaptor)
+        template <typename Adaptor>
+        void handle_upgrade(const request &req, response &res, Adaptor &&adaptor)
         {
             if (req.method >= HTTPMethod::InternalMethodCount)
                 return;
 
-            auto& per_method = per_methods_[static_cast<int>(req.method)];
-            auto& rules = per_method.rules;
+            auto &per_method = per_methods_[static_cast<int>(req.method)];
+            auto &rules = per_method.rules;
             unsigned rule_index = per_method.trie.find(req.url).rule_index;
 
             if (!rule_index)
             {
-                for (auto& method : per_methods_)
+                for (auto &method : per_methods_)
                 {
                     if (method.trie.find(req.url).rule_index)
                     {
@@ -13542,7 +13617,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
         }
 
-        void get_found_bp(std::vector<uint16_t>& bp_i, std::vector<Blueprint*>& blueprints, std::vector<Blueprint*>& found_bps, uint16_t index = 0)
+        void get_found_bp(std::vector<uint16_t> &bp_i, std::vector<Blueprint *> &blueprints, std::vector<Blueprint *> &found_bps, uint16_t index = 0)
         {
             // This statement makes 3 assertions:
             // 1. The index is above 0.
@@ -13552,7 +13627,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             // This is done to prevent a blueprint that has a prefix of "bp_prefix2" to be assumed as a child of one that has "bp_prefix".
             //
             // If any of the assertions is untrue, we delete the last item added, and continue using the blueprint list of the blueprint found before, the topmost being the router's list
-            auto verify_prefix = [&bp_i, &index, &blueprints, &found_bps]() {
+            auto verify_prefix = [&bp_i, &index, &blueprints, &found_bps]()
+            {
                 return index > 0 &&
                        bp_i[index] < blueprints.size() &&
                        blueprints[bp_i[index]]->prefix().substr(0, found_bps[index - 1]->prefix().length() + 1).compare(std::string(found_bps[index - 1]->prefix() + '/')) == 0;
@@ -13575,7 +13651,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     else
                     {
                         found_bps.pop_back();
-                        Blueprint* last_element = found_bps.back();
+                        Blueprint *last_element = found_bps.back();
                         found_bps.push_back(last_element->blueprints_[bp_i[index]]);
                     }
                     get_found_bp(bp_i, found_bps.back()->blueprints_, found_bps, ++index);
@@ -13584,10 +13660,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         }
 
         /// Is used to handle errors, you insert the error code, found route, request, and response. and it'll either call the appropriate catchall route (considering the blueprint system) and send you a status string (which is mainly used for debug messages), or just set the response code to the proper error code.
-        std::string get_error(unsigned short code, routing_handle_result& found, const request& req, response& res)
+        std::string get_error(unsigned short code, routing_handle_result &found, const request &req, response &res)
         {
             res.code = code;
-            std::vector<Blueprint*> bps_found;
+            std::vector<Blueprint *> bps_found;
             get_found_bp(found.blueprint_indices, blueprints_, bps_found);
             for (int i = bps_found.size() - 1; i > 0; i--)
             {
@@ -13628,16 +13704,16 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             return std::string();
         }
 
-        std::unique_ptr<routing_handle_result> handle_initial(request& req, response& res)
+        std::unique_ptr<routing_handle_result> handle_initial(request &req, response &res)
         {
             HTTPMethod method_actual = req.method;
 
             std::unique_ptr<routing_handle_result> found{
-              new routing_handle_result(
-                0,
-                std::vector<uint16_t>(),
-                routing_params(),
-                HTTPMethod::InternalMethodCount)}; // This is always returned to avoid a null pointer dereference.
+                new routing_handle_result(
+                    0,
+                    std::vector<uint16_t>(),
+                    routing_params(),
+                    HTTPMethod::InternalMethodCount)}; // This is always returned to avoid a null pointer dereference.
 
             // NOTE(EDev): This most likely will never run since the parser should handle this situation and close the connection before it gets here.
             if (CROW_UNLIKELY(req.method >= HTTPMethod::InternalMethodCount))
@@ -13653,7 +13729,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     if (!found->rule_index) // If a route is still not found, return a 404 without executing the rest of the HEAD specific code.
                     {
                         CROW_LOG_DEBUG << "Cannot match rules " << req.url;
-                        res = response(404); //TODO(EDev): Should this redirect to catchall?
+                        res = response(404); // TODO(EDev): Should this redirect to catchall?
                         res.end();
                         return found;
                     }
@@ -13722,7 +13798,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     else
                     {
                         CROW_LOG_DEBUG << "Cannot match rules " << req.url;
-                        res = response(404); //TODO(EDev): Should this redirect to catchall?
+                        res = response(404); // TODO(EDev): Should this redirect to catchall?
                         res.end();
                         return found;
                     }
@@ -13734,9 +13810,9 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                 // TODO(EDev): maybe ending the else here would allow the requests coming from above (after removing the return statement) to be checked on whether they actually point to a route
                 if (!found->rule_index)
                 {
-                    for (auto& per_method : per_methods_)
+                    for (auto &per_method : per_methods_)
                     {
-                        if (per_method.trie.find(req.url).rule_index) //Route found, but in another method
+                        if (per_method.trie.find(req.url).rule_index) // Route found, but in another method
                         {
                             const std::string error_message(get_error(405, *found, req, res));
                             CROW_LOG_DEBUG << "Cannot match method " << req.url << " " << method_name(method_actual) << ". " << error_message;
@@ -13744,7 +13820,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                             return found;
                         }
                     }
-                    //Route does not exist anywhere
+                    // Route does not exist anywhere
 
                     const std::string error_message(get_error(404, *found, req, res));
                     CROW_LOG_DEBUG << "Cannot match rules " << req.url << ". " << error_message;
@@ -13757,11 +13833,11 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
         }
 
-        template<typename App>
-        void handle(request& req, response& res, routing_handle_result found)
+        template <typename App>
+        void handle(request &req, response &res, routing_handle_result found)
         {
             HTTPMethod method_actual = found.method;
-            auto& rules = per_methods_[static_cast<int>(method_actual)].rules;
+            auto &rules = per_methods_[static_cast<int>(method_actual)].rules;
             unsigned rule_index = found.rule_index;
 
             if (rule_index >= rules.size())
@@ -13780,7 +13856,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
             try
             {
-                BaseRule& rule = *rules[rule_index];
+                BaseRule &rule = *rules[rule_index];
                 handle_rule<App>(rule, req, res, found.r_params);
             }
             catch (...)
@@ -13791,14 +13867,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
         }
 
-        template<typename App>
+        template <typename App>
         typename std::enable_if<std::tuple_size<typename App::mw_container_t>::value != 0, void>::type
-          handle_rule(BaseRule& rule, crow::request& req, crow::response& res, const crow::routing_params& rp)
+        handle_rule(BaseRule &rule, crow::request &req, crow::response &res, const crow::routing_params &rp)
         {
             if (!rule.mw_indices_.empty())
             {
-                auto& ctx = *reinterpret_cast<typename App::context_t*>(req.middleware_context);
-                auto& container = *reinterpret_cast<typename App::mw_container_t*>(req.middleware_container);
+                auto &ctx = *reinterpret_cast<typename App::context_t *>(req.middleware_context);
+                auto &container = *reinterpret_cast<typename App::mw_container_t *>(req.middleware_container);
                 detail::middleware_call_criteria_dynamic<false> crit_fwd(rule.mw_indices_.indices());
 
                 auto glob_completion_handler = std::move(res.complete_request_handler_);
@@ -13813,23 +13889,24 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                     return;
                 }
 
-                res.complete_request_handler_ = [&rule, &ctx, &container, &req, &res, glob_completion_handler] {
+                res.complete_request_handler_ = [&rule, &ctx, &container, &req, &res, glob_completion_handler]
+                {
                     detail::middleware_call_criteria_dynamic<true> crit_bwd(rule.mw_indices_.indices());
 
                     detail::after_handlers_call_helper<
-                      decltype(crit_bwd),
-                      std::tuple_size<typename App::mw_container_t>::value - 1,
-                      typename App::context_t,
-                      typename App::mw_container_t>(crit_bwd, container, ctx, req, res);
+                        decltype(crit_bwd),
+                        std::tuple_size<typename App::mw_container_t>::value - 1,
+                        typename App::context_t,
+                        typename App::mw_container_t>(crit_bwd, container, ctx, req, res);
                     glob_completion_handler();
                 };
             }
             rule.handle(req, res, rp);
         }
 
-        template<typename App>
+        template <typename App>
         typename std::enable_if<std::tuple_size<typename App::mw_container_t>::value == 0, void>::type
-          handle_rule(BaseRule& rule, crow::request& req, crow::response& res, const crow::routing_params& rp)
+        handle_rule(BaseRule &rule, crow::request &req, crow::response &res, const crow::routing_params &rp)
         {
             rule.handle(req, res, rp);
         }
@@ -13838,7 +13915,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             for (int i = 0; i < static_cast<int>(HTTPMethod::InternalMethodCount); i++)
             {
-                Trie& trie_ = per_methods_[i].trie;
+                Trie &trie_ = per_methods_[i].trie;
                 if (!trie_.is_empty())
                 {
                     CROW_LOG_DEBUG << method_name(static_cast<HTTPMethod>(i));
@@ -13847,17 +13924,17 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             }
         }
 
-        std::vector<Blueprint*>& blueprints()
+        std::vector<Blueprint *> &blueprints()
         {
             return blueprints_;
         }
 
-        std::function<void(crow::response&)>& exception_handler()
+        std::function<void(crow::response &)> &exception_handler()
         {
             return exception_handler_;
         }
 
-        static void default_exception_handler(response& res)
+        static void default_exception_handler(response &res)
         {
             // any uncaught exceptions become 500s
             res = response(500);
@@ -13866,12 +13943,12 @@ namespace crow // NOTE: Already documented in "crow/app.h"
             {
                 throw;
             }
-            catch (const bad_request& e)
+            catch (const bad_request &e)
             {
-                res = response (400);
+                res = response(400);
                 res.body = e.what();
             }
-            catch (const std::exception& e)
+            catch (const std::exception &e)
             {
                 CROW_LOG_ERROR << "An uncaught exception occurred: " << e.what();
             }
@@ -13886,20 +13963,18 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         struct PerMethod
         {
-            std::vector<BaseRule*> rules;
+            std::vector<BaseRule *> rules;
             Trie trie;
 
             // rule index 0, 1 has special meaning; preallocate it to avoid duplication.
-            PerMethod():
-              rules(2) {}
+            PerMethod() : rules(2) {}
         };
         std::array<PerMethod, static_cast<int>(HTTPMethod::InternalMethodCount)> per_methods_;
         std::vector<std::unique_ptr<BaseRule>> all_rules_;
-        std::vector<Blueprint*> blueprints_;
-        std::function<void(crow::response&)> exception_handler_ = &default_exception_handler;
+        std::vector<Blueprint *> blueprints_;
+        std::function<void(crow::response &)> exception_handler_ = &default_exception_handler;
     };
 } // namespace crow
-
 
 namespace crow
 {
@@ -13911,22 +13986,22 @@ namespace crow
         friend struct crow::CORSHandler;
 
         /// Set Access-Control-Allow-Origin. Default is "*"
-        CORSRules& origin(const std::string& origin)
+        CORSRules &origin(const std::string &origin)
         {
             origin_ = origin;
             return *this;
         }
 
         /// Set Access-Control-Allow-Methods. Default is "*"
-        CORSRules& methods(crow::HTTPMethod method)
+        CORSRules &methods(crow::HTTPMethod method)
         {
             add_list_item(methods_, crow::method_name(method));
             return *this;
         }
 
         /// Set Access-Control-Allow-Methods. Default is "*"
-        template<typename... Methods>
-        CORSRules& methods(crow::HTTPMethod method, Methods... method_list)
+        template <typename... Methods>
+        CORSRules &methods(crow::HTTPMethod method, Methods... method_list)
         {
             add_list_item(methods_, crow::method_name(method));
             methods(method_list...);
@@ -13934,15 +14009,15 @@ namespace crow
         }
 
         /// Set Access-Control-Allow-Headers. Default is "*"
-        CORSRules& headers(const std::string& header)
+        CORSRules &headers(const std::string &header)
         {
             add_list_item(headers_, header);
             return *this;
         }
 
         /// Set Access-Control-Allow-Headers. Default is "*"
-        template<typename... Headers>
-        CORSRules& headers(const std::string& header, Headers... header_list)
+        template <typename... Headers>
+        CORSRules &headers(const std::string &header, Headers... header_list)
         {
             add_list_item(headers_, header);
             headers(header_list...);
@@ -13950,15 +14025,15 @@ namespace crow
         }
 
         /// Set Access-Control-Expose-Headers. Default is none
-        CORSRules& expose(const std::string& header)
+        CORSRules &expose(const std::string &header)
         {
             add_list_item(exposed_headers_, header);
             return *this;
         }
 
         /// Set Access-Control-Expose-Headers. Default is none
-        template<typename... Headers>
-        CORSRules& expose(const std::string& header, Headers... header_list)
+        template <typename... Headers>
+        CORSRules &expose(const std::string &header, Headers... header_list)
         {
             add_list_item(exposed_headers_, header);
             expose(header_list...);
@@ -13966,14 +14041,14 @@ namespace crow
         }
 
         /// Set Access-Control-Max-Age. Default is none
-        CORSRules& max_age(int max_age)
+        CORSRules &max_age(int max_age)
         {
             max_age_ = std::to_string(max_age);
             return *this;
         }
 
         /// Enable Access-Control-Allow-Credentials
-        CORSRules& allow_credentials()
+        CORSRules &allow_credentials()
         {
             allow_credentials_ = true;
             return *this;
@@ -13986,39 +14061,43 @@ namespace crow
         }
 
         /// Handle CORS on specific prefix path
-        CORSRules& prefix(const std::string& prefix);
+        CORSRules &prefix(const std::string &prefix);
 
         /// Handle CORS for specific blueprint
-        CORSRules& blueprint(const Blueprint& bp);
+        CORSRules &blueprint(const Blueprint &bp);
 
         /// Global CORS policy
-        CORSRules& global();
+        CORSRules &global();
 
     private:
         CORSRules() = delete;
-        CORSRules(CORSHandler* handler):
-          handler_(handler) {}
+        CORSRules(CORSHandler *handler) : handler_(handler) {}
 
         /// build comma separated list
-        void add_list_item(std::string& list, const std::string& val)
+        void add_list_item(std::string &list, const std::string &val)
         {
-            if (list == "*") list = "";
-            if (list.size() > 0) list += ", ";
+            if (list == "*")
+                list = "";
+            if (list.size() > 0)
+                list += ", ";
             list += val;
         }
 
         /// Set header `key` to `value` if it is not set
-        void set_header_no_override(const std::string& key, const std::string& value, crow::response& res)
+        void set_header_no_override(const std::string &key, const std::string &value, crow::response &res)
         {
-            if (value.size() == 0) return;
-            if (!get_header_value(res.headers, key).empty()) return;
+            if (value.size() == 0)
+                return;
+            if (!get_header_value(res.headers, key).empty())
+                return;
             res.add_header(key, value);
         }
 
         /// Set response headers
-        void apply(const request& req, response& res)
+        void apply(const request &req, response &res)
         {
-            if (ignore_) return;
+            if (ignore_)
+                return;
 
             set_header_no_override("Access-Control-Allow-Methods", methods_, res);
             set_header_no_override("Access-Control-Allow-Headers", headers_, res);
@@ -14040,7 +14119,8 @@ namespace crow
                 }
             }
 
-            if( !origin_set){
+            if (!origin_set)
+            {
                 set_header_no_override("Access-Control-Allow-Origin", origin_, res);
             }
         }
@@ -14054,7 +14134,7 @@ namespace crow
         std::string max_age_;
         bool allow_credentials_ = false;
 
-        CORSHandler* handler_;
+        CORSHandler *handler_;
     };
 
     /// CORSHandler is a global middleware for setting CORS headers.
@@ -14066,42 +14146,44 @@ namespace crow
     struct CORSHandler
     {
         struct context
-        {};
-
-        void before_handle(crow::request& /*req*/, crow::response& /*res*/, context& /*ctx*/)
-        {}
-
-        void after_handle(crow::request& req, crow::response& res, context& /*ctx*/)
         {
-            auto& rule = find_rule(req.url);
+        };
+
+        void before_handle(crow::request & /*req*/, crow::response & /*res*/, context & /*ctx*/)
+        {
+        }
+
+        void after_handle(crow::request &req, crow::response &res, context & /*ctx*/)
+        {
+            auto &rule = find_rule(req.url);
             rule.apply(req, res);
         }
 
         /// Handle CORS on a specific prefix path
-        CORSRules& prefix(const std::string& prefix)
+        CORSRules &prefix(const std::string &prefix)
         {
             rules.emplace_back(prefix, CORSRules(this));
             return rules.back().second;
         }
 
         /// Handle CORS for a specific blueprint
-        CORSRules& blueprint(const Blueprint& bp)
+        CORSRules &blueprint(const Blueprint &bp)
         {
             rules.emplace_back(bp.prefix(), CORSRules(this));
             return rules.back().second;
         }
 
         /// Get the global CORS policy
-        CORSRules& global()
+        CORSRules &global()
         {
             return default_;
         }
 
     private:
-        CORSRules& find_rule(const std::string& path)
+        CORSRules &find_rule(const std::string &path)
         {
             // TODO: use a trie in case of many rules
-            for (auto& rule : rules)
+            for (auto &rule : rules)
             {
                 // Check if path starts with a rules prefix
                 if (path.rfind(rule.first, 0) == 0)
@@ -14116,17 +14198,17 @@ namespace crow
         CORSRules default_ = CORSRules(this);
     };
 
-    inline CORSRules& CORSRules::prefix(const std::string& prefix)
+    inline CORSRules &CORSRules::prefix(const std::string &prefix)
     {
         return handler_->prefix(prefix);
     }
 
-    inline CORSRules& CORSRules::blueprint(const Blueprint& bp)
+    inline CORSRules &CORSRules::blueprint(const Blueprint &bp)
     {
         return handler_->blueprint(bp);
     }
 
-    inline CORSRules& CORSRules::global()
+    inline CORSRules &CORSRules::global()
     {
         return handler_->global();
     }
@@ -14150,7 +14232,6 @@ namespace crow
  * - \ref CROW_BP_CATCHALL_ROUTE
  */
 
-
 #include <chrono>
 #include <string>
 #include <functional>
@@ -14164,10 +14245,9 @@ namespace crow
 #ifdef CROW_ENABLE_COMPRESSION
 #endif // #ifdef CROW_ENABLE_COMPRESSION
 
-
 #ifdef CROW_MSVC_WORKAROUND
 
-#define CROW_ROUTE(app, url) app.route_dynamic(url) // See the documentation in the comment below.
+#define CROW_ROUTE(app, url) app.route_dynamic(url)                   // See the documentation in the comment below.
 #define CROW_BP_ROUTE(blueprint, url) blueprint.new_rule_dynamic(url) // See the documentation in the comment below.
 
 #else // #ifdef CROW_MSVC_WORKAROUND
@@ -14295,7 +14375,6 @@ namespace crow
  */
 #define CROW_BP_CATCHALL_ROUTE(blueprint) blueprint.catchall_rule()
 
-
 /**
  * \namespace crow
  * \brief The main namespace of the library. In this namespace
@@ -14317,7 +14396,7 @@ namespace crow
      * Use crow::SimpleApp or crow::App<Middleware1, Middleware2, etc...> instead of
      * directly instantiate this class.
      */
-    template<typename... Middlewares>
+    template <typename... Middlewares>
     class Crow
     {
     public:
@@ -14332,37 +14411,38 @@ namespace crow
         using ssl_server_t = Server<Crow, SSLAdaptor, Middlewares...>;
 #endif
         Crow()
-        {}
+        {
+        }
 
         /// \brief Construct Crow with a subset of middleware
-        template<typename... Ts>
-        Crow(Ts&&... ts):
-          middlewares_(make_middleware_tuple(std::forward<Ts>(ts)...))
-        {}
+        template <typename... Ts>
+        Crow(Ts &&...ts) : middlewares_(make_middleware_tuple(std::forward<Ts>(ts)...))
+        {
+        }
 
         /// \brief Process an Upgrade request
         ///
         /// Currently used to upgrade an HTTP connection to a WebSocket connection
-        template<typename Adaptor>
-        void handle_upgrade(const request& req, response& res, Adaptor&& adaptor)
+        template <typename Adaptor>
+        void handle_upgrade(const request &req, response &res, Adaptor &&adaptor)
         {
             router_.handle_upgrade(req, res, adaptor);
         }
 
         /// \brief Process only the method and URL of a request and provide a route (or an error response)
-        std::unique_ptr<routing_handle_result> handle_initial(request& req, response& res)
+        std::unique_ptr<routing_handle_result> handle_initial(request &req, response &res)
         {
             return router_.handle_initial(req, res);
         }
 
         /// \brief Process the fully parsed request and generate a response for it
-        void handle(request& req, response& res, std::unique_ptr<routing_handle_result>& found)
+        void handle(request &req, response &res, std::unique_ptr<routing_handle_result> &found)
         {
             router_.handle<self_t>(req, res, *found);
         }
 
         /// \brief Process a fully parsed request from start to finish (primarily used for debugging)
-        void handle_full(request& req, response& res)
+        void handle_full(request &req, response &res)
         {
             auto found = handle_initial(req, res);
             if (found->rule_index)
@@ -14370,27 +14450,27 @@ namespace crow
         }
 
         /// \brief Create a dynamic route using a rule (**Use CROW_ROUTE instead**)
-        DynamicRule& route_dynamic(const std::string& rule)
+        DynamicRule &route_dynamic(const std::string &rule)
         {
             return router_.new_rule_dynamic(rule);
         }
 
         /// \brief Create a route using a rule (**Use CROW_ROUTE instead**)
-        template<uint64_t Tag>
-        auto route(const std::string& rule)
-          -> typename std::invoke_result<decltype(&Router::new_rule_tagged<Tag>), Router, const std::string&>::type
+        template <uint64_t Tag>
+        auto route(const std::string &rule)
+            -> typename std::invoke_result<decltype(&Router::new_rule_tagged<Tag>), Router, const std::string &>::type
         {
             return router_.new_rule_tagged<Tag>(rule);
         }
 
         /// \brief Create a route for any requests without a proper route (**Use CROW_CATCHALL_ROUTE instead**)
-        CatchallRule& catchall_route()
+        CatchallRule &catchall_route()
         {
             return router_.catchall_rule();
         }
 
         /// \brief Set the default max payload size for websockets
-        self_t& websocket_max_payload(uint64_t max_payload)
+        self_t &websocket_max_payload(uint64_t max_payload)
         {
             max_payload_ = max_payload;
             return *this;
@@ -14402,13 +14482,13 @@ namespace crow
             return max_payload_;
         }
 
-        self_t& signal_clear()
+        self_t &signal_clear()
         {
             signals_.clear();
             return *this;
         }
 
-        self_t& signal_add(int signal_number)
+        self_t &signal_add(int signal_number)
         {
             signals_.push_back(signal_number);
             return *this;
@@ -14420,7 +14500,7 @@ namespace crow
         }
 
         /// \brief Set the port that Crow will handle requests on
-        self_t& port(std::uint16_t port)
+        self_t &port(std::uint16_t port)
         {
             port_ = port;
             return *this;
@@ -14446,21 +14526,21 @@ namespace crow
         }
 
         /// \brief Set the connection timeout in seconds (default is 5)
-        self_t& timeout(std::uint8_t timeout)
+        self_t &timeout(std::uint8_t timeout)
         {
             timeout_ = timeout;
             return *this;
         }
 
         /// \brief Set the server name
-        self_t& server_name(std::string server_name)
+        self_t &server_name(std::string server_name)
         {
             server_name_ = server_name;
             return *this;
         }
 
         /// \brief The IP address that Crow will handle requests on (default is 0.0.0.0)
-        self_t& bindaddr(std::string bindaddr)
+        self_t &bindaddr(std::string bindaddr)
         {
             bindaddr_ = bindaddr;
             return *this;
@@ -14473,13 +14553,13 @@ namespace crow
         }
 
         /// \brief Run the server on multiple threads using all available threads
-        self_t& multithreaded()
+        self_t &multithreaded()
         {
             return concurrency(std::thread::hardware_concurrency());
         }
 
         /// \brief Run the server on multiple threads using a specific number
-        self_t& concurrency(std::uint16_t concurrency)
+        self_t &concurrency(std::uint16_t concurrency)
         {
             if (concurrency < 2) // Crow can have a minimum of 2 threads running
                 concurrency = 2;
@@ -14501,7 +14581,7 @@ namespace crow
         /// - crow::LogLevel::Warning     (2)
         /// - crow::LogLevel::Error       (3)
         /// - crow::LogLevel::Critical    (4)
-        self_t& loglevel(LogLevel level)
+        self_t &loglevel(LogLevel level)
         {
             crow::logger::setLogLevel(level);
             return *this;
@@ -14510,20 +14590,19 @@ namespace crow
         /// \brief Set the response body size (in bytes) beyond which Crow automatically streams responses (Default is 1MiB)
         ///
         /// Any streamed response is unaffected by Crow's timer, and therefore won't timeout before a response is fully sent.
-        self_t& stream_threshold(size_t threshold)
+        self_t &stream_threshold(size_t threshold)
         {
             res_stream_threshold_ = threshold;
             return *this;
         }
 
         /// \brief Get the response body size (in bytes) beyond which Crow automatically streams responses
-        size_t& stream_threshold()
+        size_t &stream_threshold()
         {
             return res_stream_threshold_;
         }
 
-
-        self_t& register_blueprint(Blueprint& blueprint)
+        self_t &register_blueprint(Blueprint &blueprint)
         {
             router_.register_blueprint(blueprint);
             return *this;
@@ -14534,21 +14613,21 @@ namespace crow
         /// The function must have the following signature: void(crow::response&).
         /// It must set the response passed in argument to the function, which will be sent back to the client.
         /// See Router::default_exception_handler() for the default implementation.
-        template<typename Func>
-        self_t& exception_handler(Func&& f)
+        template <typename Func>
+        self_t &exception_handler(Func &&f)
         {
             router_.exception_handler() = std::forward<Func>(f);
             return *this;
         }
 
-        std::function<void(crow::response&)>& exception_handler()
+        std::function<void(crow::response &)> &exception_handler()
         {
             return router_.exception_handler();
         }
 
         /// \brief Set a custom duration and function to run on every tick
-        template<typename Duration, typename Func>
-        self_t& tick(Duration d, Func f)
+        template <typename Duration, typename Func>
+        self_t &tick(Duration d, Func f)
         {
             tick_interval_ = std::chrono::duration_cast<std::chrono::milliseconds>(d);
             tick_function_ = f;
@@ -14557,7 +14636,7 @@ namespace crow
 
 #ifdef CROW_ENABLE_COMPRESSION
 
-        self_t& use_compression(compression::algorithm algorithm)
+        self_t &use_compression(compression::algorithm algorithm)
         {
             comp_algorithm_ = algorithm;
             compression_used_ = true;
@@ -14579,22 +14658,24 @@ namespace crow
         void add_blueprint()
         {
 #if defined(__APPLE__) || defined(__MACH__)
-            if (router_.blueprints().empty()) return;
+            if (router_.blueprints().empty())
+                return;
 #endif
 
-            for (Blueprint* bp : router_.blueprints())
+            for (Blueprint *bp : router_.blueprints())
             {
-                if (bp->static_dir().empty()) {
+                if (bp->static_dir().empty())
+                {
                     CROW_LOG_ERROR << "Blueprint " << bp->prefix() << " and its sub-blueprints ignored due to empty static directory.";
                     continue;
                 }
                 auto static_dir_ = crow::utility::normalize_path(bp->static_dir());
 
-                bp->new_rule_tagged<crow::black_magic::get_parameter_tag(CROW_STATIC_ENDPOINT)>(CROW_STATIC_ENDPOINT)([static_dir_](crow::response& res, std::string file_path_partial) {
+                bp->new_rule_tagged<crow::black_magic::get_parameter_tag(CROW_STATIC_ENDPOINT)>(CROW_STATIC_ENDPOINT)([static_dir_](crow::response &res, std::string file_path_partial)
+                                                                                                                      {
                     utility::sanitize_filename(file_path_partial);
                     res.set_static_file_info_unsafe(static_dir_ + file_path_partial);
-                    res.end();
-                });
+                    res.end(); });
             }
 
             router_.validate_bp();
@@ -14603,14 +14684,15 @@ namespace crow
         /// \brief Go through the rules, upgrade them if possible, and add them to the list of rules
         void add_static_dir()
         {
-            if (are_static_routes_added()) return;
+            if (are_static_routes_added())
+                return;
             auto static_dir_ = crow::utility::normalize_path(CROW_STATIC_DIRECTORY);
 
-            route<crow::black_magic::get_parameter_tag(CROW_STATIC_ENDPOINT)>(CROW_STATIC_ENDPOINT)([static_dir_](crow::response& res, std::string file_path_partial) {
+            route<crow::black_magic::get_parameter_tag(CROW_STATIC_ENDPOINT)>(CROW_STATIC_ENDPOINT)([static_dir_](crow::response &res, std::string file_path_partial)
+                                                                                                    {
                 utility::sanitize_filename(file_path_partial);
                 res.set_static_file_info_unsafe(static_dir_ + file_path_partial);
-                res.end();
-            });
+                res.end(); });
             set_static_routes_added();
         }
 
@@ -14630,8 +14712,9 @@ namespace crow
             validate();
 
             error_code ec;
-            asio::ip::address addr = asio::ip::make_address(bindaddr_,ec);
-            if (ec){
+            asio::ip::address addr = asio::ip::make_address(bindaddr_, ec);
+            if (ec)
+            {
                 CROW_LOG_ERROR << ec.message() << " - Can not create valid ip address from string: \"" << bindaddr_ << "\"";
                 return;
             }
@@ -14670,9 +14753,8 @@ namespace crow
         /// Otherwise the call will be made on the same thread.
         std::future<void> run_async()
         {
-            return std::async(std::launch::async, [&] {
-                this->run();
-            });
+            return std::async(std::launch::async, [&]
+                              { this->run(); });
         }
 
         /// \brief Stop the server
@@ -14681,28 +14763,34 @@ namespace crow
 #ifdef CROW_ENABLE_SSL
             if (ssl_used_)
             {
-                if (ssl_server_) { ssl_server_->stop(); }
+                if (ssl_server_)
+                {
+                    ssl_server_->stop();
+                }
             }
             else
 #endif
             {
                 // TODO(EDev): Move these 6 lines to a method in http_server.
-                std::vector<crow::websocket::connection*> websockets_to_close = websockets_;
+                std::vector<crow::websocket::connection *> websockets_to_close = websockets_;
                 for (auto websocket : websockets_to_close)
                 {
                     CROW_LOG_INFO << "Quitting Websocket: " << websocket;
                     websocket->close("Server Application Terminated");
                 }
-                if (server_) { server_->stop(); }
+                if (server_)
+                {
+                    server_->stop();
+                }
             }
         }
 
-        void add_websocket(crow::websocket::connection* conn)
+        void add_websocket(crow::websocket::connection *conn)
         {
             websockets_.push_back(conn);
         }
 
-        void remove_websocket(crow::websocket::connection* conn)
+        void remove_websocket(crow::websocket::connection *conn)
         {
             websockets_.erase(std::remove(websockets_.begin(), websockets_.end(), conn), websockets_.end());
         }
@@ -14714,11 +14802,10 @@ namespace crow
             router_.debug_print();
         }
 
-
 #ifdef CROW_ENABLE_SSL
 
         /// \brief Use certificate and key files for SSL
-        self_t& ssl_file(const std::string& crt_filename, const std::string& key_filename)
+        self_t &ssl_file(const std::string &crt_filename, const std::string &key_filename)
         {
             ssl_used_ = true;
             ssl_context_.set_verify_mode(asio::ssl::verify_peer);
@@ -14726,24 +14813,24 @@ namespace crow
             ssl_context_.use_certificate_file(crt_filename, ssl_context_t::pem);
             ssl_context_.use_private_key_file(key_filename, ssl_context_t::pem);
             ssl_context_.set_options(
-              asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3);
+                asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3);
             return *this;
         }
 
         /// \brief Use `.pem` file for SSL
-        self_t& ssl_file(const std::string& pem_filename)
+        self_t &ssl_file(const std::string &pem_filename)
         {
             ssl_used_ = true;
             ssl_context_.set_verify_mode(asio::ssl::verify_peer);
             ssl_context_.set_verify_mode(asio::ssl::verify_client_once);
             ssl_context_.load_verify_file(pem_filename);
             ssl_context_.set_options(
-              asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3);
+                asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3);
             return *this;
         }
 
         /// \brief Use certificate chain and key files for SSL
-        self_t& ssl_chainfile(const std::string& crt_filename, const std::string& key_filename)
+        self_t &ssl_chainfile(const std::string &crt_filename, const std::string &key_filename)
         {
             ssl_used_ = true;
             ssl_context_.set_verify_mode(asio::ssl::verify_peer);
@@ -14751,11 +14838,11 @@ namespace crow
             ssl_context_.use_certificate_chain_file(crt_filename);
             ssl_context_.use_private_key_file(key_filename, ssl_context_t::pem);
             ssl_context_.set_options(
-              asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3);
+                asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 | asio::ssl::context::no_sslv3);
             return *this;
         }
 
-        self_t& ssl(asio::ssl::context&& ctx)
+        self_t &ssl(asio::ssl::context &&ctx)
         {
             ssl_used_ = true;
             ssl_context_ = std::move(ctx);
@@ -14768,36 +14855,36 @@ namespace crow
         }
 #else
 
-        template<typename T, typename... Remain>
-        self_t& ssl_file(T&&, Remain&&...)
+        template <typename T, typename... Remain>
+        self_t &ssl_file(T &&, Remain &&...)
         {
             // We can't call .ssl() member function unless CROW_ENABLE_SSL is defined.
             static_assert(
-              // make static_assert dependent to T; always false
-              std::is_base_of<T, void>::value,
-              "Define CROW_ENABLE_SSL to enable ssl support.");
+                // make static_assert dependent to T; always false
+                std::is_base_of<T, void>::value,
+                "Define CROW_ENABLE_SSL to enable ssl support.");
             return *this;
         }
 
-        template<typename T, typename... Remain>
-        self_t& ssl_chainfile(T&&, Remain&&...)
+        template <typename T, typename... Remain>
+        self_t &ssl_chainfile(T &&, Remain &&...)
         {
             // We can't call .ssl() member function unless CROW_ENABLE_SSL is defined.
             static_assert(
-              // make static_assert dependent to T; always false
-              std::is_base_of<T, void>::value,
-              "Define CROW_ENABLE_SSL to enable ssl support.");
+                // make static_assert dependent to T; always false
+                std::is_base_of<T, void>::value,
+                "Define CROW_ENABLE_SSL to enable ssl support.");
             return *this;
         }
 
-        template<typename T>
-        self_t& ssl(T&&)
+        template <typename T>
+        self_t &ssl(T &&)
         {
             // We can't call .ssl() member function unless CROW_ENABLE_SSL is defined.
             static_assert(
-              // make static_assert dependent to T; always false
-              std::is_base_of<T, void>::value,
-              "Define CROW_ENABLE_SSL to enable ssl support.");
+                // make static_assert dependent to T; always false
+                std::is_base_of<T, void>::value,
+                "Define CROW_ENABLE_SSL to enable ssl support.");
             return *this;
         }
 
@@ -14810,16 +14897,16 @@ namespace crow
         // middleware
         using context_t = detail::context<Middlewares...>;
         using mw_container_t = std::tuple<Middlewares...>;
-        template<typename T>
-        typename T::context& get_context(const request& req)
+        template <typename T>
+        typename T::context &get_context(const request &req)
         {
             static_assert(black_magic::contains<T, Middlewares...>::value, "App doesn't have the specified middleware type.");
-            auto& ctx = *reinterpret_cast<context_t*>(req.middleware_context);
+            auto &ctx = *reinterpret_cast<context_t *>(req.middleware_context);
             return ctx.template get<T>();
         }
 
-        template<typename T>
-        T& get_middleware()
+        template <typename T>
+        T &get_middleware()
         {
             return utility::get_element_by_type<T, Middlewares...>(middlewares_);
         }
@@ -14836,7 +14923,7 @@ namespace crow
                     status = cv_started_.wait_until(lock, wait_until);
                 }
             }
-            
+
             if (status == std::cv_status::no_timeout)
             {
                 if (server_)
@@ -14854,13 +14941,13 @@ namespace crow
         }
 
     private:
-        template<typename... Ts>
-        std::tuple<Middlewares...> make_middleware_tuple(Ts&&... ts)
+        template <typename... Ts>
+        std::tuple<Middlewares...> make_middleware_tuple(Ts &&...ts)
         {
             auto fwd = std::forward_as_tuple((ts)...);
             return std::make_tuple(
-              std::forward<Middlewares>(
-                black_magic::tuple_extract<Middlewares, decltype(fwd)>(fwd))...);
+                std::forward<Middlewares>(
+                    black_magic::tuple_extract<Middlewares, decltype(fwd)>(fwd))...);
         }
 
         /// \brief Notify anything using \ref wait_for_server_start() to proceed
@@ -14871,11 +14958,13 @@ namespace crow
             cv_started_.notify_all();
         }
 
-        void set_static_routes_added() {
+        void set_static_routes_added()
+        {
             static_routes_added_ = true;
         }
 
-        bool are_static_routes_added() {
+        bool are_static_routes_added()
+        {
             return static_routes_added_;
         }
 
@@ -14913,16 +15002,15 @@ namespace crow
         bool server_started_{false};
         std::condition_variable cv_started_;
         std::mutex start_mutex_;
-        std::vector<crow::websocket::connection*> websockets_;
+        std::vector<crow::websocket::connection *> websockets_;
     };
 
     /// \brief Alias of Crow<Middlewares...>. Useful if you want
     /// a instance of an Crow application that require Middlewares
-    template<typename... Middlewares>
+    template <typename... Middlewares>
     using App = Crow<Middlewares...>;
 
     /// \brief Alias of Crow<>. Useful if you want a instance of
     /// an Crow application that doesn't require of Middlewares
     using SimpleApp = Crow<>;
 } // namespace crow
-

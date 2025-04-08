@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -Iinclude -lboost_system -pthread -Wall -g
-SRC = src/main.cpp src/server.cpp
+SRC = src/main.cpp src/server.cpp src/Routes/index_routes.cpp src/Controllers/index_controllers.cpp
 OBJ = $(SRC:.cpp=.o)
 TARGET = server
 

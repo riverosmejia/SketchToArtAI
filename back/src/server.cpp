@@ -1,15 +1,19 @@
-#include "server.h"
+#include "server.hpp"
+#include "Routes/index_routes.hpp" // Agrega tus rutas aquí
 
-void start_server()
+Server::Server()
+{
+    setupRoutes(); // ✅ ¡Así está bien!
+}
+
+void Server::run()
 {
 
-    crow::SimpleApp app;
+    app.port(18080).multithreaded().run(); // iniciar servidor en puerto 18080
+}
 
-    CROW_ROUTE(app, "/")([]()
+void Server::setupRoutes()
+{
 
-                         { return "Servidor funcionando!"; }
-
-    );
-
-    app.port(8080).multithreaded().run(); // Iniciar el servidor
+    setupIndexRoutes(app); // iniciar rutas por el index de rutas
 }
