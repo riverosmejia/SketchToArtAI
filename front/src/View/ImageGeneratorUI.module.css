@@ -1,0 +1,111 @@
+.container {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #f8f8f8;
+    min-height: 100vh;
+  }
+  
+  .wrapper {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .title {
+    color:black;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tabs {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .tabButton {
+    flex: 1;
+    padding: 0.5rem;
+    background: #e0e0e0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .active {
+    background: #007bff;
+    color: white;
+  }
+  
+  .textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .inputFile {
+    display: block;
+    width: 100%;
+  }
+  
+  .grid {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .gridItem {
+    flex: 1;
+  }
+  
+  .select {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  .generateButton {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .generateButton:hover {
+    background-color: #218838;
+  }
+  
+  .preview {
+    margin-top: 2rem;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    border: 1px dashed #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
