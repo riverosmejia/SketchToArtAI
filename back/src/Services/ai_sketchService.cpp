@@ -15,7 +15,7 @@ bool ai_sketchService::SketchToGenerate(const std::string &imagePath, const std:
         pos += 2;
     }
 
-    command << "python3 Scripts/generate_from_sketch.py"
+    command << "python3 Scripts/sketch.py"
             << " --sketch \"" << imagePath << "\""
             << " --prompt \"" << safePrompt << "\"";
 

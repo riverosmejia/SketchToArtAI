@@ -2,6 +2,7 @@ import argparse
 from PIL import Image
 from diffusers import StableDiffusionImg2ImgPipeline
 import torch
+import os
 
 def generate_from_sketch(sketch_path, prompt):
     # Cargar imagen del bosquejo
@@ -18,6 +19,7 @@ def generate_from_sketch(sketch_path, prompt):
 
     # Guardar la imagen
     output_path = "generated/generated_from_sketch.png"
+    os.makedirs("generated", exist_ok=True)
     result.save(output_path)
     print(f"✅ Imagen generada y guardada en {output_path}")
 

@@ -11,8 +11,8 @@ bool AiGenerate_service::generateImage(const std::string &prompt, const std::str
 
     // Comando para ejecutar el script de Python ubicado en Scripts
 
-    std::string command = "python3 Scripts/sketch.py --prompt " + safePrompt +
-                          " --output " + safeOutput +
+    std::string command = "python3 Scripts/generate.py --prompt " + safePrompt +
+                          " --filename " + safeOutput +
                           " --model " + safeModel;
 
     std::cout << "ejecutando el comando" + command + ".\n";

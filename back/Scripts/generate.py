@@ -1,76 +1,43 @@
-# generate.py
-
-# argparse: permite definir y parsear argumentos desde la línea de comandos.
 import argparse
-
-# StableDiffusionPipeline: pipeline de Hugging Face para convertir texto en imagen.
 from diffusers import StableDiffusionPipeline
-
-# torch: la librería de PyTorch, usada por diffusers para manejar tensores y modelos.
 import torch
-
-# PIL.Image: parte de Pillow, útil para abrir, manipular y guardar imágenes.
 from PIL import Image
+import os
 
-def generate_image(prompt, output_path, model_id):
+def generate_image(prompt, filename, model_id):
     """
-    Carga el modelo y genera una imagen a partir de un prompt.
-    :param prompt: Texto descriptivo de la imagen a generar.
-    :param output_path: Ruta donde se guardará la imagen resultante.
-    :param model_id: Identificador del modelo en Hugging Face Hub.
+    Genera una imagen desde un prompt y la guarda en la carpeta 'generated/'.
+    :param prompt: texto descriptivo.
+    :param filename: nombre del archivo (sin ruta).
+    :param model_id: modelo de Hugging Face.
     """
 
-    # from_pretrained: descarga (o usa caché) el modelo especificado.
-    # torch_dtype=torch.float32: usamos precisión estándar, ideal para CPU.
+    # Asegurar que la carpeta exista
+    output_dir = "generated"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Ruta completa (forzada a generated/)
+    output_path = os.path.join(output_dir, filename)
+
+    # Cargar modelo
     pipe = StableDiffusionPipeline.from_pretrained(
         model_id,
         torch_dtype=torch.float32
-    ).to("cpu")  # .to("cpu") fuerza la ejecución en CPU.
+    ).to("cpu")
 
-    # Ejecuta el pipeline: pasa el prompt y recibe una lista de imágenes.
+    # Generar imagen
     image = pipe(prompt).images[0]
-
-    # Guarda la primera imagen generada en disco.
     image.save(output_path)
     print(f"✅ Imagen guardada en {output_path}")
 
 def main():
-    """
-    Función principal que parsea argumentos y llama a generate_image.
-    """
-
-    # Crea el parser de argumentos con descripción del script.
-    parser = argparse.ArgumentParser(
-        description="🎨 Generador de imágenes con Stable Diffusion"
-    )
-
-    # --prompt: texto obligatorio que describe la imagen.
-    parser.add_argument(
-        "--prompt",
-        required=True,
-        help="Texto que describe la imagen a generar."
-    )
-
-    # --output: ruta de salida, por defecto "output.png".
-    parser.add_argument(
-        "--output",
-        default="output.png",
-        help="Ruta de salida (por defecto: output.png)."
-    )
-
-    # --model: ID del modelo en HF Hub, por defecto SD v1-4.
-    parser.add_argument(
-        "--model",
-        default="CompVis/stable-diffusion-v1-4",
-        help="ID del modelo Hugging Face a usar."
-    )
-
-    # Parsea los argumentos y los guarda en args.
+    parser = argparse.ArgumentParser(description="🎨 Generador de imágenes")
+    parser.add_argument("--prompt", required=True, help="Texto descriptivo")
+    parser.add_argument("--filename", default="output.png", help="Nombre del archivo")
+    parser.add_argument("--model", default="CompVis/stable-diffusion-v1-4", help="Modelo Hugging Face")
     args = parser.parse_args()
 
-    # Llama a la función de generación con los valores proporcionados.
-    generate_image(args.prompt, args.output, args.model)
+    generate_image(args.prompt, args.filename, args.model)
 
-# Este bloque asegura que main() solo se ejecute si corremos el script directamente.
 if __name__ == "__main__":
     main()
